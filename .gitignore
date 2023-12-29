@@ -11,3 +11,6 @@
 .Rdata
 .httr-oauth
 .DS_Store
+*_files/
+*_cache/
+

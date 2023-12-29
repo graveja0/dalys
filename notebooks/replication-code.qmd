@@ -1,151 +1,19 @@
 ---
-title: Modeling Disability-Adjusted Life Years for Policy and Decision Analysis
-subtitle: A Tutorial
-author:
-  - name: John A. Graves
-    orcid: 0000-0002-8954-8202
-    corresponding: true
-    email: john.graves@vanderbilt.edu
-    roles:
-      - Investigation
-      - Project administration
-      - Software
-      - Visualization
-    affiliations:
-      - Vanderbilt University      
-      - Vanderbilt University Medical Center       
-  - name: Jinyi Zhu
-    orcid: 0000-0001-8169-5956
-    corresponding: false
-    roles: []
-    affiliations:
-      - Vanderbilt University
-      - Vanderbilt University Medical Center       
-  - name: Hannah Peterson
-    corresponding: false
-    roles: []
-    affiliations:
-      - Vanderbilt University Medical Center    
-  - name: Shawn Garbett
-    corresponding: false
-    roles: []
-    affiliations:
-      - Vanderbilt University Medical Center        
-  - name: Ashley Leech
-    orcid: 0000-0001-6795-929X
-    corresponding: false
-    roles: []
-    affiliations:
-      - Vanderbilt University School of Medicine
-      - Vanderbilt University Medical Center            
-keywords:
-  - Cost-Effectiveness Analysis
-  - Microsimulation
-  - Discrete Event Simulation
-  - Markov Cohort Models
-abstract: |
-  This study outlines a methodological framework for joint modeling of Disability- and Quality-Adjusted Life Year outcomes. Our primary focus is on how transition matrices and state occupancy payoffs in discrete-time Markov cohort models can be structured to calculate years of life lost to disability (YLD) and years of life lost to premature death (YLL), in addition to quality-adjusted life year (QALY) outcomes. We also demonstrate how our modeling framework extends directly to microsimulation and (in part) to continuous time discrete event simulation (DES) models. In a tutorial application, we use our joing modeling framework to construct a discrete time Markov cohort natural history model for cardiovascular disease that estimates DALY and QALY outcomes for any country, region, or setting represented in the 2020 Global Burden of Disease data.
-plain-language-summary: |
-  Structuring Markov Models for Multidimensional Health Outcomes
-key-points:
-  - Key Point 1
-  - Key Point 2
-date: last-modified
-bibliography: references.bib
-citation:
-  container-title: Citation title
-number-sections: true
+title: "Replication Code"
+author: John A. Graves
+editor: source
 editor_options: 
   chunk_output_type: console
-prefer-html: true  
 ---
 
-## Introduction
+Notes:
+
+- The original paper uses pairwise conversion formulas. We have verified that we can replicate their results if we do this. However, we use the matrix exponentiation method here.
+
+- For QALY-like DALYs, the levels are very different (and are a function of number of cycles), but the incremental results are similar and actually yield the same ICER for strategy AB relative to B. Why ? the problem with QALY-like DALYs comes through the deaths. Any strategy that affects death will yield different results relative to our approach. Strategy AB, relative to strategy B, however, just affects the disability weight. So the incremental effect of adding A to B yields the same answer as under our DALY approach---but this will in general not hold if deaths are affected.
+
 
 ```{r}
-#| echo: false
-#| message: false
-#| warning: false
-library(tidyverse)
-library(MASS)
-# library(Matrix)
-library(expm)
-library(knitr)
-library(kableExtra)
-options(scipen = 5) 
-transpose <- purrr::transpose
-select <- dplyr::select
-#quarto preview index.qmd --to html --no-watch-inputs --no-browse
-```
-
-Disability-adjusted life years (DALYs) measure disease burden in a population. Conceptualized in the Global Burden of Disease (GBD) study [@Murray1997], DALYs quantify the total sum of years of life lost due to disability attributable to a disease (YLD), plus years of life lost to premature mortality from the disease (YLL; i.e., DALY = YLD + YLL).
-
-In addition to their role in describing levels and trends in disease burdens worldwide, DALYs are a primary health outcome in evaluations of health interventions in low- and middle-income countries (LMICs). In these settings, resource allocation decisions are guided by modeled assessments of the incremental costs per DALY averted under alternative (often competing) strategies to improve population health.[^1]
-
-[^1]: The adoption of DALYs over other common health outcomes in health economics (e.g., quality-adjusted life years, or QALYs) stems from several practical and theoretical considerations. See @Feng2020 and @Wilkinson2016 for futher discussion.
-
-Despite the prominent role of DALYs in global health policy, scant methodological guidance is available for adapting and/or structuring decision analytic models for DALY outcomes. This methodological gap has its roots in health economics education, where textbooks and training exercises focus almost exclusively on Quality-Adjusted Life Year (QALY) outcomes---the primary health outcome used for health technology assessments (HTAs) and policy decisionmaking in high-income countries (HICs). DALYs differ from QALYs in important and model-relevant respects, including the use of reference life tables to calculate YLLs and standardized disability weights to calculate YLDs.[^2] To the extent DALY-specific modeling considerations are taught, they are often considered in isolation and without a firm methodological grounding in *how* a model can be structured to measure DALY outcomes.
-
-[^2]: In contrast, QALYs are calculated based on utility weights derived from general and patient surveys. See @Feng2020 and @Wilkinson2016 for futher discussion.
-
-As a consequence, and in practice, health economic applications often resort to shortcuts and other "hacks" for calculating DALYs. For example, practitioners may simply estimate a "QALY-like" DALY that is based on a diseased state occupancy payoff of one minus the disability weight. Other approaches define a diseased-state payoff using the disability weight as an estimate of YLDs, and accumulate person-years in an absorbing death state (due to disease) as an estimate of YLLs. As this study will show, these shortcuts do not provide an accurate representation of DALY levels in a population.
-
-This tutorial fills the methodological gap described above by outlining a foundation for direct incorporation of DALY outcomes in common decision modeling frameworks. Our primary focus is on how transition matrices and state occupancy payoffs in discrete-time Markov cohort models can be structured to calculate YLLs and YLDs---however, our framework extends directly to microsimulation and (in part) to continuous time discrete event simulation (DES) models. As such, our study provides a comprehensive roadmap for incorporating DALY outcomes into common decision modeling frameworks. 
-
-This tutorial is structured around a simple disease progression model developed to demonstrate how to fit time-dependent cohort state transition models in R. However, the techniques and code provided can be easily adapted for any disease process. We also provide supplemental material in which the same methods are applied to a 
-
-## Background {#sec-background}
-
-DALYs are calculated from two components. First, conditions are assigned disability weights ($D$) ranging from zero to one, with zero representing the absence of the condition and one representing the highest burden a condition can inflict, equivocal to death. Years lost to disability (YLD) is defined as the disability weight multiplied by the number of years a person lives with the condition ($L$):
-
-$$
-YLD = D \cdot L
-$$ {#eq-yld1} 
-
-The impact of disease on mortality is quantified using years of life lost to disease (YLL), which is based on remaining life expectancy $Ex(a)$ at the age of premature death from the disease ($a$). 
-
-$$
-YLL(a)= Ex(a)
-$$ {#eq-yll1} .
-
-DALYs are the sum of the two components:
-
-$$
-DALY(a) = YLD + YLL(a)
-$$ {#eq-daly}
-
-In the original GBD study, age-weighting and time discounting practices were applied to DALY calculations [@Murray1997]. These methods respectively weighted the burden of illness more during adulthood than early childhood and old age, and valued present health over future years of illness by discounting YLD and YLL measures by 3% per year. From 2010 onwards, both practices were discontinued to make the DALY a more descriptive measure [@who2013methods].
-
-While the GBD no longer uses age and time discounting for the purposes of documenting disease burdens worldwide, the World Health Organization's Choosing Interventions that are Cost-Effective (WHO-CHOICE) program recommends consideration of time discounting of health outcomes [@murray2020; @bertram2021]. We therefore adopt the WHO-CHOICE recommendation and include time discounting in our DALY modeling approach.[^7]
-
-[^7]: Practitioners who do not wish to discount DALY outcomes can simply set the annual discount rate $r$ to zero.
-
-For an annual discount rate $r$, the equation for YLDs is,
-
-$$
-YLD = D  \left ( \frac{1}{r}\left(1-e^{-rL }\right) \right ).
-$$ {#eq-yld}
-
-Similarly, YLLs are calculated as,
-
-$$
-YLL(a)= \frac{1}{r}\left(1-e^{-r Ex(a)}\right).
-$$ {#eq-yll} 
-
-### Reference Life Expectancy
-
-While the creation of the DALY measure was an important step in global health research, it has received scrutiny due to its inherent assumptions and value judgements. For example, calculating YLLs requires the use of a reference life table that provides an estimate of ...
-
-## Structuring a Discrete Time Markov Model for DALY Outcomes
-
-This section outlines a process for structuring a discrete time Markov cohort model to estimate DALY outcomes. To demonstrate our method, we build on a progressive disease model in which healthy individuals develop a chronic disease with two health states ("Sick" and "Sicker"). Individuals can also transition to an absorbing death state due to causes unrelated to the disease (i.e., "background" mortality), or due to disease-specific causes [@alarid-escudero2022]. Once ill, individuals do not transition back to a healthier state---though this is merely a simplification and our approach is generally applicable in models with multi-way transitions. In addition, the model structure is homogeneous (i.e., transition rates do not vary as a function of time ). Again, this is a simplification to distill model complexity down to only those components needed to demonstrate our DALY approach. 
-
-We will structure our model to consider outcomes under four different
-strategies:
- 
-A state transition diagram is shown in @fig-model1, and key model parameters are summarized in @tbl-model1.
-
-```{r setup}
 library(tidyverse)
 library(MASS)
 library(expm)
@@ -178,9 +46,7 @@ gen_wcc <- function (n_cycles, method = c("Simpson1/3", "half-cycle", "none"))
     }
     return(v_wcc)
 }
-```
 
-```{r parameterize}
 params_ <- list(
     # Treatment Strategies
     tx_names = c("SoC","A","B","AB"),      # treatment names
@@ -282,7 +148,7 @@ disc_c =
   exp(-params$r_disc_c_Delta_t  * 0:(params$omega))
 ```
 
-```{r transition-matrices}
+```{r}
 fn_r_HD <- function(age) {
   # Access r_HD from the parent frame where this function is called
   r_HD <- get("r_HD", envir = parent.frame())
@@ -389,7 +255,7 @@ params1 <- with(params1,modifyList(params1,list(
 
 ```
 
-```{r trace}
+```{r}
 trace1 <- 
     with(params1, {
         m_P %>% map( ~ ({
@@ -407,8 +273,8 @@ trace1 <-
         tmp[1,] = params$s0T
         tmp = rbind(tmp,.x)
     }))
+tr <- trace1$SoC
 ```
-
 
 ```{r}
 # Life Expectancy (Non-Discounted)
@@ -580,7 +446,8 @@ result1 <- cbind(LE, QALY, YLD, YLL, DALY, QALY_DALY, COST) %>%
   dplyr::select(approach, strategy, LE, QALY,YLD, YLL, DALY, QALY_DALY, COST) 
 
 result1 %>% 
-    kable(digits = 3, col.names = c("Approach","Scenario","Life Expectancy (Model)","QALYs","YLDs","YLLs","DALYs","QALY-like DALY","Costs")) 
+    kable(digits = 3, col.names = c("Approach","Scenario","Life Expectancy (Model)","QALYs","YLDs","YLLs","DALYs","QALY-like DALY","Costs")) %>% 
+    kable_styling()
 ```
 
 ```{r}
@@ -597,7 +464,8 @@ result1 %>%
   mutate(icer = iCOST / iQALY) %>% 
   bind_rows(result1 %>% 
   select(strategy,QALY,COST) %>% filter(strategy=="A")) %>% 
-  kable() 
+  kable() %>% 
+  kable_styling()
   
 ```
 
@@ -616,7 +484,8 @@ result1 %>%
   mutate(icer = iCOST / iDALY) %>% 
   bind_rows(result1 %>% 
   select(strategy,DALY,COST) %>% filter(strategy=="A")) %>% 
-  kable()
+  kable() %>% 
+  kable_styling()
 ```
 
 ```{r}
@@ -635,19 +504,8 @@ result1 %>%
   bind_rows(result1 %>% 
   select(strategy,QALY_DALY,COST) %>% filter(strategy=="A")) %>% 
   kable() %>% 
-  kable_styling(bootstrap_options = c("striped", "condensed")) #%>% 
-  #save_kable("images/test.png")
+  kable_styling()
 ```
 
-![](images/test.png)
-```{r}
+## Approach 2
 
-```
-
-## Conclusion
-
-## References {.unnumbered}
-
-:::{#refs}
-
-:::
