@@ -1,0 +1,28 @@
+\documentclass{article}
+\usepackage{lipsum}\usepackage{setspace}\usepackage{nicematrix} \usepackage{relsize}\NiceMatrixOptions{cell-space-limits=1pt} \onehalfspacing\linespread{2}
+\begin{document}
+
+\[
+\mathbf{Q}=\begin{pNiceArray}{ccccc}[small, baseline=line-3, first-row, first-col]
+& \smaller \text{H} & \smaller \text{S1} & \smaller \text{S2} & \smaller \text{DOC} & \smaller \text{DS}\\
+\smaller \text{H} & -(\texttt{r\_HS1}+\texttt{r\_HD}) & \texttt{r\_HS1} & 0 & \texttt{r\_HD}  & 0 \\
+\smaller \text{S1} & \texttt{r\_S1H} & -( \texttt{r\_S1H} + \texttt{r\_S1S2} + \texttt{hr\_S1} \cdot \texttt{r\_HD}) & \texttt{r\_S1S2} &  \texttt{r\_HD} & \texttt{hr\_S1} \cdot \texttt{r\_HD} - \texttt{r\_HD}  \\
+\smaller \text{S2} & 0 & 0 & -(\texttt{hr\_S2} \cdot \texttt{r\_HD}) & \texttt{r\_HD} & \texttt{hr\_S2} \cdot \texttt{r\_HD} - \texttt{r\_HD} \\
+\smaller \text{DOC} & 0 & 0 & 0 & 0 & 0\\
+\smaller \text{DS} & 0 & 0 & 0 & 0 & 0\\
+\end{pNiceArray}
+\]
+
+\[
+\mathbf{Q}=\begin{pNiceArray}{cccc:c}[small, baseline=line-3, first-row, first-col]
+& \smaller \text{H} & \smaller \text{S1} & \smaller \text{S2} & \smaller \text{D} & \smaller \text{trDS}\\
+\smaller \text{H} & -(\texttt{r\_HS1}+\texttt{r\_HD}) & \texttt{r\_HS1} & 0 & \texttt{r\_HD}  & 0 \\
+\smaller \text{S1} & \texttt{r\_S1H} & -( \texttt{r\_S1H} + \texttt{r\_S1S2} + \texttt{hr\_S1} \cdot \texttt{r\_HD}) & \texttt{r\_S1S2} &  \texttt{hr\_S1} \cdot \texttt{r\_HD} & \texttt{hr\_S1} \cdot \texttt{r\_HD} - \texttt{r\_HD}  \\
+\smaller \text{S2} & 0 & 0 & -(\texttt{hr\_S2} \cdot \texttt{r\_HD}) & \texttt{hr\_S2} \cdot \texttt{r\_HD}  & \texttt{hr\_S2} \cdot \texttt{r\_HD} - \texttt{r\_HD} \\
+\smaller \text{D} & 0 & 0 & 0 & 0 & 0 \\ \hdottedline
+\smaller \text{trDS} & 0 & 0 & 0 & 0 & 0\\
+\end{pNiceArray}
+\]
+
+
+\end{document}

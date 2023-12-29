@@ -134,16 +134,16 @@ While the creation of the DALY measure was an important step in global health re
 
 ## Structuring a Discrete Time Markov Model for DALY Outcomes
 
-This section outlines a process for structuring a discrete time Markov cohort model to estimate DALY outcomes. To demonstrate our method, we build on a progressive disease model in which healthy individuals develop a disease with two health states ("Sick" and "Sicker") [@alarid2023introductory]. Individuals can also transition to an absorbing death state due to causes unrelated to the disease (i.e., "background" mortality), or due to disease-specific causes. In addition, the model structure is homogeneous (i.e., transition rates do not vary as a function of time). This is a simplification to distill model complexity down to only those components needed to demonstrate our DALY approach---and our replication code is structured in such a way as to easily incorporate transition rates that are a function of age/time in model. 
+This section outlines a process for structuring a discrete time Markov cohort model to estimate DALY outcomes. To demonstrate our method, we build on a progressive disease model in which healthy individuals develop a disease with two health states ("Sick" and "Sicker") [@alarid2023introductory]. Individuals can also transition to an absorbing death state due to causes unrelated to the disease (i.e., "background" mortality), or due to disease-specific causes. In addition, the model structure is homogeneous (i.e., transition rates do not vary as a function of time). This is a simplification to distill model complexity down to only those components needed to demonstrate our DALY approach---though our replication code is structured in such a way as to easily incorporate transition rates that are a function of age/time in the model. 
 
-We will structure our model to consider outcomes under four different strategies:
+We will consider outcomes under four different strategies:
 
 - A **Standard of Care** strategy based on the baseline model parameters.
 - **Strategy A**,  which improves the quality of life among individuals with the disease, but does not affect disease progression.
 - **Strategy B**, which reduces the rate of progression from Sick to Sicker by 40%.
 - **Composite Strategy AB**, which jointly implements strategies A and B. 
  
-A state transition diagram is shown in @fig-model1, and key model parameters are summarized ...
+A state transition diagram is shown in @fig-model1. In the figure, nodes are health states and edges depict possible transitions among them. Edge labels are defined in terms of transition intensities (rates).  Other key model parameters are summarized in TK....
 
 ![State transition diagram for progressive disease model](images/state-transition-diagram-1.svg){#fig-model1}
 
@@ -284,20 +284,83 @@ v_disc_c =
   exp(-params$r_v_disc_c_Delta_t  * 0:(params$omega))
 ```
 
-### Transition Matrices
 
 
-### Scratch
+## Transition Matrices
 
-Modeling DALYs requires us to track deaths due to disease. This is difficult in a model structured based on @fig-model1 because the absorbing death state includes individuals who transition from the non-diseased state. Our first step, then, is to redefine the health states to include two absorbing death states: death from other causes, and death from disease (@fig-model2):[^othcause]
+With the model parameterized, our next step is to define the matrices that govern health state transitions. The state transition diagram represented in @fig-model1 is not well-suited to calculate DALY outcomes, however. A primary reason is that the death transitions reflect transitions due to all causes of death.  To calculate YLLs, we need to separately track the timing and number of deaths *due to disease*. 
+
+To accommodate this need and to accurately model DALY outcomes, several options are available:
+
+1. Re-define the health states to include a separate cause-specific death state as depicted in @fig-modelDS.[^othcause] We can then draw on the resulting Markov trace and use changes in the number of cause-specific deaths in each cycle to calculate YLLs. 
+
+2. Include a non-Markovian transition state for cause-specific deaths in the transition matrix. This approach will maintain the Markovian components captured in @fig-model1, but will allow us to add a column to the Markov trace that separately tracks the number of new deaths from the disease in each cycle. We can then apply transition state payoffs (based on remaining life expectancy at each age/cycle) to calculate YLL outcomes. 
+
+3. Define a block matrix Markov chain with rewards by adapting the methods in @caswell2021a and @caswell2018. This approach draws on matrix calculus and solves for expected outcomes as well as higher order moments such as variance and skewness. 
 
 [^othcause]: In this example, disease-specific death rates are goverened by a hazard ratio applied to the background mortality rate. Because we are operating on the rate scale, we can separate out disease-related deaths from other-cause mortality by simply taking a difference in the rates. Other applications for prevalent conditions with high death rates, however, may require us to construct a cause-deleted life table to obtain background mortality rates that net out deaths from the modeled disease.
 
-![State transition diagram with two absorbing death states](images/state-transition-diagram-2.svg){#fig-model2}
+In practice, approaches (1) and (2) above draw on similar transition matrices and payoff vectors, as we will show immediately below. Approach (3) is quite distinct, however, so we will demonstrate this method in Section TK.
 
+### Approach 1: Cause-Specific Death State
 
+Under this approach, we separate out deaths from disease vs. other causes by defining a separate health state for cause-specific mortality; an updated state transition diagram is shown in @fig-modelDS. 
 
+![State transition diagram for progressive disease model with separate cause-specific death state](images/state-transition-diagram-2.svg){#fig-modelDS}
 
+Transitions among health states are defined in terms of continuous rates ("intensities") and are captured within an intensity matrix $\mathbf{Q}$,
+
+![Transition Intensity Matrix for Approach 1](images/Q_model2.png)
+
+The matrix $\mathbf{Q}$ has diagonal elements defined as the negative sum of the off-diagonal row values (i.e., the row sums of $\mathbf{Q}$ are zero). This ensures that the Markov model is "closed"---that is, the total cohort size neither grows nor shrinks over time.
+
+We next embed the continuous transition intensity matrix into a discrete time transition probability matrix by taking the matrix exponential of $\mathbf{Q}$ for a defined time step (i.e., "cycle length") $\Delta t$:[^3]
+
+$$
+\mathbf{P} = e^{\mathbf{Q}\Delta t}
+$$ {#eq-embed}
+
+This results in a transition probability matrix with the following probabilities defined:
+
+![Transition Probability Matrix for Approach 1](images/P_model2.png)
+
+[^3]: In Markov theory, $\mathbf{P}$ is called the "discrete skeleton" of the continuous model [@iosifescu1980]. The conversion formula used to calculate $\widetilde{\mathbf{P}}$ is the matrix analogue to the standard rate-to-probability formula commonly taught in health economics textbooks, i.e., $p = 1 - e^{r\Delta t}$, where $r$ is the rate and $\Delta t$ is the time step (i.e., "cycle length").
+
+Embedding the transition probability matrix using the matrix exponential ensures that the resulting transition probabilities capture the underlying continuous time disease process. In particular, $\mathbf{P}$ will capture the probability of compound ("jumpover") transitions within a single cycle. 
+
+For example, in the continuous time rate matrix $\mathbf{Q}$ above, there is a zero-valued rate defined for progressions from Healthy (H) to Disease-related death (DS), since individuals must first become ill before they can die from disease-related causes. However, after embedding, the matrix $\mathbf{P}$ has a non-zero cycle transition probability from Healthy (H) to Disease-related death (DS) (i.e., $\texttt{p\_HDS}$). This value captures the probability of a compound or "jumpover" transition from Healthy and through the Sick and/or Sicker state to death from disease-related causes within the same discrete time cycle; see @graves2021 for further discussion, and @iosifescu1980 for additional theory.[^comparison]
+
+[^comparison]: Because we embed the transition probability matrix using matrix exponentiation, rather than through pairwise application of rate-to-probability formulas to each transition type, our results will differ from those in @alarid2023introductory---even though we use identical input parameters. Application of standard rate-to-probability formulas in health states with competing risks (i.e., the possibility of transitioning to more than one other health state in a given cycle) will ignore the possibility of compound transitions within a single cycle. Though not (yet) widely used in health economics, embedding the transition probability matrix using the matrix exponential is the technically correct way to construct a transition probability matrix from underlying transition rates.
+
+### Approach 2: Non-Markovian Tracking States
+
+This section will outline an approach similar to Approach 1, but that draws on a non-Markovian tracking state to track the number of disease-related deaths in each cycle; these counts are then used to match the age of the cohort at each cycle with a reference life table to calculate YLL outcomes. 
+
+Under this approach, we maintain the overall structure as depicted in the original model (@fig-model1), but augment the transition probability matrix with non-Markovian components to facilitate accounting of disease-related deaths.[^tracking]  Approach 2 offers a more generalized method that allows practitioners to accurately account for costs and/or health payoffs (such as YLLs) that are defined by *transitions* among health states, rather than occupancy in a health state. 
+
+A state transition diagram with the tracking state added for disease-related deaths is shown in @fig-transition. 
+
+![State Transition Diagram with Transition State (Red)](images/state-transition-diagram-3.svg){#fig-transition}
+
+[^tracking]: Tracking states also allow for accurate bookeeping for other outcomes such as costs. For example, if developing the disease incurs a one-time diagnosis or treatment cost, the compound transitions implied by the embedded transition probability matrix indicate that some individuals will transiently enter (and then exit) the Sick state in a single cycle. When calculating costs, practitioners may want to include a tracking state for the Sick state to be sure to capture these one-time costs, which would be masked if cost payoffs are simply multiplied by state occupancy at the end of each cycle (e.g., costs for individuals with a sojourn through the Sick state in a single cycle would not be accounted for).
+
+In general, tracking states can either count the total number of transitions that have occurred up to a given cycle (i.e., an "accumulator" state), or can track the total number of new transitions that occur within a single cycle (i.e., a "transition" state).[^augmented] To calculate YLL outcomes we will add a transition state that records the total number of new disease-related deaths in each cycle. 
+
+[^augmented]: More generally, accumulator and transition states can be defined for any number of transition types, as they are useful for capturing one-time costs in the model, or for for calculating other decision-relevant outcomes such as the total number of people who developed the disease or died from the disease as secondary outcomes.
+
+To implement Approach 2, we add a transition state row and column to the transition intensity matrix. This transition state, called $\texttt{trDS}$, is included in the augmented intensity matrix $\mathbf{Q}$ below:
+
+![Transition intensity matrix with transition state added](images/Q_model1.png)
+
+Two aspects of $\mathbf{Q}$ are worth highlighting. First, two transition intensities---from the S1 (Sick) and S2 (Sicker) states to Death---appear in the tracking column. This ensures that $\texttt{trDeadDisease}$ will track all relevant transitions to death due to the disease. Moreover, because we are operating on the rate scale, we can net out non-disease related deaths as captured by the background mortality rate among healthy individuals (i.e., $\texttt{r\_HD}$). 
+
+Second, $\mathbf{Q}$ is divided into a Markovian submatrix and the non-Markovian tracking row and column. This division is made apparent using dotted vertical and horizontal lines. Critically, the Markovian submatrix remains closed---that is, the diagonal elements remain unchanged so that the row sums of the submatrix remain zero, even after the addition of the tracking column along the "edges" of $\mathbf{Q}$. This ensures that the Markovian submatrix can be used to calculate state occupancy for a closed cohort that neither gains nor loses cohort members over the modeled time horizon.
+
+As above, we obtain the transition probability matrix by embedding $\mathbf{Q}$ into the discrete time step (@eq-embed). However, the resulting transition probability matrix $\mathbf{P}$ treats $\texttt{trDS}$ as an absorbing state (i.e., individuals are retained in the $\texttt{trDS}$ with probability one). Using the terminology introduced above, this absorbing state could serve as an **accumulator** state that (in the constructed Markov trace) records the total number of people who have died from the disease up to any given cycle. This may be a decision-relevant health outcome to consider on its own; indeed, so long as the Markovian submatrix remains closed, there is no limit to the number of accumulator and/or transition states one might add along the "edges" of a model.
+
+To change $\texttt{trDS}$ to a **transition** state, we simply replace the absorbing probability of one in the cell $[\texttt{trDS},\texttt{trDS}]$ with a zero.  This cell-level change is highlighted in grey in the bottom right cell of $\mathbf{P}$ below:
+
+![Transition Probability Matrix for Approach 2](images/P_model1.png)
 ```{r transition-matrices}
 fn_r_HD <- function(age) {
   # Access r_HD from the parent frame where this function is called
@@ -403,7 +466,116 @@ params1 <- with(params1,modifyList(params1,list(
       }))
 )))
 
+params2 <- with(params,modifyList(params,list(
+    v_tr_names = c("H","S1","S2"), # transient health states
+    v_ab_names = c("D","trDS"), # absorbing health states
+    n_states = 5, # total number of health states
+    v_names_states = c(c("H","S1","S2"), c("D","trDS"))
+)))
+
+params2 <- with(params2,modifyList(params2,list(
+    # Natural History Transition Rate Matrix
+    m_R = 
+      ages %>% map(~({
+        mR_SoC = 
+          matrix(c(
+          -(fn_r_HD(.x)+fn_r_HS1(.x)), fn_r_HS1(.x), 0, fn_r_HD(.x), 0,
+          fn_r_S1H(.x),-(fn_r_S1H(.x) + fn_r_S1S2(.x) + fn_r_HD(.x) + hr_S1 * fn_r_HD(.x) - fn_r_HD(.x)),fn_r_S1S2(.x),hr_S1 * fn_r_HD(.x),hr_S1 * fn_r_HD(.x) - fn_r_HD(.x),
+          0,0,-(fn_r_HD(.x) + hr_S2 * fn_r_HD(.x) - fn_r_HD(.x)),hr_S2 * fn_r_HD(.x),hr_S2 * fn_r_HD(.x) - fn_r_HD(.x),
+          0,0,0,0,0,          
+          0,0,0,0,0),
+          nrow = n_states, 
+          ncol = n_states,
+          byrow=TRUE, 
+          dimnames = list(c(v_tr_names,v_ab_names),
+                          c(v_tr_names,v_ab_names)
+          ))
+        
+        mR_A = 
+          matrix(c(
+          -(fn_r_HD(.x)+fn_r_HS1(.x)), fn_r_HS1(.x), 0, fn_r_HD(.x), 0,
+          fn_r_S1H(.x),-(fn_r_S1H(.x) + fn_r_S1S2(.x) + fn_r_HD(.x) + hr_S1 * fn_r_HD(.x) - fn_r_HD(.x)),fn_r_S1S2(.x),hr_S1 * fn_r_HD(.x) ,hr_S1 * fn_r_HD(.x) - fn_r_HD(.x),
+          0,0,-(fn_r_HD(.x) + hr_S2 * fn_r_HD(.x) - fn_r_HD(.x)),hr_S2 * fn_r_HD(.x),hr_S2 * fn_r_HD(.x) - fn_r_HD(.x),
+          0,0,0,0,0,          
+          0,0,0,0,0),
+          nrow = n_states, 
+          ncol = n_states,
+          byrow=TRUE, 
+          dimnames = list(c(v_tr_names,v_ab_names),
+                          c(v_tr_names,v_ab_names)
+          ))
+        
+        mR_B = 
+          matrix(c(
+          -(fn_r_HD(.x)+fn_r_HS1(.x)), fn_r_HS1(.x), 0, fn_r_HD(.x), 0,
+          fn_r_S1H(.x),-(fn_r_S1H(.x) + hr_S1S2_trtB * fn_r_S1S2(.x) + fn_r_HD(.x) + hr_S1 * fn_r_HD(.x) - fn_r_HD(.x)),hr_S1S2_trtB *  fn_r_S1S2(.x),hr_S1 * fn_r_HD(.x) ,hr_S1 * fn_r_HD(.x) - fn_r_HD(.x),
+          0,0,-(fn_r_HD(.x) + hr_S2 * fn_r_HD(.x) - fn_r_HD(.x)),hr_S2 * fn_r_HD(.x),hr_S2 * fn_r_HD(.x) - fn_r_HD(.x),
+          0,0,0,0,0,          
+          0,0,0,0,0),
+          nrow = n_states, 
+          ncol = n_states,
+          byrow=TRUE, 
+          dimnames = list(c(v_tr_names,v_ab_names),
+                          c(v_tr_names,v_ab_names)
+          ))
+        
+        mR_AB = 
+          matrix(c(
+          -(fn_r_HD(.x)+fn_r_HS1(.x)), fn_r_HS1(.x), 0, fn_r_HD(.x), 0,
+          fn_r_S1H(.x),-(fn_r_S1H(.x) + hr_S1S2_trtB *  fn_r_S1S2(.x) + fn_r_HD(.x) + hr_S1 * fn_r_HD(.x) - fn_r_HD(.x)),hr_S1S2_trtB * fn_r_S1S2(.x),hr_S1 * fn_r_HD(.x),hr_S1 * fn_r_HD(.x) - fn_r_HD(.x),
+          0,0,-(fn_r_HD(.x) + hr_S2 * fn_r_HD(.x) - fn_r_HD(.x)),hr_S2 * fn_r_HD(.x),hr_S2 * fn_r_HD(.x) - fn_r_HD(.x),
+          0,0,0,0,0,          
+          0,0,0,0,0),
+          nrow = n_states, 
+          ncol = n_states,
+          byrow=TRUE, 
+          dimnames = list(c(v_tr_names,v_ab_names),
+                          c(v_tr_names,v_ab_names)
+          ))
+        
+        array(c(as.vector(mR_SoC),
+                as.vector(mR_A), 
+                as.vector(mR_B),
+                as.vector(mR_AB)), 
+              dim = c(length(v_tr_names)+ length(v_ab_names),length(v_tr_names)+ length(v_ab_names),length(v_tx_names)),
+          dimnames = list(c(v_tr_names,v_ab_names),c(v_tr_names,v_ab_names),v_tx_names)) %>% 
+            apply(.,3,function(x) x, simplify=FALSE) 
+        
+      }))
+    )))
+
+params2 <- with(params2,modifyList(params2,list(
+    m_P = m_R %>% transpose() %>% map(~({
+      mR_ = .x
+      mR_ %>% map(~({
+              tmp_ <- expm(.x * Delta_t)
+              tmp_[5,5] = 0
+              tmp_
+         }))
+      }))
+)))
+
 ```
+
+
+## Construct the Markov Trace
+
+With $\mathbf{P}$ defined under either Approach 1 or Approach 2, we now have the necessary ingredients to construct a Markov trace. Define $\mathbf{s}_0$ as the initial state occupancy vector at time $t=0$. The vector $\mathbf{s}_0$ has size $k$, where $k$ is the total number of states captured in $\mathbf{P}$ (including transition states, if using Approach 2). This vector summarizes the number or fraction of the population in each health state at baseline. Often, this vector will be set such that the entire cohort starts off healthy---though this need not always be the case.
+
+For a time-homogenous model such as considered here, health state occupancy at cycle $t$ is defined as the total number or fraction of the cohort in each health state at that time. State occupancy at cycle $t$ is calculated as:
+
+$$
+\mathbf{s}'_t=\mathbf{s}'_0 \mathbf{P}^t
+$$ {#eq-trace}
+
+
+For a time-inhomongenous model in which transition probabilities change over time (e.g., death rates increase due to aging), we must construct separate transition probability matrices for each cycle (i.e., $\mathbf{P}(t)$). State occupancy at cycle $t$ is calculated by sequentially applying the transition matrices corresponding to each time step leading up to cycle $t$, i.e., 
+
+$$
+\mathbf{s}'_t=\mathbf{s}'_0 \mathbf{P}(1)\mathbf{P}(2)\dots\mathbf{P}(t)
+$$ {#eq-trace-inhomo}
+
+@tbl-trace1 shows the Markov trace for the first five cycles under Approach 1, while @tbl-trace2 shows the trace under Approach 2.  @tbl-trace1 also includes a new column (```new_deaths```) that is calculated as the difference in state occupancy in the ```DS``` column between cycles. This extra step will be necessary later for calculating YLL outcomes. The trace shown under Approach 2 (@tbl-trace2), by comparison, automatically calculates new deaths through the inclusion of the transition state ```trDS```; the values under ```new_deaths``` and ```trDS``` are identical, again highlighting that either approach can be used to calculate the number of disease-related deaths in each cycle.  
 
 ```{r trace}
 trace1 <- 
@@ -420,11 +592,53 @@ trace1 <-
     })  %>% 
     map(~({
         tmp = .x[1,]
-        tmp[1,] = params$v_s0T
+        tmp[1,] = params1$v_s0T
+        tmp = rbind(tmp,.x)
+    }))
+
+trace2 <- 
+    with(params2, {
+        m_P %>% map( ~ ({
+            P = .x
+            occ <- v_s0T
+            P %>% map(~({
+              occ <<- occ %*% .x
+            })) %>% 
+            map(~(data.frame(.x))) %>% 
+            bind_rows()
+        }))
+    })  %>% 
+    map(~({
+        tmp = .x[1,]
+        tmp[1,] = params2$v_s0T
         tmp = rbind(tmp,.x)
     }))
 ```
 
+
+```{r}
+#| tbl-cap: Markov Trace Under Approach 1
+#| label: tbl-trace1
+
+trace1$SoC %>% head() %>% 
+  data.frame() %>% 
+  mutate(new_deaths = c(0,diff(DS))) %>% 
+  mutate(cycle = row_number()-1) %>% 
+  select(cycle,everything()) %>% 
+  kable(digits = c(0,rep(4,6))) 
+```
+
+```{r}
+#| tbl-cap: Markov Trace Under Approach 2
+#| label: tbl-trace2
+#|
+trace2$SoC %>% head() %>% data.frame() %>% 
+  mutate(cycle = row_number()-1) %>% 
+  select(cycle,everything()) %>% 
+  kable(digits = c(0,rep(4,5))) 
+```
+
+## Occupancy and Transition Rewards
 
 ```{r}
 # Life Expectancy (Non-Discounted)

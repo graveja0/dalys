@@ -1,0 +1,29 @@
+\documentclass{article}
+\usepackage{lipsum}\usepackage{setspace}\usepackage{nicematrix} \usepackage{relsize}\NiceMatrixOptions{cell-space-limits=1pt} \onehalfspacing\linespread{2}
+\begin{document}
+
+\[
+\mathbf{P}=\begin{pNiceArray}{ccccc}[small, baseline=line-3, first-row, first-col]
+& \smaller \text{H} & \smaller \text{S1} & \smaller \text{S2} & \smaller \text{DOC} & \smaller \text{DS}\\
+\smaller \text{H} & \texttt{p\_HH} & \texttt{p\_HS1} & \texttt{p\_HS2} & \texttt{p\_HDOC} & \texttt{p\_HDS}\\
+\smaller \text{S1} & \texttt{p\_S1H} & \texttt{p\_S1S1} & \texttt{p\_S1S2} & \texttt{p\_S1DOC} & \texttt{p\_S1DS}\\
+\smaller \text{S2} & 0 & 0 & \texttt{p\_S2S2} & \texttt{p\_S2DOC} & \texttt{p\_S2DS}\\
+\smaller \text{DOC} & 0 & 0 & 0 & 1.0& 0\\
+\smaller \text{DS} & 0 & 0 & 0 & 0 & 1.0 \\
+\end{pNiceArray}
+\]
+
+\[
+\mathbf{P}=\begin{pNiceArray}{cccc:c}[small, baseline=line-3, first-row, first-col]
+\CodeBefore \rectanglecolor{black!15}{5-5}{5-5} \Body
+& \smaller \text{H} & \smaller \text{S1} & \smaller \text{S2} & \smaller \text{D} & \smaller \text{trDS}\\
+\smaller \text{H} & \texttt{p\_HH} & \texttt{p\_HS1} & \texttt{p\_HS2} & \texttt{p\_HD} & \texttt{p\_HDS}\\
+\smaller \text{S1} & \texttt{p\_S1H} & \texttt{p\_S1S1} & \texttt{p\_S1S2} & \texttt{p\_S1D} & \texttt{p\_S1DS}\\
+\smaller \text{S2} & 0 & 0 & \texttt{p\_S2S2} & \texttt{p\_S2D} & \texttt{p\_S2DS}\\
+\smaller \text{D} & 0 & 0 & 0 & 1.0& 0\\ \hdottedline
+\smaller \text{trDS} & 0 & 0 & 0 & 0 & 0.0 \\
+\end{pNiceArray}
+\]
+
+
+\end{document}
