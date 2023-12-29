@@ -1,39 +1,6 @@
 ---
 title: Modeling Disability-Adjusted Life Years for Policy and Decision Analysis
 subtitle: A Tutorial
-author:
-  - name: John A. Graves
-    orcid: 0000-0002-8954-8202
-    corresponding: true
-    roles: []    
-    email: john.graves@vanderbilt.edu
-    affiliations:
-      - Vanderbilt University      
-      - Vanderbilt University Medical Center       
-  - name: Jinyi Zhu
-    orcid: 0000-0001-8169-5956
-    corresponding: false
-    roles: []
-    affiliations:
-      - Vanderbilt University
-      - Vanderbilt University Medical Center       
-  - name: Hannah Peterson
-    corresponding: false
-    roles: []
-    affiliations:
-      - Vanderbilt University Medical Center    
-  - name: Shawn Garbett
-    corresponding: false
-    roles: []
-    affiliations:
-      - Vanderbilt University Medical Center        
-  - name: Ashley Leech
-    orcid: 0000-0001-6795-929X
-    corresponding: false
-    roles: []
-    affiliations:
-      - Vanderbilt University School of Medicine
-      - Vanderbilt University Medical Center            
 keywords:
   - Cost-Effectiveness Analysis
   - Microsimulation
@@ -88,7 +55,7 @@ As a consequence, and in practice, health economic applications often resort to 
 
 This tutorial outlines a framework for direct incorporation of DALY outcomes in common decision modeling environments. Our primary focus is on discrete-time Markov cohort models---however, our framework extends directly to microsimulation and is also easily adapted for continuous time discrete event simulation (DES) models. As such, our study provides a comprehensive roadmap for incorporating DALY outcomes into common decision modeling frameworks.
 
-To maintain consistency within the literature, our tutorial builds on an existing didactic disease progression model [@alarid2023introductory]. The underlying discrete time Markov cohort model is time homogeneous---that is, transition probabilities do not vary as a function of age/time in model. However, the methods and code provided are easily adapted for time inhomogenous models. Finally, recognizing the wide spectrum of experience and programming comfort level among those constructing DALY-based models, we demonstrate our approach in both R and Microsoft Excel. 
+To maintain consistency within the literature, our tutorial builds on an existing didactic disease progression model [@alarid2023introductory]. The underlying discrete time Markov cohort model is time homogeneous---that is, transition probabilities do not vary as a function of age/time in model. However, the methods and code provided are easily adapted for time inhomogenous models. Finally, recognizing the wide spectrum of experience and programming comfort level among those constructing DALY-based models, we provide replication materials for implementing our approach in both R and Microsoft Excel. 
 
 ## Background {#sec-background}
 
@@ -132,11 +99,11 @@ $$ {#eq-yll}
 
 While the creation of the DALY measure was an important step in global health research, it has received scrutiny due to its inherent assumptions and value judgements. For example, calculating YLLs requires the use of a reference life table that provides an estimate of ...
 
-## Structuring a Discrete Time Markov Model for DALY Outcomes
+## Model Overview
 
-This section outlines a process for structuring a discrete time Markov cohort model to estimate DALY outcomes. To demonstrate our method, we build on a progressive disease model in which healthy individuals develop a disease with two health states ("Sick" and "Sicker") [@alarid2023introductory]. Individuals can also transition to an absorbing death state due to causes unrelated to the disease (i.e., "background" mortality), or due to disease-specific causes. In addition, the model structure is homogeneous (i.e., transition rates do not vary as a function of time). This is a simplification to distill model complexity down to only those components needed to demonstrate our DALY approach---though our replication code is structured in such a way as to easily incorporate transition rates that are a function of age/time in the model. 
+This tutorial builds on an existing progressive disease model in which healthy individuals develop a disease with two health states ("Sick" and "Sicker") [@alarid2023introductory]. Individuals can also transition to an absorbing death state due to causes unrelated to the disease (i.e., "background" mortality), or due to disease-specific causes. In addition, the model structure is homogeneous (i.e., transition rates do not vary as a function of time). This is a simplification to distill model complexity down to only those components needed to demonstrate our DALY approach; our replication code is structured in such a way as to easily incorporate transition rates that are a function of age/time in the model. 
 
-We will consider outcomes under four different strategies:
+We consider outcomes under four strategies:
 
 - A **Standard of Care** strategy based on the baseline model parameters.
 - **Strategy A**,  which improves the quality of life among individuals with the disease, but does not affect disease progression.
@@ -296,11 +263,11 @@ To accommodate this need and to accurately model DALY outcomes, several options 
 
 2. Include a non-Markovian transition state for cause-specific deaths in the transition matrix. This approach will maintain the Markovian components captured in @fig-model1, but will allow us to add a column to the Markov trace that separately tracks the number of new deaths from the disease in each cycle. We can then apply transition state payoffs (based on remaining life expectancy at each age/cycle) to calculate YLL outcomes. 
 
-3. Define a block matrix Markov chain with rewards by adapting the methods in @caswell2021a and @caswell2018. This approach draws on matrix calculus and solves for expected outcomes as well as higher order moments such as variance and skewness. 
+3. Define a block matrix Markov chain with rewards for occupancy (YLDs) and disease-relatd death transitions (YLLs) by adapting the methods in @caswell2021a and @caswell2018. This approach draws on matrix calculus and solves for expected outcomes as well as higher order moments such as variance and skewness. 
 
 [^othcause]: In this example, disease-specific death rates are goverened by a hazard ratio applied to the background mortality rate. Because we are operating on the rate scale, we can separate out disease-related deaths from other-cause mortality by simply taking a difference in the rates. Other applications for prevalent conditions with high death rates, however, may require us to construct a cause-deleted life table to obtain background mortality rates that net out deaths from the modeled disease.
 
-In practice, approaches (1) and (2) above draw on similar transition matrices and payoff vectors, as we will show immediately below. Approach (3) is quite distinct, however, so we will demonstrate this method in Section TK.
+Each of the above approaches facilitate the design and execution of a decision-analytic model that accomodates any number or types of outcomes (e.g., QALYs, DALYs, life-years, etc.). In practice, approaches (1) and (2) draw on similar transition matrices and payoff vectors, as we will show immediately below. Approach (3) is quite distinct, however, so we will demonstrate this method separately in Section TK.
 
 ### Approach 1: Cause-Specific Death State
 
@@ -312,7 +279,7 @@ Transitions among health states are defined in terms of continuous rates ("inten
 
 ![Transition Intensity Matrix for Approach 1](images/Q_model2.png)
 
-The matrix $\mathbf{Q}$ has diagonal elements defined as the negative sum of the off-diagonal row values (i.e., the row sums of $\mathbf{Q}$ are zero). This ensures that the Markov model is "closed"---that is, the total cohort size neither grows nor shrinks over time.
+Cell values in row $i$, column $j$ of $\mathbf{Q}$ capture the (continuous time) transition rate from health state $i$ to health state $j$. $\mathbf{Q}$ has diagonal elements defined as the negative sum of the off-diagonal row values (i.e., the row sums of $\mathbf{Q}$ are zero). This ensures that the Markov model is "closed"---that is, the total cohort size neither grows nor shrinks over time.
 
 We next embed the continuous transition intensity matrix into a discrete time transition probability matrix by taking the matrix exponential of $\mathbf{Q}$ for a defined time step (i.e., "cycle length") $\Delta t$:[^3]
 
@@ -322,7 +289,7 @@ $$ {#eq-embed}
 
 This results in a transition probability matrix with the following probabilities defined:
 
-![Transition Probability Matrix for Approach 1](images/P_model2.png)
+![Transition Probability Matrix for Approach 1](images/P_model2.png){width=60%}
 
 [^3]: In Markov theory, $\mathbf{P}$ is called the "discrete skeleton" of the continuous model [@iosifescu1980]. The conversion formula used to calculate $\widetilde{\mathbf{P}}$ is the matrix analogue to the standard rate-to-probability formula commonly taught in health economics textbooks, i.e., $p = 1 - e^{r\Delta t}$, where $r$ is the rate and $\Delta t$ is the time step (i.e., "cycle length").
 
@@ -334,11 +301,11 @@ For example, in the continuous time rate matrix $\mathbf{Q}$ above, there is a z
 
 ### Approach 2: Non-Markovian Tracking States
 
-This section will outline an approach similar to Approach 1, but that draws on a non-Markovian tracking state to track the number of disease-related deaths in each cycle; these counts are then used to match the age of the cohort at each cycle with a reference life table to calculate YLL outcomes. 
+This section will outline an approach similar to Approach 1, but that draws on a non-Markovian "transition" state that tracks the number of disease-related deaths in each cycle; these counts will be used later to match the age of the cohort at each cycle with a reference life table to calculate YLL outcomes. 
 
 Under this approach, we maintain the overall structure as depicted in the original model (@fig-model1), but augment the transition probability matrix with non-Markovian components to facilitate accounting of disease-related deaths.[^tracking]  Approach 2 offers a more generalized method that allows practitioners to accurately account for costs and/or health payoffs (such as YLLs) that are defined by *transitions* among health states, rather than occupancy in a health state. 
 
-A state transition diagram with the tracking state added for disease-related deaths is shown in @fig-transition. 
+@fig-transition shows a state transition diagram with the tracking state added. The tracking state (shown as red nodes)  simply records transitions as cohort members move from either diseased state to the absorbing death state due to causes related to the disease. 
 
 ![State Transition Diagram with Transition State (Red)](images/state-transition-diagram-3.svg){#fig-transition}
 
@@ -360,7 +327,7 @@ As above, we obtain the transition probability matrix by embedding $\mathbf{Q}$ 
 
 To change $\texttt{trDS}$ to a **transition** state, we simply replace the absorbing probability of one in the cell $[\texttt{trDS},\texttt{trDS}]$ with a zero.  This cell-level change is highlighted in grey in the bottom right cell of $\mathbf{P}$ below:
 
-![Transition Probability Matrix for Approach 2](images/P_model1.png)
+![Transition Probability Matrix for Approach 2](images/P_model1.png){width=60%}
 ```{r transition-matrices}
 fn_r_HD <- function(age) {
   # Access r_HD from the parent frame where this function is called
@@ -560,9 +527,9 @@ params2 <- with(params2,modifyList(params2,list(
 
 ## Construct the Markov Trace
 
-With $\mathbf{P}$ defined under either Approach 1 or Approach 2, we now have the necessary ingredients to construct a Markov trace. Define $\mathbf{s}_0$ as the initial state occupancy vector at time $t=0$. The vector $\mathbf{s}_0$ has size $k$, where $k$ is the total number of states captured in $\mathbf{P}$ (including transition states, if using Approach 2). This vector summarizes the number or fraction of the population in each health state at baseline. Often, this vector will be set such that the entire cohort starts off healthy---though this need not always be the case.
+With $\mathbf{P}$ defined under either Approach 1 or Approach 2, we now have the necessary ingredients to construct a Markov trace. Define $\mathbf{s}_0$ as the initial state occupancy vector at time $t=0$. The vector $\mathbf{s}_0$ has size $k$, where $k$ is the total number of states captured in the $k \times k$ matrix $\mathbf{P}$ (including transition states, if using Approach 2). This vector summarizes the number or fraction of the population in each health state at baseline. Often, this vector will be set such that the entire cohort starts off healthy---though this need not always be the case.
 
-For a time-homogenous model such as considered here, health state occupancy at cycle $t$ is defined as the total number or fraction of the cohort in each health state at that time. State occupancy at cycle $t$ is calculated as:
+For a time-homogenous model such as considered here, health state occupancy at cycle $t$ is defined as the total number or fraction of the cohort in each health state. State occupancy at cycle $t$ is calculated as:
 
 $$
 \mathbf{s}'_t=\mathbf{s}'_0 \mathbf{P}^t
