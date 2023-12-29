@@ -5,12 +5,8 @@ author:
   - name: John A. Graves
     orcid: 0000-0002-8954-8202
     corresponding: true
+    roles: []    
     email: john.graves@vanderbilt.edu
-    roles:
-      - Investigation
-      - Project administration
-      - Software
-      - Visualization
     affiliations:
       - Vanderbilt University      
       - Vanderbilt University Medical Center       
@@ -183,19 +179,21 @@ gen_wcc <- function (n_cycles, method = c("Simpson1/3", "half-cycle", "none"))
 ```{r parameterize}
 params_ <- list(
     # Treatment Strategies
-    tx_names = c("SoC","A","B","AB"),      # treatment names
+    v_tx_names = c("SoC","A","B","AB"),      # treatment names
     n_tx = 4, # number of treatment strategies
     
-    tr_names = c("H","S1","S2"), # transient health states
-    ab_names = c("DOC","DS"), # absorbing health states
+    cycle_correction = "Simpson1/3",
+    
+    v_tr_names = c("H","S1","S2"), # transient health states
+    v_ab_names = c("DOC","DS"), # absorbing health states
     n_states = 5, # total number of health states
     
     horizon = 150,    # model time horizon (in years)  
-    r_disc_h  = 0.03,     # annual discount rate for health outcomes
-    r_disc_c = 0.03,     # annual discount rate for cost outcomes
+    r_v_disc_h  = 0.03,     # annual discount rate for health outcomes
+    r_v_disc_c = 0.03,     # annual discount rate for cost outcomes
     Delta_t = 1,      # time step (1 = yearly, 1/12 = monthly, etc.)
     age0 = 25,         # age at baseline
-    s0T = c(1,0,0,0,0), # initial state occupancy  
+    v_s0T = c(1,0,0,0,0), # initial state occupancy  
                       # c(1,0,0,0,0) means the modeled cohort starts off healthy
     
     r_HS1 = 0.15,   # disease onset rate
@@ -229,7 +227,7 @@ params_ <- list(
     hr_treat = 0.85,  # Hazard Ratio for Treatment Strategy
     hr_prevent = 0.9, # Hazard Ratio for Prevention Strategy
 
-    ExR =  # Reference life table from GBD
+    df_ExR =  # Reference life table from GBD
           tibble::tribble(
               ~Age, ~Life.Expectancy,
               0L,       88.8718951,
@@ -253,33 +251,31 @@ params_ <- list(
               85L,      9.990181244,
               90L,      7.617724915,
               95L,      5.922359078
-          ),
-    
-    cycle_correction = "Simpson1/3"
+          )
 )
 
 params <- 
     with(params_,{
         modifyList(params_,list(
-            v_names_states = c(tr_names, ab_names),
+            v_names_states = c(v_tr_names, v_ab_names), # health state names
             omega = horizon/Delta_t,  # Total number of cycles
-            r_disc_h_Delta_t = r_disc_h * Delta_t,  # Cycle discount rate: health outcomes
-            r_disc_c_Delta_t = r_disc_c * Delta_t,  # Cycle discount rate: cost outcomes
+            r_v_disc_h_Delta_t = r_v_disc_h * Delta_t,  # Cycle discount rate: health outcomes
+            r_v_disc_c_Delta_t = r_v_disc_c * Delta_t,  # Cycle discount rate: cost outcomes
             ages = (0:(horizon/Delta_t))*Delta_t + age0,  # Age in each cycle
              # Approximation function for reference life table life expectancies:
-            fExR = function(x) pmax(0,unname(Hmisc::approxExtrap(ExR$Age, ExR$Life.Expectancy,xout = x)$y))
+            f_ExR = function(x) pmax(0,unname(Hmisc::approxExtrap(df_ExR$Age, df_ExR$Life.Expectancy,xout = x)$y))
         ))
     })
 
 params$ages_trace <- params$ages
 params$ages <- params$ages[-length(params$ages)]
 
-disc_h =  # Continuous time
-  exp(-params$r_disc_h_Delta_t  * 0:(params$omega))
-disc_h =  # Discrete time
-  with(params,1 / (( 1 + (r_disc_h * Delta_t)) ^ (0 : omega)))
-disc_c = 
-  exp(-params$r_disc_c_Delta_t  * 0:(params$omega))
+v_disc_h =  # Continuous time discounting
+  exp(-params$r_v_disc_h_Delta_t  * 0:(params$omega))
+# v_disc_h =  # Discrete time discounting
+#   with(params,1 / (( 1 + (r_v_disc_h * Delta_t)) ^ (0 : omega)))
+v_disc_c = 
+  exp(-params$r_v_disc_c_Delta_t  * 0:(params$omega))
 ```
 
 ```{r transition-matrices}
@@ -321,8 +317,8 @@ params1 <- with(params,modifyList(params,list(
           nrow = n_states, 
           ncol = n_states,
           byrow=TRUE, 
-          dimnames = list(c(tr_names,ab_names),
-                          c(tr_names,ab_names)
+          dimnames = list(c(v_tr_names,v_ab_names),
+                          c(v_tr_names,v_ab_names)
           ))
         
         mR_A = 
@@ -335,8 +331,8 @@ params1 <- with(params,modifyList(params,list(
           nrow = n_states, 
           ncol = n_states,
           byrow=TRUE, 
-          dimnames = list(c(tr_names,ab_names),
-                          c(tr_names,ab_names)
+          dimnames = list(c(v_tr_names,v_ab_names),
+                          c(v_tr_names,v_ab_names)
           ))
         
         mR_B = 
@@ -349,8 +345,8 @@ params1 <- with(params,modifyList(params,list(
           nrow = n_states, 
           ncol = n_states,
           byrow=TRUE, 
-          dimnames = list(c(tr_names,ab_names),
-                          c(tr_names,ab_names)
+          dimnames = list(c(v_tr_names,v_ab_names),
+                          c(v_tr_names,v_ab_names)
           ))
         
         mR_AB = 
@@ -363,16 +359,16 @@ params1 <- with(params,modifyList(params,list(
           nrow = n_states, 
           ncol = n_states,
           byrow=TRUE, 
-          dimnames = list(c(tr_names,ab_names),
-                          c(tr_names,ab_names)
+          dimnames = list(c(v_tr_names,v_ab_names),
+                          c(v_tr_names,v_ab_names)
           ))
         
         array(c(as.vector(mR_SoC),
                 as.vector(mR_A), 
                 as.vector(mR_B),
                 as.vector(mR_AB)), 
-              dim = c(length(tr_names)+ length(ab_names),length(tr_names)+ length(ab_names),length(tx_names)),
-          dimnames = list(c(tr_names,ab_names),c(tr_names,ab_names),tx_names)) %>% 
+              dim = c(length(v_tr_names)+ length(v_ab_names),length(v_tr_names)+ length(v_ab_names),length(v_tx_names)),
+          dimnames = list(c(v_tr_names,v_ab_names),c(v_tr_names,v_ab_names),v_tx_names)) %>% 
             apply(.,3,function(x) x, simplify=FALSE) 
         
       }))
@@ -394,7 +390,7 @@ trace1 <-
     with(params1, {
         m_P %>% map( ~ ({
             P = .x
-            occ <- s0T
+            occ <- v_s0T
             P %>% map(~({
               occ <<- occ %*% .x
             })) %>% 
@@ -404,7 +400,7 @@ trace1 <-
     })  %>% 
     map(~({
         tmp = .x[1,]
-        tmp[1,] = params$s0T
+        tmp[1,] = params$v_s0T
         tmp = rbind(tmp,.x)
     }))
 ```
@@ -418,7 +414,7 @@ le_ = with(params1,(matrix(c(1,
               0,
               0)*Delta_t,
             dimnames = list(c(
-                c(tr_names,ab_names)
+                c(v_tr_names,v_ab_names)
             ), c("DW")))
 ))
 
@@ -436,15 +432,15 @@ qaly_ = with(params1,(matrix(c(u_H,
               u_D,
               u_D) * Delta_t,
             dimnames = list(c(
-                c(tr_names,ab_names)
+                c(v_tr_names,v_ab_names)
             ), c("UW")))
 ))
 qaly_ <- 
   with(params1,{
-    tx_names %>% map(~({
+    v_tx_names %>% map(~({
         if (.x=="A" | .x=="AB") {
           tmp_ <- qaly_
-          tmp_[2,1] = u_trtA
+          tmp_[2,1] = u_trtA * Delta_t
           tmp_
       } else qaly_
     }))
@@ -455,24 +451,24 @@ QALYt <- trace1 %>% map2(.,qaly_, ~ ({
     tmp 
 }))
 
-QALY = QALYt %>% map(~sum(.x * disc_h * gen_wcc(params1$omega, method = params1$cycle_correction))) 
+QALY = QALYt %>% map(~sum(.x * v_disc_h * gen_wcc(params1$omega, method = params1$cycle_correction))) 
 
 # YLD
 yld_ = with(params1,(matrix(c(0,
-              dw_S1 * Delta_t * (1/r_disc_h_Delta_t) * (1 - exp(-r_disc_h_Delta_t)) ,
-              dw_S2 * Delta_t * (1/r_disc_h_Delta_t) * (1 - exp(-r_disc_h_Delta_t)),
+              dw_S1 * Delta_t * (1/r_v_disc_h_Delta_t) * (1 - exp(-r_v_disc_h_Delta_t)) ,
+              dw_S2 * Delta_t * (1/r_v_disc_h_Delta_t) * (1 - exp(-r_v_disc_h_Delta_t)),
               0,
               0),
             dimnames = list(c(
-                c(tr_names,ab_names)
+                c(v_tr_names,v_ab_names)
             ), c("DW")))
 ))
 yld_ <- 
   with(params1,{
-    tx_names %>% map(~({
+    v_tx_names %>% map(~({
         if (.x=="A" | .x=="AB") {
           tmp_ <- yld_
-          tmp_[2,1] = dw_trtA * Delta_t * (1/r_disc_h_Delta_t) * (1 - exp(-r_disc_h_Delta_t))
+          tmp_[2,1] = dw_trtA * Delta_t * (1/r_v_disc_h_Delta_t) * (1 - exp(-r_v_disc_h_Delta_t))
           tmp_
       } else yld_
     }))
@@ -483,7 +479,7 @@ YLDt <- trace1 %>% map2(.,yld_, ~ ({
     tmp 
 }))
 
-YLD = YLDt %>% map(~sum(.x*  disc_h * gen_wcc(params1$omega, method = params1$cycle_correction)))
+YLD = YLDt %>% map(~sum(.x*  v_disc_h * gen_wcc(params1$omega, method = params1$cycle_correction)))
 
 # YLL
 
@@ -493,33 +489,33 @@ new_deaths_from_disease <-
     })) 
    
 remaining_life_expectancy <- 
-    with(params1,(1/r_disc_h) * (1 - exp(-r_disc_h * fExR(ages_trace))))
+    with(params1,(1/r_v_disc_h) * (1 - exp(-r_v_disc_h * f_ExR(ages_trace))))
     
 YLLt <- 
     new_deaths_from_disease %>% map(~(.x * remaining_life_expectancy ))
 
 YLL <- 
-    YLLt %>% map(~(sum(.x * disc_h * gen_wcc(params1$omega,method = params1$cycle_correction))))
+    YLLt %>% map(~(sum(.x * v_disc_h * gen_wcc(params1$omega,method = params1$cycle_correction))))
 
 DALY <- 
     map2(YLL,YLD,~(.x + .y))
 
 # QALY-Like DALY
 qaly_daly_ = with(params1,(matrix(c(0,
-              dw_S1 * Delta_t * (1/r_disc_h_Delta_t) * (1 - exp(-r_disc_h_Delta_t)) ,
-              dw_S2 * Delta_t * (1/r_disc_h_Delta_t) * (1 - exp(-r_disc_h_Delta_t)),
+              dw_S1 * Delta_t * (1/r_v_disc_h_Delta_t) * (1 - exp(-r_v_disc_h_Delta_t)) ,
+              dw_S2 * Delta_t * (1/r_v_disc_h_Delta_t) * (1 - exp(-r_v_disc_h_Delta_t)),
               0,
               1) * Delta_t,
             dimnames = list(c(
-                c(tr_names,ab_names)
+                c(v_tr_names,v_ab_names)
             ), c("UW")))
 ))
 qaly_daly_ <- 
   with(params1,{
-    tx_names %>% map(~({
+    v_tx_names %>% map(~({
         if (.x=="A" | .x=="AB") {
           tmp_ <- qaly_daly_
-          tmp_[2,1] = dw_trtA * Delta_t * (1/r_disc_h_Delta_t) * (1 - exp(-r_disc_h_Delta_t))
+          tmp_[2,1] = dw_trtA * Delta_t * (1/r_v_disc_h_Delta_t) * (1 - exp(-r_v_disc_h_Delta_t))
           tmp_
       } else qaly_daly_
     }))
@@ -530,7 +526,7 @@ QALY_DALYt <- trace1 %>% map2(.,qaly_daly_, ~ ({
     tmp 
 }))
 
-QALY_DALY = QALY_DALYt %>% map(~sum(.x * disc_h * gen_wcc(params1$omega, method = params1$cycle_correction))) 
+QALY_DALY = QALY_DALYt %>% map(~sum(.x * v_disc_h * gen_wcc(params1$omega, method = params1$cycle_correction))) 
 
 # Costs
 cost_ = with(params1,(matrix(c(c_H,
@@ -539,38 +535,38 @@ cost_ = with(params1,(matrix(c(c_H,
               c_D,
               c_D)*Delta_t,
             dimnames = list(c(
-                c(tr_names,ab_names)
+                c(v_tr_names,v_ab_names)
             ), c("COST")))
 ))
 cost_ <-
   with(params1, {
-    tx_names %>% map( ~ ({
+    v_tx_names %>% map( ~ ({
       if (.x == "A") {
         tmp_ <- cost_
-        tmp_["S1", 1] = c_S1 + c_trtA
-        tmp_["S2", 1] = c_S2 + c_trtA
+        tmp_["S1", 1] = (c_S1 + c_trtA)*Delta_t
+        tmp_["S2", 1] = (c_S2 + c_trtA)*Delta_t
         tmp_
       } else if (.x == "B") {
         tmp_ <- cost_
-        tmp_["S1", 1] = c_S1 + c_trtB
-        tmp_["S2", 1] = c_S2 + c_trtB
+        tmp_["S1", 1] = (c_S1 + c_trtB)*Delta_t
+        tmp_["S2", 1] = (c_S2 + c_trtB)*Delta_t
         tmp_
       } else if (.x == "AB") {
         tmp_ <- cost_
-        tmp_["S1", 1] = c_S1 + c_trtA + c_trtB
-        tmp_["S2", 1] = c_S2 + c_trtA + c_trtB
+        tmp_["S1", 1] = (c_S1 + c_trtA + c_trtB)*Delta_t
+        tmp_["S2", 1] = (c_S2 + c_trtA + c_trtB)*Delta_t
         tmp_
       } else cost_
     }))
   }) %>% 
-  set_names(params1$tx_names)
+  set_names(params1$v_tx_names)
 
 COSTt <- trace1 %>% map2(.,cost_, ~ ({
     tmp = as.matrix(.x) %*% .y
     tmp 
 }))
 
-COST = COSTt %>% map(~sum(.x * disc_c * gen_wcc(params1$omega, method = params1$cycle_correction))) 
+COST = COSTt %>% map(~sum(.x * v_disc_c * gen_wcc(params1$omega, method = params1$cycle_correction))) 
 
 result1 <- cbind(LE, QALY, YLD, YLL, DALY, QALY_DALY, COST) %>%
   as.data.frame() %>%
@@ -639,7 +635,6 @@ result1 %>%
   #save_kable("images/test.png")
 ```
 
-![](images/test.png)
 ```{r}
 
 ```
