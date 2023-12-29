@@ -143,7 +143,7 @@ We will structure our model to consider outcomes under four different strategies
 - **Strategy B**, which reduces the rate of progression from Sick to Sicker by 40%.
 - **Composite Strategy AB**, which jointly implements strategies A and B. 
  
-A state transition diagram is shown in @fig-model1, and key model parameters are summarized in @tbl-model1.
+A state transition diagram is shown in @fig-model1, and key model parameters are summarized ...
 
 ![State transition diagram for progressive disease model](images/state-transition-diagram-1.svg){#fig-model1}
 
@@ -285,28 +285,6 @@ v_disc_c =
 ```
 
 ### Transition Matrices
-
-Transitions among health states are defined in terms of continuous rates ("intensities") and are captured within an intensity matrix $\widetilde{\mathbf{Q}}$:
-
-$$
-\widetilde{\mathbf{Q}}=\begin{pNiceArray}{cccc}[small, baseline=line-3, first-row, first-col] & \smaller \text{Healthy} & \smaller \text{Sick} & \smaller \text{Sicker} & \smaller \text{Dead} \\ \smaller \text{Healthy} & -(\texttt{rHS1}+\texttt{rD}) & \texttt{rHS1} & 0 & \texttt{rD} \\ \smaller \text{Sick} & 0 & -(\texttt{rS1S2} + \texttt{rS1D} +\texttt{rD}) & \texttt{rS1S2} & (\texttt{rS1D} + \texttt{rD}) \\ \smaller \text{Sicker} & 0 & 0 & -(\texttt{rS2D} +\texttt{rD}) & (\texttt{rS2D} +\texttt{rD}) \\ \smaller \text{Dead} & 0 & 0 & 0 & 0 \\ \end{pNiceArray}
-$$
-
-The matrix $\widetilde{\mathbf{Q}}$ has diagonal elements defined as the negative sum of the off-diagonal row values (i.e., the row sums of $\widetilde{\mathbf{Q}}$ are zero). This ensures that the Markov model is "closed"---that is, the total cohort size neither grows nor shrinks over time.
-
-We next embed the continuous transition intensity matrix into a discrete time transition probability matrix by taking the matrix exponential of $\widetilde{\mathbf{Q}}$ for a defined time step (i.e., "cycle length") $\Delta t$:[^3]
-
-[^3]: In Markov theory, $\widetilde{\mathbf{P}}$ is called the "discrete skeleton" of the continuous model [@iosifescu1980]. The conversion formula used to calculate $\widetilde{\mathbf{P}}$ is the matrix analogue to the standard rate-to-probability formula commonly taught in health economics textbooks, i.e., $p = 1 - e^{r\Delta t}$, where $r$ is the rate and $\Delta t$ is the time step (i.e., "cycle length").
-
-$$
-\widetilde{\mathbf{P}}=e^{\widetilde{\mathbf{Q}}\Delta t}=\begin{pNiceArray}{cccc}[baseline=line-3, first-row, first-col] \CodeBefore \rectanglecolor{black!15}{5-5}{5-5} \Body & \smaller \text{Healthy} & \smaller \text{Sick} & \smaller \text{Sicker} & \smaller \text{Dead}  \\ \smaller \text{Healthy} & \texttt{pHH} & \texttt{pHS1} & \texttt{pHS2} & \texttt{pHD}  \\ \smaller \text{Sick} & 0 & \texttt{pS1S1} & \texttt{pS1S2}& \texttt{pS1D}  \\ \smaller \text{Sicker} & 0 & 0 & \texttt{pS2S2} & \texttt{pS2D}  \\ \smaller \text{Dead} & 0 & 0 & 0 & 1   \end{pNiceArray}
-$$
-
-Embedding the transition probability matrix using the matrix exponential ensures that the resulting transition probabilities capture the underlying continuous time disease process. In particular, $\widetilde{\mathbf{P}}$ will capture the probability of compound ("jumpover") transitions within a single cycle. For example, in the continuous time rate matrix $\widetilde{\mathbf{Q}}$ above, there is a zero-valued rate defined for progressions from Healthy to Sicker, since individuals must first enter the Sick state before they can advance to the Sicker state. However, after embedding using the matrix exponential of $\widetilde{\mathbf{Q}}$, the matrix $\widetilde{\mathbf{P}}$ has a non-zero cycle transition probability from Healthy To Sicker (i.e., $\texttt{pHS2}$). This value captures the probability of a compound or "jumpover" transition from Healthy $\rightarrow$ Sick $\rightarrow$ Sicker within the same discrete time cycle; see @graves2021 for further discussion, and @iosifescu1980 for additional theory.
-
-As we will show below, the transition probability matrix $\widetilde{\mathbf{P}}$ can be combined with an initial state occpuancy vector $\mathbf{s}'_0$ to construct a Markov trace to calculate health (and cost) outcomes. The matrix $\widetilde{\mathbf{P}}$ is not well-suited to calculate DALY outcomes, however. A primary reason is that the death transition probabilities reflect transitions due to all causes of death. Accumulated person-time in the absorbing death state will therefore reflect time spent in the death state due to the disease *or* due to other background causes.[^4]
-
-[^4]: To highlight how this is problematic, assume for now that the disease affects quality of life but not death. That is, assume $\texttt{rS1}=0$ and $\texttt{rS2}=0$. In each cycle, there will be some number of deaths due to background mortality causes in the cohort. When calculating YLL outcomes, we compare the age at which these deaths occur to a reference life table that tells us the remaining life expectancy for those who died. These remaining life expectancy values are accumulated and averaged across the cohort to yield an estimate of the YLL for the disease. This YLL value would be non-zero if we were to use $\widetilde{\mathbf{P}}$ as the underlying basis for our calculations---even though in this hypothetical the disease does not affect death.
 
 
 ### Scratch
