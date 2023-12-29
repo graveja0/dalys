@@ -8,7 +8,19 @@ format:
       hypothesis: true
   docx: default
   jats: default
-  agu-pdf: default
+  agu-pdf: 
+      fig-pos: H
+      include-in-header:
+        text: |
+          \usepackage{lipsum}
+          \usepackage{setspace}
+          \usepackage{nicematrix}
+          \usepackage{relsize}
+          \NiceMatrixOptions{cell-space-limits=1pt}
+          \onehalfspacing
+          \linespread{2}
+      df-print: kable
+      highlight-style: zenburn
 
 
 
