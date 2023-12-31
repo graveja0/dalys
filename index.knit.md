@@ -23,28 +23,158 @@ editor_options:
 prefer-html: true  
 ---
 
+
 ## Introduction {#sec-introduction}
 
-```{r}
-#| echo: false
-#| message: false
-#| warning: false
+
+::: {.cell}
+
+```{.r .cell-code .hidden}
 library(tidyverse)
+```
+
+::: {.cell-output .cell-output-stderr .hidden}
+
+```
+── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.4     ✔ readr     2.1.4
+✔ forcats   1.0.0     ✔ stringr   1.5.1
+✔ ggplot2   3.4.4     ✔ tibble    3.2.1
+✔ lubridate 1.9.3     ✔ tidyr     1.3.0
+✔ purrr     1.0.2     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
+```
+
+
+:::
+
+```{.r .cell-code .hidden}
 library(MASS)
+```
+
+::: {.cell-output .cell-output-stderr .hidden}
+
+```
+
+Attaching package: 'MASS'
+
+The following object is masked from 'package:dplyr':
+
+    select
+```
+
+
+:::
+
+```{.r .cell-code .hidden}
 # library(Matrix)
 library(expm)
+```
+
+::: {.cell-output .cell-output-stderr .hidden}
+
+```
+Loading required package: Matrix
+
+Attaching package: 'Matrix'
+
+The following objects are masked from 'package:tidyr':
+
+    expand, pack, unpack
+
+
+Attaching package: 'expm'
+
+The following object is masked from 'package:Matrix':
+
+    expm
+```
+
+
+:::
+
+```{.r .cell-code .hidden}
 library(knitr)
 library(kableExtra)
+```
+
+::: {.cell-output .cell-output-stderr .hidden}
+
+```
+
+Attaching package: 'kableExtra'
+
+The following object is masked from 'package:dplyr':
+
+    group_rows
+```
+
+
+:::
+
+```{.r .cell-code .hidden}
 library(dampack)
 library(here)
+```
+
+::: {.cell-output .cell-output-stderr .hidden}
+
+```
+here() starts at /Users/johngraves/Dropbox/Projects/dalys
+```
+
+
+:::
+
+```{.r .cell-code .hidden}
 library(Hmisc)
+```
+
+::: {.cell-output .cell-output-stderr .hidden}
+
+```
+
+Attaching package: 'Hmisc'
+
+The following objects are masked from 'package:dplyr':
+
+    src, summarize
+
+The following objects are masked from 'package:base':
+
+    format.pval, units
+```
+
+
+:::
+
+```{.r .cell-code .hidden}
 library(hrbrthemes)
+```
+
+::: {.cell-output .cell-output-stderr .hidden}
+
+```
+NOTE: Either Arial Narrow or Roboto Condensed fonts are required to use these themes.
+      Please use hrbrthemes::import_roboto_condensed() to install Roboto Condensed and
+      if Arial Narrow is not on your system, please see https://bit.ly/arialnarrow
+```
+
+
+:::
+
+```{.r .cell-code .hidden}
 library(ggsci)
 options(scipen = 5) 
 transpose <- purrr::transpose
 select <- dplyr::select
 #quarto preview index.qmd --to html --no-watch-inputs --no-browse
 ```
+:::
+
 
 Disability-adjusted life years (DALYs) measure disease burden in a population. Conceptualized in the Global Burden of Disease (GBD) study [@Murray1997], DALYs quantify the total sum of years of life lost due to disability attributable to a disease (YLD), plus years of life lost to premature mortality from the disease (YLL; i.e., DALY = YLD + YLL).
 
@@ -119,7 +249,10 @@ A state transition diagram is shown in @fig-model1. In the figure, nodes are hea
 
 ![State transition diagram for progressive disease model](images/state-transition-diagram-1.svg){#fig-model1}
 
-```{r setup}
+
+::: {.cell}
+
+```{.r .cell-code .hidden}
 library(tidyverse)
 library(MASS)
 library(expm)
@@ -153,8 +286,11 @@ gen_wcc <- function (n_cycles, method = c("Simpson1/3", "half-cycle", "none"))
     return(v_wcc)
 }
 ```
+:::
 
-```{r parameterize}
+::: {.cell}
+
+```{.r .cell-code .hidden}
 params_ <- list(
     # Treatment Strategies
     v_tx_names = c("SoC","A","B","AB"),      # treatment names
@@ -255,6 +391,8 @@ v_disc_h =  # Continuous time discounting
 v_disc_c = 
   exp(-params$r_v_disc_c_Delta_t  * 0:(params$omega))
 ```
+:::
+
 
 
 
@@ -336,7 +474,10 @@ To change $\texttt{trDS}$ to a **transition** state, we simply replace the absor
 
 ![Transition Probability Matrix for Approach 2](images/P_model1.png){width=60%}
 
-```{r transition-matrices}
+
+::: {.cell}
+
+```{.r .cell-code .hidden}
 fn_r_HD <- function(age) {
   # Access r_HD from the parent frame where this function is called
   r_HD <- get("r_HD", envir = parent.frame())
@@ -529,8 +670,9 @@ params2 <- with(params2,modifyList(params2,list(
          }))
       }))
 )))
-
 ```
+:::
+
 
 ## Construct the Markov Trace
 
@@ -550,7 +692,10 @@ $$ {#eq-trace-inhomo}
 
 @tbl-trace1 shows the Markov trace for the first five cycles under Approach 1, while @tbl-trace2 shows the trace under Approach 2.  @tbl-trace1 also includes a new column (```deaths_disease```) that is calculated as the difference in state occupancy in the ```DS``` column between cycles. This extra step will be necessary later for calculating YLL outcomes. The trace shown under Approach 2 (@tbl-trace2), by comparison, automatically calculates new deaths through the inclusion of the transition state ```trDS```; the values under ```deaths_disease``` and ```trDS``` are identical, again highlighting that either approach can be used to calculate the number of disease-related deaths in each cycle.  
 
-```{r trace}
+
+::: {.cell}
+
+```{.r .cell-code .hidden}
 trace1 <- 
     with(params1, {
         m_P %>% map( ~ ({
@@ -587,12 +732,11 @@ trace2 <-
         tmp = rbind(tmp,.x)
     }))
 ```
+:::
 
+::: {#tbl-trace1 .cell tbl-cap='Markov Trace Under Approach 1'}
 
-```{r}
-#| tbl-cap: Markov Trace Under Approach 1
-#| label: tbl-trace1
-
+```{.r .cell-code .hidden}
 trace1$SoC %>% head() %>% 
   data.frame() %>% 
   mutate(deaths_disease = c(0,diff(DS))) %>% 
@@ -601,15 +745,161 @@ trace1$SoC %>% head() %>%
   kable(digits = c(0,rep(4,6))) 
 ```
 
-```{r}
-#| tbl-cap: Markov Trace Under Approach 2
-#| label: tbl-trace2
+::: {.cell-output-display}
+`````{=html}
+<table>
+ <thead>
+  <tr>
+   <th style="text-align:right;"> cycle </th>
+   <th style="text-align:right;"> H </th>
+   <th style="text-align:right;"> S1 </th>
+   <th style="text-align:right;"> S2 </th>
+   <th style="text-align:right;"> DOC </th>
+   <th style="text-align:right;"> DS </th>
+   <th style="text-align:right;"> deaths_disease </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 1.0000 </td>
+   <td style="text-align:right;"> 0.0000 </td>
+   <td style="text-align:right;"> 0.0000 </td>
+   <td style="text-align:right;"> 0.0000 </td>
+   <td style="text-align:right;"> 0.0000 </td>
+   <td style="text-align:right;"> 0.0000 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 0.8870 </td>
+   <td style="text-align:right;"> 0.1046 </td>
+   <td style="text-align:right;"> 0.0062 </td>
+   <td style="text-align:right;"> 0.0020 </td>
+   <td style="text-align:right;"> 0.0003 </td>
+   <td style="text-align:right;"> 0.0003 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:right;"> 0.8232 </td>
+   <td style="text-align:right;"> 0.1521 </td>
+   <td style="text-align:right;"> 0.0197 </td>
+   <td style="text-align:right;"> 0.0040 </td>
+   <td style="text-align:right;"> 0.0010 </td>
+   <td style="text-align:right;"> 0.0008 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 3 </td>
+   <td style="text-align:right;"> 0.7832 </td>
+   <td style="text-align:right;"> 0.1723 </td>
+   <td style="text-align:right;"> 0.0363 </td>
+   <td style="text-align:right;"> 0.0060 </td>
+   <td style="text-align:right;"> 0.0022 </td>
+   <td style="text-align:right;"> 0.0012 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 4 </td>
+   <td style="text-align:right;"> 0.7547 </td>
+   <td style="text-align:right;"> 0.1796 </td>
+   <td style="text-align:right;"> 0.0540 </td>
+   <td style="text-align:right;"> 0.0080 </td>
+   <td style="text-align:right;"> 0.0037 </td>
+   <td style="text-align:right;"> 0.0015 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 5 </td>
+   <td style="text-align:right;"> 0.7321 </td>
+   <td style="text-align:right;"> 0.1808 </td>
+   <td style="text-align:right;"> 0.0717 </td>
+   <td style="text-align:right;"> 0.0099 </td>
+   <td style="text-align:right;"> 0.0056 </td>
+   <td style="text-align:right;"> 0.0019 </td>
+  </tr>
+</tbody>
+</table>
+
+`````
+:::
+:::
+
+::: {#tbl-trace2 .cell tbl-cap='Markov Trace Under Approach 2'}
+
+```{.r .cell-code .hidden}
 #|
 trace2$SoC %>% head() %>% data.frame() %>% 
   mutate(cycle = row_number()-1) %>% 
   select(cycle,everything()) %>% 
   kable(digits = c(0,rep(4,5))) 
 ```
+
+::: {.cell-output-display}
+`````{=html}
+<table>
+ <thead>
+  <tr>
+   <th style="text-align:right;"> cycle </th>
+   <th style="text-align:right;"> H </th>
+   <th style="text-align:right;"> S1 </th>
+   <th style="text-align:right;"> S2 </th>
+   <th style="text-align:right;"> D </th>
+   <th style="text-align:right;"> trDS </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 1.0000 </td>
+   <td style="text-align:right;"> 0.0000 </td>
+   <td style="text-align:right;"> 0.0000 </td>
+   <td style="text-align:right;"> 0.0000 </td>
+   <td style="text-align:right;"> 0.0000 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 0.8870 </td>
+   <td style="text-align:right;"> 0.1046 </td>
+   <td style="text-align:right;"> 0.0062 </td>
+   <td style="text-align:right;"> 0.0023 </td>
+   <td style="text-align:right;"> 0.0003 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:right;"> 0.8232 </td>
+   <td style="text-align:right;"> 0.1521 </td>
+   <td style="text-align:right;"> 0.0197 </td>
+   <td style="text-align:right;"> 0.0050 </td>
+   <td style="text-align:right;"> 0.0008 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 3 </td>
+   <td style="text-align:right;"> 0.7832 </td>
+   <td style="text-align:right;"> 0.1723 </td>
+   <td style="text-align:right;"> 0.0363 </td>
+   <td style="text-align:right;"> 0.0082 </td>
+   <td style="text-align:right;"> 0.0012 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 4 </td>
+   <td style="text-align:right;"> 0.7547 </td>
+   <td style="text-align:right;"> 0.1796 </td>
+   <td style="text-align:right;"> 0.0540 </td>
+   <td style="text-align:right;"> 0.0117 </td>
+   <td style="text-align:right;"> 0.0015 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 5 </td>
+   <td style="text-align:right;"> 0.7321 </td>
+   <td style="text-align:right;"> 0.1808 </td>
+   <td style="text-align:right;"> 0.0717 </td>
+   <td style="text-align:right;"> 0.0155 </td>
+   <td style="text-align:right;"> 0.0019 </td>
+  </tr>
+</tbody>
+</table>
+
+`````
+:::
+:::
+
 
 ## Occupancy and Transition Rewards
 
@@ -670,7 +960,10 @@ $$
 YLL=\sum_{t=0}^{N-1} YLL(t) =\sum_{t=0}^{N-1}\left(\mathbf{s}'_0 \mathbf{P}^t \mathbf{e}(t)  \times{e^{-r\Delta_t t}} \right) 
 $$ {#eq-yllcum}
 
-```{r}
+
+::: {.cell}
+
+```{.r .cell-code .hidden}
 # QALYs
 qaly_ = with(params1,(matrix(c(u_H,
               u_S1 ,
@@ -846,8 +1139,9 @@ result1 <- cbind(YLD, YLL, DALY, ACCDALY, QALY_DALY, QALY,COST) %>%
   rownames_to_column(var = "strategy") %>%
   mutate(approach = "Markov Trace") %>% 
   dplyr::select(approach, strategy, everything()) 
-
 ```
+:::
+
 
 ## Approach 3: Markov Chain With Rewards
 
@@ -1213,7 +1507,10 @@ $$
 $$
 
 
-```{r approach-3}
+
+::: {.cell}
+
+```{.r .cell-code .hidden}
 params3_ <- with(params1,modifyList(params1,list(
     alpha = length(v_ab_names),
     tau = length(v_tr_names), 
@@ -1395,8 +1692,11 @@ healthy_longevity_yll <- function(params, life_expectancy, disc) {
     })
 }
 ```
+:::
 
-```{r markov-chain-rewards}
+::: {.cell}
+
+```{.r .cell-code .hidden}
 H = with(params3,matrix(1,nrow=tau, ncol=omega))
 
 with(params3,{
@@ -1503,12 +1803,16 @@ result3 <- cbind(YLD3, YLL3, DALY3, QALY3,COST3) %>%
   rownames_to_column(var = "strategy") %>%
   mutate(approach = "Markov Chain With Rewards") %>% 
   dplyr::select(approach, strategy, everything())
-
 ```
+:::
+
 
 ## Results
 
-```{r}
+
+::: {.cell}
+
+```{.r .cell-code .hidden}
 result1 %>% 
   bind_rows(result3) %>% 
   select(-approach) %>% 
@@ -1518,8 +1822,114 @@ result1 %>%
   pack_rows("Approach 3 (Markov Chain With Rewards)",5,8)
 ```
 
+::: {.cell-output-display}
+`````{=html}
+<table class="table" style="margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Scenario </th>
+   <th style="text-align:right;"> YLDs </th>
+   <th style="text-align:right;"> YLLs </th>
+   <th style="text-align:right;"> DALYs </th>
+   <th style="text-align:right;"> DALY-hack </th>
+   <th style="text-align:right;"> QALY-like DALY </th>
+   <th style="text-align:right;"> QALY </th>
+   <th style="text-align:right;"> Costs </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr grouplength="4"><td colspan="8" style="border-bottom: 1px solid;"><strong>Approaches 1 and 2 (Markov Trace)</strong></td></tr>
+<tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> SoC </td>
+   <td style="text-align:right;"> 4.607 </td>
+   <td style="text-align:right;"> 2.683 </td>
+   <td style="text-align:right;"> 7.290 </td>
+   <td style="text-align:right;"> 9.558 </td>
+   <td style="text-align:right;"> 21.870 </td>
+   <td style="text-align:right;"> 21.870 </td>
+   <td style="text-align:right;"> 158522.6 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> A </td>
+   <td style="text-align:right;"> 4.006 </td>
+   <td style="text-align:right;"> 2.683 </td>
+   <td style="text-align:right;"> 6.689 </td>
+   <td style="text-align:right;"> 8.957 </td>
+   <td style="text-align:right;"> 22.480 </td>
+   <td style="text-align:right;"> 22.588 </td>
+   <td style="text-align:right;"> 292273.9 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> B </td>
+   <td style="text-align:right;"> 3.817 </td>
+   <td style="text-align:right;"> 2.028 </td>
+   <td style="text-align:right;"> 5.845 </td>
+   <td style="text-align:right;"> 7.679 </td>
+   <td style="text-align:right;"> 23.695 </td>
+   <td style="text-align:right;"> 23.695 </td>
+   <td style="text-align:right;"> 255483.2 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> AB </td>
+   <td style="text-align:right;"> 3.081 </td>
+   <td style="text-align:right;"> 2.028 </td>
+   <td style="text-align:right;"> 5.109 </td>
+   <td style="text-align:right;"> 6.943 </td>
+   <td style="text-align:right;"> 24.442 </td>
+   <td style="text-align:right;"> 24.574 </td>
+   <td style="text-align:right;"> 374862.0 </td>
+  </tr>
+  <tr grouplength="4"><td colspan="8" style="border-bottom: 1px solid;"><strong>Approach 3 (Markov Chain With Rewards)</strong></td></tr>
+<tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> SoC </td>
+   <td style="text-align:right;"> 4.571 </td>
+   <td style="text-align:right;"> 2.810 </td>
+   <td style="text-align:right;"> 7.381 </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:right;"> 22.312 </td>
+   <td style="text-align:right;"> 158440.8 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> A </td>
+   <td style="text-align:right;"> 3.972 </td>
+   <td style="text-align:right;"> 2.810 </td>
+   <td style="text-align:right;"> 6.782 </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:right;"> 23.027 </td>
+   <td style="text-align:right;"> 291264.5 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> B </td>
+   <td style="text-align:right;"> 3.794 </td>
+   <td style="text-align:right;"> 2.124 </td>
+   <td style="text-align:right;"> 5.919 </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:right;"> 24.150 </td>
+   <td style="text-align:right;"> 255156.7 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> AB </td>
+   <td style="text-align:right;"> 3.060 </td>
+   <td style="text-align:right;"> 2.124 </td>
+   <td style="text-align:right;"> 5.184 </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:right;"> 25.028 </td>
+   <td style="text-align:right;"> 373906.6 </td>
+  </tr>
+</tbody>
+</table>
 
-```{r}
+`````
+:::
+:::
+
+::: {.cell}
+
+```{.r .cell-code .hidden}
 dampack::calculate_icers(cost = result1$COST, effect = result1$QALY, strategies = result1$strategy) %>% 
   bind_rows(
     dampack::calculate_icers(cost = result3$COST, effect = result3$QALY, strategies = result3$strategy)
@@ -1550,8 +1960,253 @@ dampack::calculate_icers(cost = result1$COST, effect = result1$QALY, strategies 
   pack_rows("QALY-like DALY",21,24)
 ```
 
+::: {.cell-output-display}
+`````{=html}
+<table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Strategy </th>
+   <th style="text-align:right;"> Cost </th>
+   <th style="text-align:right;"> Effect </th>
+   <th style="text-align:right;"> Inc_Cost </th>
+   <th style="text-align:right;"> Inc_Effect </th>
+   <th style="text-align:right;"> ICER </th>
+   <th style="text-align:left;"> Status </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr grouplength="4"><td colspan="7" style="border-bottom: 1px solid;"><strong>QALY - Approaches 1 &amp; 2</strong></td></tr>
+<tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> SoC </td>
+   <td style="text-align:right;"> 158523 </td>
+   <td style="text-align:right;"> 21.870 </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:left;"> ND </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> B </td>
+   <td style="text-align:right;"> 255483 </td>
+   <td style="text-align:right;"> 23.695 </td>
+   <td style="text-align:right;"> 96961 </td>
+   <td style="text-align:right;"> 1.825 </td>
+   <td style="text-align:right;"> 53142 </td>
+   <td style="text-align:left;"> ND </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> AB </td>
+   <td style="text-align:right;"> 374862 </td>
+   <td style="text-align:right;"> 24.574 </td>
+   <td style="text-align:right;"> 119379 </td>
+   <td style="text-align:right;"> 0.879 </td>
+   <td style="text-align:right;"> 135763 </td>
+   <td style="text-align:left;"> ND </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> A </td>
+   <td style="text-align:right;"> 292274 </td>
+   <td style="text-align:right;"> 22.588 </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:left;"> D </td>
+  </tr>
+  <tr grouplength="4"><td colspan="7" style="border-bottom: 1px solid;"><strong>QALY - Approach 3</strong></td></tr>
+<tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> SoC </td>
+   <td style="text-align:right;"> 158441 </td>
+   <td style="text-align:right;"> 22.312 </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:left;"> ND </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> B </td>
+   <td style="text-align:right;"> 255157 </td>
+   <td style="text-align:right;"> 24.150 </td>
+   <td style="text-align:right;"> 96716 </td>
+   <td style="text-align:right;"> 1.839 </td>
+   <td style="text-align:right;"> 52604 </td>
+   <td style="text-align:left;"> ND </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> AB </td>
+   <td style="text-align:right;"> 373907 </td>
+   <td style="text-align:right;"> 25.028 </td>
+   <td style="text-align:right;"> 118750 </td>
+   <td style="text-align:right;"> 0.877 </td>
+   <td style="text-align:right;"> 135383 </td>
+   <td style="text-align:left;"> ND </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> A </td>
+   <td style="text-align:right;"> 291264 </td>
+   <td style="text-align:right;"> 23.027 </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:left;"> D </td>
+  </tr>
+  <tr grouplength="4"><td colspan="7" style="border-bottom: 1px solid;"><strong>DALY - Approaches 1 &amp; 2</strong></td></tr>
+<tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> SoC </td>
+   <td style="text-align:right;"> 158523 </td>
+   <td style="text-align:right;"> 7.290 </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:left;"> ND </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> B </td>
+   <td style="text-align:right;"> 255483 </td>
+   <td style="text-align:right;"> 5.845 </td>
+   <td style="text-align:right;"> 96961 </td>
+   <td style="text-align:right;"> 1.445 </td>
+   <td style="text-align:right;"> 67111 </td>
+   <td style="text-align:left;"> ND </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> AB </td>
+   <td style="text-align:right;"> 374862 </td>
+   <td style="text-align:right;"> 5.109 </td>
+   <td style="text-align:right;"> 119379 </td>
+   <td style="text-align:right;"> 0.736 </td>
+   <td style="text-align:right;"> 162129 </td>
+   <td style="text-align:left;"> ND </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> A </td>
+   <td style="text-align:right;"> 292274 </td>
+   <td style="text-align:right;"> 6.689 </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:left;"> D </td>
+  </tr>
+  <tr grouplength="4"><td colspan="7" style="border-bottom: 1px solid;"><strong>DALY - Approach 3</strong></td></tr>
+<tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> SoC </td>
+   <td style="text-align:right;"> 158441 </td>
+   <td style="text-align:right;"> 7.381 </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:left;"> ND </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> B </td>
+   <td style="text-align:right;"> 255157 </td>
+   <td style="text-align:right;"> 5.919 </td>
+   <td style="text-align:right;"> 96716 </td>
+   <td style="text-align:right;"> 1.463 </td>
+   <td style="text-align:right;"> 66122 </td>
+   <td style="text-align:left;"> ND </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> AB </td>
+   <td style="text-align:right;"> 373907 </td>
+   <td style="text-align:right;"> 5.184 </td>
+   <td style="text-align:right;"> 118750 </td>
+   <td style="text-align:right;"> 0.734 </td>
+   <td style="text-align:right;"> 161675 </td>
+   <td style="text-align:left;"> ND </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> A </td>
+   <td style="text-align:right;"> 291264 </td>
+   <td style="text-align:right;"> 6.782 </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:left;"> D </td>
+  </tr>
+  <tr grouplength="4"><td colspan="7" style="border-bottom: 1px solid;"><strong>DALY-Shortcut</strong></td></tr>
+<tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> SoC </td>
+   <td style="text-align:right;"> 158523 </td>
+   <td style="text-align:right;"> 9.558 </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:left;"> ND </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> B </td>
+   <td style="text-align:right;"> 255483 </td>
+   <td style="text-align:right;"> 7.679 </td>
+   <td style="text-align:right;"> 96961 </td>
+   <td style="text-align:right;"> 1.879 </td>
+   <td style="text-align:right;"> 51608 </td>
+   <td style="text-align:left;"> ND </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> AB </td>
+   <td style="text-align:right;"> 374862 </td>
+   <td style="text-align:right;"> 6.943 </td>
+   <td style="text-align:right;"> 119379 </td>
+   <td style="text-align:right;"> 0.736 </td>
+   <td style="text-align:right;"> 162129 </td>
+   <td style="text-align:left;"> ND </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> A </td>
+   <td style="text-align:right;"> 292274 </td>
+   <td style="text-align:right;"> 8.957 </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:left;"> D </td>
+  </tr>
+  <tr grouplength="4"><td colspan="7" style="border-bottom: 1px solid;"><strong>QALY-like DALY</strong></td></tr>
+<tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> SoC </td>
+   <td style="text-align:right;"> 158523 </td>
+   <td style="text-align:right;"> 21.870 </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:left;"> ND </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> B </td>
+   <td style="text-align:right;"> 255483 </td>
+   <td style="text-align:right;"> 23.695 </td>
+   <td style="text-align:right;"> 96961 </td>
+   <td style="text-align:right;"> 1.825 </td>
+   <td style="text-align:right;"> 53142 </td>
+   <td style="text-align:left;"> ND </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> AB </td>
+   <td style="text-align:right;"> 374862 </td>
+   <td style="text-align:right;"> 24.442 </td>
+   <td style="text-align:right;"> 119379 </td>
+   <td style="text-align:right;"> 0.747 </td>
+   <td style="text-align:right;"> 159721 </td>
+   <td style="text-align:left;"> ND </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> A </td>
+   <td style="text-align:right;"> 292274 </td>
+   <td style="text-align:right;"> 22.480 </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:right;">  </td>
+   <td style="text-align:left;"> D </td>
+  </tr>
+</tbody>
+</table>
 
-```{r, eval = FALSE}
+`````
+:::
+:::
+
+::: {.cell}
+
+```{.r .cell-code .hidden}
 dampack::calculate_icers(cost = result1$COST, effect = result1$QALY, strategies = result1$strategy) %>% 
   mutate(outcome = "QALY", approach = "Approach 1 & 2") %>% 
   bind_rows(
@@ -1582,6 +2237,8 @@ dampack::calculate_icers(cost = result1$COST, effect = result1$QALY, strategies 
   hrbrthemes::theme_ipsum() + ggsci::scale_color_aaas(name="Approach") + facet_wrap(~Strategy) + 
   scale_x_continuous(limits = c(0,10)) + scale_shape(name="Outcome") + theme(legend.position = "bottom")
 ```
+:::
+
 
 
 ## Conclusion

@@ -1,0 +1,37 @@
+\documentclass{article}
+\usepackage{lipsum}
+\usepackage{setspace}
+\usepackage{nicematrix}
+ \usepackage{relsize}
+\NiceMatrixOptions{cell-space-limits=1pt}
+ \onehalfspacing
+\linespread{2}
+\begin{document}
+
+\[
+\mathbf{d}_{YLD}=\begin{pNiceArray}{c}[small, baseline=line-3, first-row, first-col]
+& \smaller \text{} \\
+\smaller \text{H} & 0  \\
+\smaller \text{S1} & \texttt{dwS1} \frac{1}{r_{\Delta_t}}(1-e^{-r_{\Delta_t}}) \Delta_t\\
+\smaller \text{S2} & \texttt{dwS2} \frac{1}{r_{\Delta_t}}(1-e^{-r_{\Delta_t}}) \Delta_t\\ 
+\smaller \text{DOC} & 0 \\\
+\smaller \text{DS} & 0 \\
+\end{pNiceArray}
+\]
+
+\[
+\mathbf{d}_{YLL}=\begin{pNiceArray}{c}[small, baseline=line-3, first-row, first-col]
+& \smaller \text{} \\
+\smaller \text{H} & 0  \\
+\smaller \text{S1} & 0\\
+\smaller \text{S2} & 0 \\
+\smaller \text{DOC} & 0 \\\
+\smaller \text{DS} & \frac{1}{r}\big (1 - e^{-rEx(a(t))}  \\
+\end{pNiceArray}
+\]
+
+
+
+
+
+\end{document}
