@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999995 (TeX Live 2023) (preloaded format=xelatex 2023.10.30)  31 DEC 2023 06:40
+This is XeTeX, Version 3.141592653-2.6-0.999995 (TeX Live 2023) (preloaded format=xelatex 2023.10.30)  2 JAN 2024 07:39
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1315,447 +1315,543 @@ orporating DALY
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 283--292
-[]\TU/lmr/m/n/10 To maintain consistency within the literature, our tutorial bu
-ilds on an existing 
+Underfull \hbox (badness 10000) in paragraph at lines 283--294
+[]\TU/lmr/m/n/10 To maintain consistency within the literature, this tutorial b
+uilds on an existing 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 283--292
+Underfull \hbox (badness 10000) in paragraph at lines 283--294
 \TU/lmr/m/n/10 didactic disease progression model (Alarid-Escudero et al., 2023
 ). The underlying 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 283--292
+Underfull \hbox (badness 10000) in paragraph at lines 283--294
 \TU/lmr/m/n/10 discrete time Markov cohort model is time homogeneous—that is, t
 ransition proba- 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 283--292
+Underfull \hbox (badness 10000) in paragraph at lines 283--294
 \TU/lmr/m/n/10 bilities do not vary as a function of age/time in model. However
 , the methods and 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 283--292
+Underfull \hbox (badness 10000) in paragraph at lines 283--294
 \TU/lmr/m/n/10 code provided are easily adapted for time inhomogenous models. F
 inally, recogniz- 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 283--292
+Underfull \hbox (badness 10000) in paragraph at lines 283--294
 \TU/lmr/m/n/10 ing the wide spectrum of experience and programming comfort leve
 l among those 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 283--292
-\TU/lmr/m/n/10 constructing DALY-based models, we provide replication materials
- for implementing 
+Underfull \hbox (badness 10000) in paragraph at lines 283--294
+\TU/lmr/m/n/10 constructing DALY-based models, we offer three approaches for mo
+deling DALYs 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 295--301
+Underfull \hbox (badness 10000) in paragraph at lines 283--294
+\TU/lmr/m/n/10 (beginner, intermediate and advanced) and provide replication ma
+terials for imple- 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 297--303
 []\TU/lmr/m/n/10 DALYs are calculated from two components. First, conditions ar
 e assigned disability 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 295--301
+Underfull \hbox (badness 10000) in paragraph at lines 297--303
 \TU/lmr/m/n/10 weights ($[]$) ranging from zero to one, with zero representing 
 the absence of the con- 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 295--301
+Underfull \hbox (badness 10000) in paragraph at lines 297--303
 \TU/lmr/m/n/10 dition and one representing the highest burden a condition can i
 nflict, equivocal to 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 295--301
+Underfull \hbox (badness 10000) in paragraph at lines 297--303
 \TU/lmr/m/n/10 death. Years lost to disability (YLD) is defined as the disabili
 ty weight multiplied by 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 306--309
+Underfull \hbox (badness 10000) in paragraph at lines 308--311
 []\TU/lmr/m/n/10 The impact of disease on mortality is quantified using years o
 f life lost to disease 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 306--309
+Underfull \hbox (badness 10000) in paragraph at lines 308--311
 \TU/lmr/m/n/10 (YLL), which is based on remaining life expectancy $[][][][][]$ 
 at the age of premature 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 320--327
+Underfull \hbox (badness 10000) in paragraph at lines 322--329
 []\TU/lmr/m/n/10 In the original GBD study, age-weighting and time discounting 
 practices were ap- 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 320--327
+Underfull \hbox (badness 10000) in paragraph at lines 322--329
 \TU/lmr/m/n/10 plied to DALY calculations (C. J. Murray & Lopez, 1997). These m
 ethods respec- 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 320--327
+Underfull \hbox (badness 10000) in paragraph at lines 322--329
 \TU/lmr/m/n/10 tively weighted the burden of illness more during adulthood than
  early childhood 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 320--327
+Underfull \hbox (badness 10000) in paragraph at lines 322--329
 \TU/lmr/m/n/10 and old age, and valued present health over future years of illn
 ess by discounting 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 320--327
+Underfull \hbox (badness 10000) in paragraph at lines 322--329
 \TU/lmr/m/n/10 YLD and YLL measures by 3% per year. From 2010 onwards, both pra
 ctices were 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 342--342
+Underfull \hbox (badness 10000) in paragraph at lines 337--337
 | [][][]\TU/lmr/m/n/8 Practitioners who do not wish to discount DALY outcomes c
-an simply set the annual discount rate
+an simply set the annual discount rate $[]$
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 342--342
-[]$ \TU/lmr/m/n/8 to zero. In addition, our approach differentiates from common
- practice in the use of a continuous-time
+Underfull \hbox (badness 10000) in paragraph at lines 330--341
+[]\TU/lmr/m/n/10 While the GBD no longer uses age and time discounting, the Wor
+ld Health Organ- 
  []
 
 
-Underfull \hbox (badness 6188) in paragraph at lines 342--342
-\TU/lmr/m/n/8 discount factor (i.e., $[][][] [] [][][]$), rather than a discret
-e-time discount factor (i.e., $[][][][] [] [][][]$). We do so
+Underfull \hbox (badness 10000) in paragraph at lines 330--341
+\TU/lmr/m/n/10 ization’s Choosing Interventions that are Cost-Effective (WHO-CH
+OICE) program 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 342--342
-\TU/lmr/m/n/8 to maintain consistency with the original GBD equations—though an
- approach based on discrete-time
+Underfull \hbox (badness 10000) in paragraph at lines 330--341
+\TU/lmr/m/n/10 recommends consideration of time discounting of health outcomes 
+(Bertram et al., 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 328--343
-[]\TU/lmr/m/n/10 While the GBD no longer uses age and time discounting for the 
-purposes of doc- 
+Underfull \hbox (badness 10000) in paragraph at lines 330--341
+\TU/lmr/m/n/10 2021; C. J. L. Murray et al., 2020). We therefore adopt the WHO-
+CHOICE rec- 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 328--343
-\TU/lmr/m/n/10 umenting disease burdens worldwide, the World Health Organizatio
-n’s Choosing 
+Underfull \hbox (badness 10000) in paragraph at lines 330--341
+\TU/lmr/m/n/10 ommendation and include discounting in our DALY modeling approac
+h.[][][][][] We do, 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 328--343
-\TU/lmr/m/n/10 Interventions that are Cost-Effective (WHO-CHOICE) program recom
-mends con- 
+Underfull \hbox (badness 10000) in paragraph at lines 330--341
+\TU/lmr/m/n/10 however, maintain the continuous-time discounting used in the or
+iginal GBD DALY 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 328--343
-\TU/lmr/m/n/10 sideration of time discounting of health outcomes (Bertram et al
-., 2021; C. J. L. 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 328--343
-\TU/lmr/m/n/10 Murray et al., 2020). We therefore adopt the WHO-CHOICE recommen
-dation and 
+Underfull \hbox (badness 10000) in paragraph at lines 330--341
+\TU/lmr/m/n/10 equations—which differs slightly from the more common use of dis
+crete time dis- 
  []
 
 [3]
-Underfull \hbox (badness 10000) in paragraph at lines 360--364
+
+LaTeX Warning: Reference `eq-yld' on page 4 undefined on input line 356.
+
+
+LaTeX Warning: Reference `eq-yll' on page 4 undefined on input line 356.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 355--367
+[]\TU/lmr/m/n/10 It is important to note that the discounting shown in Equation
+ [] and Equation [] 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 355--367
+\TU/lmr/m/n/10 yield the present value of YLD and YLL outcomes at a single poin
+t in time, when 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 355--367
+\TU/lmr/m/n/10 the duration of disease ($[]$) and time of death from disease ($
+[]$) are known. For a 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 355--367
+\TU/lmr/m/n/10 decision model where not all cohort members start off ill, that 
+point in time very 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 355--367
+\TU/lmr/m/n/10 likely occurs at some point after the baseline period—and differ
+ent illness durations 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 355--367
+\TU/lmr/m/n/10 and death times will, of course, occur across different individu
+als in the modeled 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 355--367
+\TU/lmr/m/n/10 cohort. As such, to be consistent with standard practice, we mus
+t discount YLL and 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 355--367
+\TU/lmr/m/n/10 YLD outcomes further—all the way back to the baseline period. Th
+is additional 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 355--367
+\TU/lmr/m/n/10 discounting step will become apparent in the discrete time YLD a
+nd YLL equations 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 371--375
 []\TU/lmr/m/n/10 While the creation of the DALY measure was an important step i
 n global health 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 360--364
+Underfull \hbox (badness 10000) in paragraph at lines 371--375
 \TU/lmr/m/n/10 research, it has received scrutiny due to its inherent assumptio
 ns and value judge- 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 360--364
+Underfull \hbox (badness 10000) in paragraph at lines 371--375
 \TU/lmr/m/n/10 ments. For example, calculating YLLs requires the use of a refer
 ence life table that 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 367--378
-[]\TU/lmr/m/n/10 This tutorial builds on an existing progressive disease model 
-in which healthy in- 
+Underfull \hbox (badness 10000) in paragraph at lines 378--389
+[]\TU/lmr/m/n/10 We build on an existing progressive disease model in which hea
+lthy individuals de- 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 367--378
-\TU/lmr/m/n/10 dividuals develop a disease with two health states (“Sick” and “
-Sicker”) (Alarid- 
+Underfull \hbox (badness 10000) in paragraph at lines 378--389
+\TU/lmr/m/n/10 velop a disease with two health states (“Sick” and “Sicker”) (Al
+arid-Escudero et al., 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 367--378
-\TU/lmr/m/n/10 Escudero et al., 2023). Individuals can also transition to an ab
-sorbing death state 
+Underfull \hbox (badness 10000) in paragraph at lines 378--389
+\TU/lmr/m/n/10 2023). Individuals can also transition to an absorbing death sta
+te due to causes un- 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 367--378
-\TU/lmr/m/n/10 due to causes unrelated to the disease (i.e., “background” morta
-lity), or due to 
+Underfull \hbox (badness 10000) in paragraph at lines 378--389
+\TU/lmr/m/n/10 related to the disease (i.e., “background” mortality), or due to
+ disease-specific causes. 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 367--378
-\TU/lmr/m/n/10 disease-specific causes. In addition, the model structure is hom
-ogeneous (i.e., tran- 
+Underfull \hbox (badness 10000) in paragraph at lines 378--389
+\TU/lmr/m/n/10 In addition, the model structure is homogeneous (i.e., transitio
+n rates do not vary 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 367--378
-\TU/lmr/m/n/10 sition rates do not vary as a function of time). This is a simpl
-ification to distill 
+Underfull \hbox (badness 10000) in paragraph at lines 378--389
+\TU/lmr/m/n/10 as a function of time). This is a simplification to distill mode
+l complexity down to 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 367--378
-\TU/lmr/m/n/10 model complexity down to only those components needed to demonst
-rate our DALY 
+Underfull \hbox (badness 10000) in paragraph at lines 378--389
+\TU/lmr/m/n/10 only those components needed to demonstrate our DALY approach; o
+ur replication 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 367--378
-\TU/lmr/m/n/10 approach; our replication code is structured in such a way as to
- easily incorporate 
+Underfull \hbox (badness 10000) in paragraph at lines 378--389
+\TU/lmr/m/n/10 code is structured in such a way as to easily incorporate transi
+tion rates that are a 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 387--390
+Underfull \hbox (badness 10000) in paragraph at lines 398--401
 []\TU/lmr/bx/n/10 Strategy A\TU/lmr/m/n/10 , which improves the quality of life
  among individuals with the 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 390--393
+Underfull \hbox (badness 10000) in paragraph at lines 401--404
 []\TU/lmr/bx/n/10 Strategy B\TU/lmr/m/n/10 , which reduces the rate of progress
 ion from Sick to Sicker by 
  []
 
 
-LaTeX Warning: Reference `fig-model1' on page 4 undefined on input line 397.
+LaTeX Warning: Reference `fig-model1' on page 4 undefined on input line 408.
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 397--401
+Underfull \hbox (badness 10000) in paragraph at lines 408--412
 []\TU/lmr/m/n/10 A state transition diagram is shown in Figure []. In the figur
 e, nodes are health 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 397--401
+Underfull \hbox (badness 10000) in paragraph at lines 408--412
 \TU/lmr/m/n/10 states and edges depict possible transitions among them. Edge la
 bels are defined in 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 397--401
+Underfull \hbox (badness 10000) in paragraph at lines 408--412
 \TU/lmr/m/n/10 terms of transition intensities (rates). Other key model paramet
 ers are summarized 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 413--417
+[]\TU/lmr/m/n/10 We note that in our implementation of the Sick-Sicker model, w
+e define the disabil- 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 413--417
+\TU/lmr/m/n/10 ity weight as one minus the utility weight. In general, this wil
+l not be the case as 
  []
 
 File: index_files/mediabag/images/state-transition-diagram-1.pdf Graphic file (
 type pdf)
 <use index_files/mediabag/images/state-transition-diagram-1.pdf>
+[4]
 
-LaTeX Warning: Reference `fig-model1' on page 4 undefined on input line 427.
+LaTeX Warning: Reference `fig-model1' on page 5 undefined on input line 443.
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 425--432
+Underfull \hbox (badness 10000) in paragraph at lines 441--448
 []\TU/lmr/m/n/10 With the model parameterized, our next step is to define the m
 atrices that govern 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 425--432
+Underfull \hbox (badness 10000) in paragraph at lines 441--448
 \TU/lmr/m/n/10 health state transitions. The state transition diagram represent
 ed in Figure [] is 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 425--432
+Underfull \hbox (badness 10000) in paragraph at lines 441--448
 \TU/lmr/m/n/10 not well-suited to calculate DALY outcomes, however. A primary r
 eason is that the 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 425--432
+Underfull \hbox (badness 10000) in paragraph at lines 441--448
 \TU/lmr/m/n/10 death transitions reflect transitions due to all causes of death
 . To calculate YLLs, 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 433--435
+Underfull \hbox (badness 10000) in paragraph at lines 449--453
 []\TU/lmr/m/n/10 To accommodate this need and to accurately model DALY outcomes
 , several options 
  []
 
 
-LaTeX Warning: Reference `fig-modelDS' on page 4 undefined on input line 440.
+Underfull \hbox (badness 10000) in paragraph at lines 449--453
+\TU/lmr/m/n/10 are available. We categorize each approach based on the level of
+ experience and skill 
+ []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 448--448
+LaTeX Warning: Reference `fig-modelDS' on page 5 undefined on input line 459.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 467--467
 | [][][]\TU/lmr/m/n/8 In this example, disease-specific death rates are goveren
 ed by a hazard ratio applied to the background
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 448--448
+Underfull \hbox (badness 10000) in paragraph at lines 467--467
 \TU/lmr/m/n/8 mortality rate. Because we are operating on the rate scale, we ca
 n separate out disease-related deaths
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 448--448
+Underfull \hbox (badness 10000) in paragraph at lines 467--467
 \TU/lmr/m/n/8 from other-cause mortality by simply taking a difference in the r
 ates. Other applications for prevalent
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 448--448
+Underfull \hbox (badness 10000) in paragraph at lines 467--467
 \TU/lmr/m/n/8 conditions with high death rates, however, may require us to cons
 truct a cause-deleted life table to obtain
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 439--452
-[]\TU/lmr/m/n/10 Re-define the health states to include a separate cause-specif
-ic death state as 
+Underfull \hbox (badness 10000) in paragraph at lines 457--471
+[]\TU/lmr/bx/n/10 Separate Death State (Beginner)\TU/lmr/m/n/10 : Re-define the
+ health states to include 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 439--452
-\TU/lmr/m/n/10 depicted in Figure [].[][][][][] We can then draw on the resulti
-ng Markov trace and 
+Underfull \hbox (badness 10000) in paragraph at lines 457--471
+\TU/lmr/m/n/10 a separate cause-specific death state as depicted in Figure [].[
+][][][][] We then draw 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 439--452
-\TU/lmr/m/n/10 use changes in the number of cause-specific deaths in each cycle
- to calculate 
- []
-
-[4]
-
-LaTeX Warning: Reference `fig-model1' on page 5 undefined on input line 454.
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 452--460
-[]\TU/lmr/m/n/10 Include a non-Markovian transition state for cause-specific de
-aths in the 
+Underfull \hbox (badness 10000) in paragraph at lines 457--471
+\TU/lmr/m/n/10 on the resulting Markov trace and use changes in the number of c
+ause-specific 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 452--460
-\TU/lmr/m/n/10 transition matrix. This approach will maintain the Markovian com
-ponents 
+LaTeX Warning: Reference `fig-model1' on page 5 undefined on input line 474.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 471--480
+[]\TU/lmr/bx/n/10 Non-Markovian Trackers (Intermediate)\TU/lmr/m/n/10 : Include
+ a non-Markovian tran- 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 452--460
-\TU/lmr/m/n/10 captured in Figure [], but will allow us to add a column to the 
-Markov trace 
+Underfull \hbox (badness 10000) in paragraph at lines 471--480
+\TU/lmr/m/n/10 sition state for cause-specific deaths in the transition matrix.
+ This approach 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 452--460
-\TU/lmr/m/n/10 that separately tracks the number of new deaths from the disease
- in each 
+Underfull \hbox (badness 10000) in paragraph at lines 471--480
+\TU/lmr/m/n/10 will maintain the Markovian components captured in Figure [], bu
+t will allow 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 452--460
-\TU/lmr/m/n/10 cycle. We can then apply transition state payoffs (based on rema
-ining life 
+Underfull \hbox (badness 10000) in paragraph at lines 471--480
+\TU/lmr/m/n/10 us to add a column to the Markov trace that separately tracks th
+e number of 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 460--465
-[]\TU/lmr/m/n/10 Define a block matrix Markov chain with rewards for occupancy 
-(YLDs) and 
+Underfull \hbox (badness 10000) in paragraph at lines 471--480
+\TU/lmr/m/n/10 new deaths from the disease in each cycle. We can then apply tra
+nsition state 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 460--465
-\TU/lmr/m/n/10 disease-relatd death transitions (YLLs) by adapting the methods 
-in Caswell 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 460--465
-\TU/lmr/m/n/10 & van Daalen (2021) and Caswell & Zarulli (2018). This approach 
-draws 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 460--465
-\TU/lmr/m/n/10 on matrix calculus and solves for expected outcomes as well as h
-igher order 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 467--473
-[]\TU/lmr/m/n/10 Each of the above approaches facilitate the design and executi
-on of a decision- 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 467--473
-\TU/lmr/m/n/10 analytic model that accomodates any number or types of outcomes 
-(e.g., QALYs, 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 467--473
-\TU/lmr/m/n/10 DALYs, life-years, etc.). In practice, approaches (1) and (2) dr
-aw on similar transi- 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 467--473
-\TU/lmr/m/n/10 tion matrices and payoff vectors, as we will show immediately be
-low. Approach (3) 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 467--473
-\TU/lmr/m/n/10 is quite distinct, however, so we will demonstrate this method s
-eparately in Section 
+Underfull \hbox (badness 10000) in paragraph at lines 471--480
+\TU/lmr/m/n/10 payoffs (based on remaining life expectancy at each age/cycle) t
+o calculate 
  []
 
 [5]
+Underfull \hbox (badness 10000) in paragraph at lines 480--486
+[]\TU/lmr/bx/n/10 Markov Chain with Rewards (Advanced) \TU/lmr/m/n/10 Define a 
+block matrix Markov 
+ []
 
-LaTeX Warning: Reference `fig-modelDS' on page 6 undefined on input line 480.
+
+Underfull \hbox (badness 10000) in paragraph at lines 480--486
+\TU/lmr/m/n/10 chain with rewards for occupancy (YLDs) and disease-relatd death
+ transitions 
+ []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 477--481
+Underfull \hbox (badness 10000) in paragraph at lines 480--486
+\TU/lmr/m/n/10 (YLLs) by adapting the methods in Caswell & van Daalen (2021). T
+his ap- 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 480--486
+\TU/lmr/m/n/10 proach draws on matrix calculus and solves for expected outcomes
+ as well as 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 488--498
+[]\TU/lmr/m/n/10 Each of these approaches facilitate the design and execution o
+f a decision-analytic 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 488--498
+\TU/lmr/m/n/10 model that correctly calculates YLD, YLL, and DALY outcomes—as w
+ell as other 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 488--498
+\TU/lmr/m/n/10 common outcomes such as QALYs and costs. In practice, Approaches
+ (1) and (2) 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 488--498
+\TU/lmr/m/n/10 will produce identical results. Approach (3) draws on slightly d
+ifferent cycle correc- 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 488--498
+\TU/lmr/m/n/10 tion techniques, but will yield results quite similar to (1) and
+ (2). Other shortcut 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 488--498
+\TU/lmr/m/n/10 approaches previously used in the literature, such as modeling a
+ QALY-like DALY 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 488--498
+\TU/lmr/m/n/10 and/or accumulating time in the absorbing death state, will not 
+in general yield 
+ []
+
+
+LaTeX Warning: Reference `fig-modelDS' on page 6 undefined on input line 505.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 502--506
 []\TU/lmr/m/n/10 Under this approach, we separate out deaths from disease vs. o
 ther causes by defin- 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 477--481
+Underfull \hbox (badness 10000) in paragraph at lines 502--506
 \TU/lmr/m/n/10 ing a separate health state for cause-specific mortality; an upd
 ated state transition 
  []
@@ -1764,13 +1860,13 @@ File: index_files/mediabag/images/state-transition-diagram-2.pdf Graphic file (
 type pdf)
 <use index_files/mediabag/images/state-transition-diagram-2.pdf>
 
-Underfull \hbox (badness 10000) in paragraph at lines 491--491
+Underfull \hbox (badness 10000) in paragraph at lines 516--516
 []\TU/lmr/m/n/10 Figure  2: |[]State transition diagram for progressive disease
  model with separate cause-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 495--498
+Underfull \hbox (badness 10000) in paragraph at lines 520--523
 []\TU/lmr/m/n/10 Transitions among health states are defined in terms of contin
 uous rates (“intensi- 
  []
@@ -1778,58 +1874,58 @@ uous rates (“intensi-
 File: images/Q_model2.png Graphic file (type bmp)
 <images/Q_model2.png>
 
-Underfull \hbox (badness 10000) in paragraph at lines 509--516
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[6]
+Underfull \hbox (badness 10000) in paragraph at lines 534--541
 []\TU/lmr/m/n/10 Cell values in row $[]$, column $[]$ of $[]$ capture the (cont
 inuous time) transition rate 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 509--516
+Underfull \hbox (badness 10000) in paragraph at lines 534--541
 \TU/lmr/m/n/10 from health state $[]$ to health state $[]$. $[]$ has diagonal e
 lements defined as the neg- 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 509--516
+Underfull \hbox (badness 10000) in paragraph at lines 534--541
 \TU/lmr/m/n/10 ative sum of the off-diagonal row values (i.e., the row sums of 
 $[]$ are zero). This 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 509--516
+Underfull \hbox (badness 10000) in paragraph at lines 534--541
 \TU/lmr/m/n/10 ensures that the Markov model is “closed”—that is, the total coh
 ort size neither 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 526--526
+Underfull \hbox (badness 10000) in paragraph at lines 551--551
 | [][][]\TU/lmr/m/n/8 In Markov theory, $[]$ is called the “discrete skeleton” 
 of the continuous model (Iosifescu, 1980). The
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 526--526
+Underfull \hbox (badness 10000) in paragraph at lines 551--551
 \TU/lmr/m/n/8 conversion formula used to calculate $[]$ is the matrix analogue 
 to the standard rate-to-probability formula
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 517--527
+Underfull \hbox (badness 10000) in paragraph at lines 542--552
 []\TU/lmr/m/n/10 We next embed the continuous transition intensity matrix into 
 a discrete time tran- 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 517--527
+Underfull \hbox (badness 10000) in paragraph at lines 542--552
 \TU/lmr/m/n/10 sition probability matrix by taking the matrix exponential of $[
 ]$ for a defined time 
  []
 
 
-Underfull \vbox (badness 2635) has occurred while \output is active []
-
-[6]
-Underfull \hbox (badness 10000) in paragraph at lines 532--534
+Underfull \hbox (badness 10000) in paragraph at lines 557--559
 []\TU/lmr/m/n/10 This results in a transition probability matrix with the follo
 wing probabilities de- 
  []
@@ -1837,219 +1933,218 @@ wing probabilities de-
 File: images/P_model2.png Graphic file (type bmp)
 <images/P_model2.png>
 
-Underfull \hbox (badness 10000) in paragraph at lines 545--550
+Underfull \hbox (badness 10000) in paragraph at lines 570--575
 []\TU/lmr/m/n/10 Embedding the transition probability matrix using the matrix e
 xponential en- 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 545--550
+Underfull \hbox (badness 10000) in paragraph at lines 570--575
 \TU/lmr/m/n/10 sures that the resulting transition probabilities capture the un
 derlying continuous 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 545--550
+Underfull \hbox (badness 10000) in paragraph at lines 570--575
 \TU/lmr/m/n/10 time disease process. In particular, $[]$ will capture the proba
 bility of compound 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 573--573
+Underfull \hbox (badness 10000) in paragraph at lines 598--598
 | [][][]\TU/lmr/m/n/8 Because we embed the transition probability matrix using 
 matrix exponentiation, rather than through
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 573--573
+Underfull \hbox (badness 10000) in paragraph at lines 598--598
 \TU/lmr/m/n/8 pairwise application of rate-to-probability formulas to each tran
 sition type, our results will differ from
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 573--573
+Underfull \hbox (badness 10000) in paragraph at lines 598--598
 \TU/lmr/m/n/8 those in Alarid-Escudero et al. (2023)—even though we use identic
 al input parameters. Application of
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 573--573
+Underfull \hbox (badness 10000) in paragraph at lines 598--598
 \TU/lmr/m/n/8 standard rate-to-probability formulas in health states with compe
 ting risks (i.e., the possibility of transi-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 573--573
+Underfull \hbox (badness 10000) in paragraph at lines 598--598
 \TU/lmr/m/n/8 tioning to more than one other health state in a given cycle) wil
 l ignore the possibility of compound tran-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 573--573
+Underfull \hbox (badness 10000) in paragraph at lines 598--598
 \TU/lmr/m/n/8 sitions within a single cycle. Though not (yet) widely used in he
 alth economics, embedding the transition
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 573--573
+Underfull \hbox (badness 10000) in paragraph at lines 598--598
 \TU/lmr/m/n/8 probability matrix using the matrix exponential is the technicall
 y correct way to construct a transition
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 551--574
+Underfull \hbox (badness 10000) in paragraph at lines 576--599
 []\TU/lmr/m/n/10 For example, in the continuous time rate matrix $[]$ above, th
 ere is a zero-valued 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 551--574
+Underfull \hbox (badness 10000) in paragraph at lines 576--599
 \TU/lmr/m/n/10 rate defined for progressions from Healthy (H) to Disease-relate
 d death (DS), since 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 551--574
+Underfull \hbox (badness 10000) in paragraph at lines 576--599
 \TU/lmr/m/n/10 individuals must first become ill before they can die from disea
 se-related causes. 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 551--574
+Underfull \hbox (badness 10000) in paragraph at lines 576--599
 \TU/lmr/m/n/10 However, after embedding, the matrix $[]$ has a non-zero cycle t
 ransition probability 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 551--574
+Underfull \hbox (badness 10000) in paragraph at lines 576--599
 \TU/lmr/m/n/10 from Healthy (H) to Disease-related death (DS) (i.e., $[]$). Thi
 s value captures 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 551--574
+Underfull \hbox (badness 10000) in paragraph at lines 576--599
 \TU/lmr/m/n/10 the probability of a compound or “jumpover” transition from Heal
 thy and through 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 551--574
+Underfull \hbox (badness 10000) in paragraph at lines 576--599
 \TU/lmr/m/n/10 the Sick and/or Sicker state to death from disease-related cause
 s within the same 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 551--574
+Underfull \hbox (badness 10000) in paragraph at lines 576--599
 \TU/lmr/m/n/10 discrete time cycle; see Graves et al. (2021) for further discus
 sion, and Iosifescu 
  []
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 578--583
+[7]
+Underfull \hbox (badness 10000) in paragraph at lines 603--608
 []\TU/lmr/m/n/10 This section will outline an approach similar to Approach 1, b
 ut that draws on a 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 578--583
+Underfull \hbox (badness 10000) in paragraph at lines 603--608
 \TU/lmr/m/n/10 non-Markovian “transition” state that tracks the number of disea
 se-related deaths 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 578--583
+Underfull \hbox (badness 10000) in paragraph at lines 603--608
 \TU/lmr/m/n/10 in each cycle; these counts will be used later to match the age 
 of the cohort at each 
  []
 
-[7]
 
-LaTeX Warning: Reference `fig-model1' on page 8 undefined on input line 585.
+LaTeX Warning: Reference `fig-model1' on page 8 undefined on input line 610.
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 598--598
+Underfull \hbox (badness 10000) in paragraph at lines 623--623
 | [][][]\TU/lmr/m/n/8 Tracking states also allow for accurate bookeeping for ot
 her outcomes such as costs. For example, if
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 598--598
+Underfull \hbox (badness 10000) in paragraph at lines 623--623
 \TU/lmr/m/n/8 developing the disease incurs a one-time diagnosis or treatment c
 ost, the compound transitions implied
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 598--598
+Underfull \hbox (badness 10000) in paragraph at lines 623--623
 \TU/lmr/m/n/8 by the embedded transition probability matrix indicate that some 
 individuals will transiently enter (and
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 598--598
+Underfull \hbox (badness 10000) in paragraph at lines 623--623
 \TU/lmr/m/n/8 then exit) the Sick state in a single cycle. When calculating cos
 ts, practitioners may want to include a
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 598--598
+Underfull \hbox (badness 10000) in paragraph at lines 623--623
 \TU/lmr/m/n/8 tracking state for the Sick state to be sure to capture these one
 -time costs, which would be masked if cost
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 598--598
+Underfull \hbox (badness 10000) in paragraph at lines 623--623
 \TU/lmr/m/n/8 payoffs are simply multiplied by state occupancy at the end of ea
 ch cycle (e.g., costs for individuals with a
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 584--602
+Underfull \hbox (badness 10000) in paragraph at lines 609--627
 []\TU/lmr/m/n/10 Under this approach, we maintain the overall structure as depi
 cted in the origi- 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 584--602
+Underfull \hbox (badness 10000) in paragraph at lines 609--627
 \TU/lmr/m/n/10 nal model (Figure []), but augment the transition probability ma
 trix with non- 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 584--602
+Underfull \hbox (badness 10000) in paragraph at lines 609--627
 \TU/lmr/m/n/10 Markovian components to facilitate accounting of disease-related
  deaths.[][][][][] Approach 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 584--602
+Underfull \hbox (badness 10000) in paragraph at lines 609--627
 \TU/lmr/m/n/10 2 offers a more generalized method that allows practitioners to 
 accurately account 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 584--602
+Underfull \hbox (badness 10000) in paragraph at lines 609--627
 \TU/lmr/m/n/10 for costs and/or health payoffs (such as YLLs) that are defined 
 by \TU/lmr/m/it/10 transitions \TU/lmr/m/n/10 among 
  []
 
 
-LaTeX Warning: Reference `fig-transition' on page 8 undefined on input line 603
+LaTeX Warning: Reference `fig-transition' on page 8 undefined on input line 628
 .
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 603--607
+Underfull \hbox (badness 10000) in paragraph at lines 628--632
 []\TU/lmr/m/n/10 Figure [] shows a state transition diagram with the tracking s
 tate added. The track- 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 603--607
+Underfull \hbox (badness 10000) in paragraph at lines 628--632
 \TU/lmr/m/n/10 ing state (shown as red nodes) simply records transitions as coh
 ort members move 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 603--607
+Underfull \hbox (badness 10000) in paragraph at lines 628--632
 \TU/lmr/m/n/10 from either diseased state to the absorbing death state due to c
 auses related to the 
  []
@@ -2058,640 +2153,571 @@ File: index_files/mediabag/images/state-transition-diagram-3.pdf Graphic file (
 type pdf)
 <use index_files/mediabag/images/state-transition-diagram-3.pdf>
 
-Underfull \hbox (badness 10000) in paragraph at lines 629--629
+Underfull \hbox (badness 10000) in paragraph at lines 654--654
 | [][][]\TU/lmr/m/n/8 More generally, accumulator and transition states can be 
 defined for any number of transition types,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 629--629
+Underfull \hbox (badness 10000) in paragraph at lines 654--654
 \TU/lmr/m/n/8 as they are useful for capturing one-time costs in the model, or 
 for for calculating other decision-relevant
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 629--629
+Underfull \hbox (badness 10000) in paragraph at lines 654--654
 \TU/lmr/m/n/8 outcomes such as the total number of people who developed the dis
 ease or died from the disease as sec-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 621--632
+Underfull \hbox (badness 10000) in paragraph at lines 646--657
 []\TU/lmr/m/n/10 In general, tracking states can either count the total number 
 of transitions that 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 621--632
+Underfull \hbox (badness 10000) in paragraph at lines 646--657
 \TU/lmr/m/n/10 have occurred up to a given cycle (i.e., an “accumulator” state)
 , or can track the 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 621--632
+Underfull \hbox (badness 10000) in paragraph at lines 646--657
 \TU/lmr/m/n/10 total number of new transitions that occur within a single cycle
  (i.e., a “transition” 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 621--632
+Underfull \hbox (badness 10000) in paragraph at lines 646--657
 \TU/lmr/m/n/10 state).[][][][][] To calculate YLL outcomes we will add a transi
 tion state that records the 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 633--637
+Underfull \hbox (badness 10000) in paragraph at lines 658--662
 []\TU/lmr/m/n/10 To implement Approach 2, we add a transition state row and col
 umn to the tran- 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 633--637
+Underfull \hbox (badness 10000) in paragraph at lines 658--662
 \TU/lmr/m/n/10 sition intensity matrix. This transition state, called $[]$, is 
 included in the aug- 
  []
 
-[8]
 File: images/Q_model1.png Graphic file (type bmp)
 <images/Q_model1.png>
 
-Underfull \hbox (badness 10000) in paragraph at lines 648--658
+Underfull \vbox (badness 6445) has occurred while \output is active []
+
+[8]
+Underfull \hbox (badness 10000) in paragraph at lines 673--683
 []\TU/lmr/m/n/10 Two aspects of $[]$ are worth highlighting. First, $[]$ is div
 ided into a Markovian sub- 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 648--658
+Underfull \hbox (badness 10000) in paragraph at lines 673--683
 \TU/lmr/m/n/10 matrix and the non-Markovian tracking row and column. This divis
 ion is made 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 648--658
+Underfull \hbox (badness 10000) in paragraph at lines 673--683
 \TU/lmr/m/n/10 apparent using dotted vertical and horizontal lines. Critically,
  the Markovian sub- 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 648--658
+Underfull \hbox (badness 10000) in paragraph at lines 673--683
 \TU/lmr/m/n/10 matrix remains closed—that is, the diagonal elements remain unch
 anged so that 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 648--658
+Underfull \hbox (badness 10000) in paragraph at lines 673--683
 \TU/lmr/m/n/10 the row sums of the submatrix remain zero, even after the additi
 on of the tracking 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 648--658
+Underfull \hbox (badness 10000) in paragraph at lines 673--683
 \TU/lmr/m/n/10 column along the “edges” of $[]$. This ensures that the Markovia
 n submatrix can be 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 648--658
+Underfull \hbox (badness 10000) in paragraph at lines 673--683
 \TU/lmr/m/n/10 used to calculate state occupancy for a closed cohort that neith
 er gains nor loses 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 659--665
+Underfull \hbox (badness 10000) in paragraph at lines 684--690
 []\TU/lmr/m/n/10 Second, two transition intensities—from the S1 (Sick) and S2 (
 Sicker) states to 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 659--665
+Underfull \hbox (badness 10000) in paragraph at lines 684--690
 \TU/lmr/m/n/10 Death—appear in the tracking column. This ensures that $[]$ will
  track 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 659--665
+Underfull \hbox (badness 10000) in paragraph at lines 684--690
 \TU/lmr/m/n/10 all relevant transitions to death due to the disease. Because we
  are operating on the 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 659--665
+Underfull \hbox (badness 10000) in paragraph at lines 684--690
 \TU/lmr/m/n/10 rate scale, we can net out non-disease related deaths as capture
 d by the background 
  []
 
 
-LaTeX Warning: Reference `eq-embed' on page 9 undefined on input line 667.
+LaTeX Warning: Reference `eq-embed' on page 9 undefined on input line 692.
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 689--689
+Underfull \hbox (badness 10000) in paragraph at lines 714--714
 | [][][]\TU/lmr/m/n/8 To build on the example of compound “jumpover” transition
 s above, suppose an individual starts
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 689--689
+Underfull \hbox (badness 10000) in paragraph at lines 714--714
 \TU/lmr/m/n/8 off healthy in a cycle, then rapidly transitions through the Sick
  and Sicker state and dies due to disease-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 689--689
+Underfull \hbox (badness 10000) in paragraph at lines 714--714
 \TU/lmr/m/n/8 related causes within the same cycle. If there is some treatment 
 cost associated with being in the Sicker
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 689--689
+Underfull \hbox (badness 10000) in paragraph at lines 714--714
 \TU/lmr/m/n/8 state, a traditional approach that applies cost payoffs to state 
 occupancy at the (beginning) end of the
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 689--689
+Underfull \hbox (badness 10000) in paragraph at lines 714--714
 \TU/lmr/m/n/8 cycle would miss treatment costs for this individual because they
  \TU/lmr/m/it/8 transition \TU/lmr/m/n/8 through the Sicker state,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 689--689
+Underfull \hbox (badness 10000) in paragraph at lines 714--714
 \TU/lmr/m/n/8 but never occupy it at the beginning or end of a cycle. Adding a 
 non-Markovian transition state to the
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 689--689
+Underfull \hbox (badness 10000) in paragraph at lines 714--714
 \TU/lmr/m/n/8 model facilitates more accurate bookkeeping because the transitio
 n state would pick up on this transition
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 666--690
+Underfull \hbox (badness 10000) in paragraph at lines 691--715
 []\TU/lmr/m/n/10 As above, we obtain the transition probability matrix by embed
 ding $[]$ into the dis- 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 666--690
+Underfull \hbox (badness 10000) in paragraph at lines 691--715
 \TU/lmr/m/n/10 crete time step (Equation []). However, the resulting transition
  probability matrix 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 666--690
+Underfull \hbox (badness 10000) in paragraph at lines 691--715
 \TU/lmr/m/n/10 treats $[]$ as an absorbing state (i.e., individuals are retaine
 d in the $[]$ with 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 666--690
+Underfull \hbox (badness 10000) in paragraph at lines 691--715
 \TU/lmr/m/n/10 probability one). Using the terminology introduced above, this a
 bsorbing state could 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 666--690
+Underfull \hbox (badness 10000) in paragraph at lines 691--715
 \TU/lmr/m/n/10 serve as an \TU/lmr/bx/n/10 accumulator \TU/lmr/m/n/10 state tha
 t (in the constructed Markov trace) records the 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 666--690
+Underfull \hbox (badness 10000) in paragraph at lines 691--715
 \TU/lmr/m/n/10 total number of people who have died from the disease up to any 
 given cycle. This 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 666--690
+Underfull \hbox (badness 10000) in paragraph at lines 691--715
 \TU/lmr/m/n/10 may be a decision-relevant health outcome to consider on its own
 ; indeed, so long as 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 666--690
+Underfull \hbox (badness 10000) in paragraph at lines 691--715
 \TU/lmr/m/n/10 the Markovian submatrix remains closed, there is no limit to the
  number of accumu- 
  []
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 691--695
+[9]
+Underfull \hbox (badness 10000) in paragraph at lines 716--720
 []\TU/lmr/m/n/10 To change $[]$ to a \TU/lmr/bx/n/10 transition \TU/lmr/m/n/10 
 state, we simply replace the absorbing probability 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 691--695
+Underfull \hbox (badness 10000) in paragraph at lines 716--720
 \TU/lmr/m/n/10 of one in the cell $[][][] [][]$ with a zero. This cell-level ch
 ange is highlighted in 
  []
 
 File: images/P_model1.png Graphic file (type bmp)
 <images/P_model1.png>
-[9]
-Underfull \hbox (badness 10000) in paragraph at lines 713--722
+
+Underfull \hbox (badness 10000) in paragraph at lines 751--757
+\TU/lmr/m/n/10 In the above notation, the matrix $[][]$ captures transition pro
+babilities among tran- 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 751--757
+\TU/lmr/m/n/10 sient (i.e., non-absorbing) health states, while $[][]$ captures
+ transitions from tran- 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 751--757
+\TU/lmr/m/n/10 sient health states to the absorbing death states (non-disease m
+ortality and disease- 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 751--757
+\TU/lmr/m/n/10 related mortality). Indexing by age class $[]$ indicates that se
+parate matrices are 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 765--765
+| [][][]\TU/lmr/m/n/8 The only difference with the two approaches above is that
+ the rows in these rate matrices correspond
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 765--765
+\TU/lmr/m/n/8 to the final state, while the columns correspond to the starting 
+state; this is the opposite of the rate matri-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 765--765
+\TU/lmr/m/n/8 ces defined above, where the rows corresponded to the starting he
+alth state and the columns to the ending
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 758--766
+[]\TU/lmr/m/n/10 To construct $[][]$ and $[][]$ we define transition rate (“int
+ensity”) matrices as in Ap- 
+ []
+
+[10]
+Underfull \hbox (badness 10000) in paragraph at lines 772--777
+\TU/lmr/m/n/10 where $[][]$ is the rate matrix for the transitory (i.e., non-ab
+sorbing) states and $[][]$ is 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 772--777
+\TU/lmr/m/n/10 the rate matrix for the absorbing states. The diagonal elements 
+of $[][]$ are the nega- 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 772--777
+\TU/lmr/m/n/10 tive sum of the non-diagonal column elements, thus making the co
+lumn sums of $[][]$ 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 778--782
+[]\TU/lmr/m/n/10 For the defined time step $[][]$, the discrete time transition
+ probability matrix $[][]$ is 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 778--782
+\TU/lmr/m/n/10 obtained by taking the matrix exponential of the intensity matri
+x ($[][]$) multipled by 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 796--799
+[]\TU/lmr/m/n/10 In addition, the matrix $[][]$ defines age advancement in the 
+Markov chain. Using the 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 808--813
+[]\TU/lmr/m/n/10 In our implementation, we include the (optional) 1 value in th
+e lower right corner; 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 808--813
+\TU/lmr/m/n/10 this assumes that after the last specified age, the cohort conti
+nues to experience 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 808--813
+\TU/lmr/m/n/10 transitions among health states according to the transition prob
+abilities defined for 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 808--813
+\TU/lmr/m/n/10 the last age class. If this value is 0, the model will assume th
+at everyone dies after 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 814--816
+[]\TU/lmr/m/n/10 We next combine the transition matrices (for all age classes) 
+together into a series of 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 837--842
+[]\TU/lmr/m/n/10 where $[]$ is a permutation matrix known as the vec-permutatio
+n matrix.[][][][][] See Hen- 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 837--842
+\TU/lmr/m/n/10 derson & Searle (1981) and Appendix B in Caswell & van Daalen (2
+021) for further 
+ []
+
+[11]
+Underfull \hbox (badness 10000) in paragraph at lines 869--869
+| [][][]\TU/lmr/m/n/8 Again, for our purposes here we will focus on expected ou
+tcomes—though note that formulas for
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 861--870
+[]\TU/lmr/m/n/10 We now (nearly) have the components needed to calculate outcom
+es. A key differ- 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 861--870
+\TU/lmr/m/n/10 ence in the Healthy Longevity approach, relative to the approach
+es above, is that we 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 861--870
+\TU/lmr/m/n/10 do not calculate outcomes separately in each cycle, and then sum
+ them. Rather, the 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 861--870
+\TU/lmr/m/n/10 method utilizes matrix calculus to solve for \TU/lmr/m/it/10 exp
+ected outcomes \TU/lmr/m/n/10 and other moments in 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 877--886
 []\TU/lmr/m/n/10 With $[]$ defined under either Approach 1 or Approach 2, we no
 w have the necessary 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 713--722
+Underfull \hbox (badness 10000) in paragraph at lines 877--886
 \TU/lmr/m/n/10 ingredients to construct a Markov trace. Define $[][]$ as the in
 itial state occupancy 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 713--722
+Underfull \hbox (badness 10000) in paragraph at lines 877--886
 \TU/lmr/m/n/10 captured in the $[] [] []$ matrix $[]$ (including transition sta
 tes, if using Approach 2). 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 713--722
+Underfull \hbox (badness 10000) in paragraph at lines 877--886
 \TU/lmr/m/n/10 This vector summarizes the number or fraction of the population 
 in each health 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 713--722
+Underfull \hbox (badness 10000) in paragraph at lines 877--886
 \TU/lmr/m/n/10 state at baseline. Often, this vector will be set such that the 
 entire cohort starts off 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 723--725
+Underfull \hbox (badness 10000) in paragraph at lines 887--889
 []\TU/lmr/m/n/10 For a time-homogenous model such as considered here, health st
 ate occupancy at 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 730--736
+Underfull \hbox (badness 10000) in paragraph at lines 894--900
 []\TU/lmr/m/n/10 For a time-inhomongenous model in which transition probabiliti
 es change over time 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 730--736
+Underfull \hbox (badness 10000) in paragraph at lines 894--900
 \TU/lmr/m/n/10 (e.g., death rates increase due to aging), we must construct sep
 arate transition prob- 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 730--736
+Underfull \hbox (badness 10000) in paragraph at lines 894--900
 \TU/lmr/m/n/10 ability matrices for each cycle (i.e., $[][][][]$). State occupa
 ncy at cycle $[]$ is calculated by 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 730--736
+Underfull \hbox (badness 10000) in paragraph at lines 894--900
 \TU/lmr/m/n/10 sequentially applying the transition matrices corresponding to e
 ach time step leading 
  []
 
-
-LaTeX Warning: Reference `tbl-trace1' on page 10 undefined on input line 741.
-
-
-LaTeX Warning: Reference `tbl-trace2' on page 10 undefined on input line 742.
-
-
-LaTeX Warning: Reference `tbl-trace1' on page 10 undefined on input line 743.
-
-
-LaTeX Warning: Reference `tbl-trace2' on page 10 undefined on input line 747.
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 741--752
-[]\TU/lmr/m/n/10 Table [] shows the Markov trace for the first five cycles unde
-r Approach 1, while 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 741--752
-\TU/lmr/m/n/10 Table [] shows the trace under Approach 2. Table [] also include
-s a new column 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 741--752
-\TU/lmr/m/n/10 (\TU/lmtt/m/n/10 deaths_disease\TU/lmr/m/n/10 ) that is calculat
-ed as the difference in state occupancy in the \TU/lmtt/m/n/10 DS 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 741--752
-\TU/lmr/m/n/10 column between cycles. This extra step will be necessary later f
-or calculating YLL 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 741--752
-\TU/lmr/m/n/10 outcomes. The trace shown under Approach 2 (Table []), by compar
-ison, automat- 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 741--752
-\TU/lmr/m/n/10 ically calculates new deaths through the inclusion of the transi
-tion state \TU/lmtt/m/n/10 trDS\TU/lmr/m/n/10 ; the 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 741--752
-\TU/lmr/m/n/10 values under \TU/lmtt/m/n/10 deaths_disease \TU/lmr/m/n/10 and \
-TU/lmtt/m/n/10 trDS \TU/lmr/m/n/10 are identical, again highlighting that ei- 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 741--752
-\TU/lmr/m/n/10 ther approach can be used to calculate the number of disease-rel
-ated deaths in each 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 824--826
-[]\TU/lmr/m/n/10 With the Markov trace constructed, we next turn our attention 
-to defining payoff 
- []
-
-[10]
 File: images/d_yld.png Graphic file (type bmp)
 <images/d_yld.png>
-
-Underfull \hbox (badness 10000) in paragraph at lines 843--846
+[12]
+Underfull \hbox (badness 10000) in paragraph at lines 921--924
 []\TU/lmr/m/n/10 where $[]$ and $[]$ are the disability weights for the Sick an
 d Sicker states, respec- 
  []
 
 
-Underfull \hbox (badness 4913) in paragraph at lines 852--863
+Underfull \hbox (badness 4913) in paragraph at lines 930--941
 []\TU/lmr/m/n/10 In the YLD payoff vector, the term $[][][] [] [][][]$ is inclu
 ded as a continuous-time 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 852--863
+Underfull \hbox (badness 10000) in paragraph at lines 930--941
 \TU/lmr/m/n/10 discounting adjustment factor for the defined cycle length $[][]
 $. This term is included 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 852--863
+Underfull \hbox (badness 10000) in paragraph at lines 930--941
 \TU/lmr/m/n/10 to discount time \TU/lmr/m/it/10 within \TU/lmr/m/n/10 each cycl
 e in order to maintain the continuous-time discount- 
  []
 
 
-Underfull \vbox (badness 1789) has occurred while \output is active []
-
-[11]
-Underfull \hbox (badness 10000) in paragraph at lines 864--868
+Underfull \hbox (badness 10000) in paragraph at lines 942--946
 []\TU/lmr/m/n/10 To fully discount outcomes, we still must discount all future 
 outcome values back 
  []
 
 
-Underfull \hbox (badness 1210) in paragraph at lines 864--868
+Underfull \hbox (badness 1210) in paragraph at lines 942--946
 \TU/lmr/m/n/10 to baseline ($[] [] []$). For a time-homogeneous model, discount
 ed years of life lost to 
  []
 
 
-LaTeX Warning: Reference `sec-background' on page 12 undefined on input line 88
-1.
+LaTeX Warning: Reference `sec-background' on page 13 undefined on input line 95
+9.
 
 
-LaTeX Warning: Reference `eq-yll' on page 12 undefined on input line 881.
+LaTeX Warning: Reference `eq-yll' on page 13 undefined on input line 959.
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 881--888
+Underfull \hbox (badness 10000) in paragraph at lines 959--966
 []\TU/lmr/m/n/10 As noted in Section [] and in Equation [], YLLs are based on t
 he present value of 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 881--888
+Underfull \hbox (badness 10000) in paragraph at lines 959--966
 \TU/lmr/m/n/10 remaining life expectancy among deaths that occur in each cycle 
 $[]$. Define $[][][][]$ as 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 881--888
+Underfull \hbox (badness 10000) in paragraph at lines 959--966
 \TU/lmr/m/n/10 at cycle $[]$. Following the GBD continuous time discounting app
 roach, $[][][][][][][]$ is given 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 893--897
+Underfull \hbox (badness 10000) in paragraph at lines 971--975
 []\TU/lmr/m/n/10 where $[][][][][]$ is the remaining life expectancy at age $[]
 $. $[][][][][]$ is drawn from either 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 893--897
+Underfull \hbox (badness 10000) in paragraph at lines 971--975
 \TU/lmr/m/n/10 an exogenous (reference) or an endogenous life table, depending 
 on the objectives of 
  []
 
 File: images/d_yll.png Graphic file (type bmp)
 <images/d_yll.png>
-
-Underfull \hbox (badness 10000) in paragraph at lines 910--912
+[13]
+Underfull \hbox (badness 10000) in paragraph at lines 988--990
 []\TU/lmr/m/n/10 This payoff vector reflects discounting, but only in terms of 
 the present value of 
  []
 
-[12]
-Underfull \hbox (badness 10000) in paragraph at lines 943--949
-\TU/lmr/m/n/10 In the above notation, the matrix $[][]$ captures transition pro
-babilities among tran- 
- []
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 943--949
-\TU/lmr/m/n/10 sient (i.e., non-absorbing) health states, while $[][]$ captures
- transitions from tran- 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 943--949
-\TU/lmr/m/n/10 sient health states to the absorbing death states (non-disease m
-ortality and disease- 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 943--949
-\TU/lmr/m/n/10 related mortality). Indexing by age class $[]$ indicates that se
-parate matrices are 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 957--957
-| [][][]\TU/lmr/m/n/8 The only difference with the two approaches above is that
- the rows in these rate matrices correspond
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 957--957
-\TU/lmr/m/n/8 to the final state, while the columns correspond to the starting 
-state; this is the opposite of the rate matri-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 957--957
-\TU/lmr/m/n/8 ces defined above, where the rows corresponded to the starting he
-alth state and the columns to the ending
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 950--958
-[]\TU/lmr/m/n/10 To construct $[][]$ and $[][]$ we define transition rate (“int
-ensity”) matrices as in Ap- 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 964--969
-\TU/lmr/m/n/10 where $[][]$ is the rate matrix for the transitory (i.e., non-ab
-sorbing) states and $[][]$ is 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 964--969
-\TU/lmr/m/n/10 the rate matrix for the absorbing states. The diagonal elements 
-of $[][]$ are the nega- 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 964--969
-\TU/lmr/m/n/10 tive sum of the non-diagonal column elements, thus making the co
-lumn sums of $[][]$ 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 970--974
-[]\TU/lmr/m/n/10 For the defined time step $[][]$, the discrete time transition
- probability matrix $[][]$ is 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 970--974
-\TU/lmr/m/n/10 obtained by taking the matrix exponential of the intensity matri
-x ($[][]$) multipled by 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 988--991
-[]\TU/lmr/m/n/10 In addition, the matrix $[][]$ defines age advancement in the 
-Markov chain. Using the 
- []
-
-[13]
-Underfull \hbox (badness 10000) in paragraph at lines 1000--1005
-[]\TU/lmr/m/n/10 In our implementation, we include the (optional) 1 value in th
-e lower right corner; 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1000--1005
-\TU/lmr/m/n/10 this assumes that after the last specified age, the cohort conti
-nues to experience 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1000--1005
-\TU/lmr/m/n/10 transitions among health states according to the transition prob
-abilities defined for 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1000--1005
-\TU/lmr/m/n/10 the last age class. If this value is 0, the model will assume th
-at everyone dies after 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1006--1008
-[]\TU/lmr/m/n/10 We next combine the transition matrices (for all age classes) 
-together into a series of 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1029--1034
-[]\TU/lmr/m/n/10 where $[]$ is a permutation matrix known as the vec-permutatio
-n matrix.[][][][][] See Hen- 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1029--1034
-\TU/lmr/m/n/10 derson & Searle (1981) and Appendix B in Caswell & van Daalen (2
-021) for further 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1061--1061
-| [][][]\TU/lmr/m/n/8 Again, for our purposes here we will focus on expected ou
-tcomes—though note that formulas for
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1053--1062
-[]\TU/lmr/m/n/10 We now (nearly) have the components needed to calculate outcom
-es. A key differ- 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1053--1062
-\TU/lmr/m/n/10 ence in the Healthy Longevity approach, relative to the approach
-es above, is that we 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1053--1062
-\TU/lmr/m/n/10 do not calculate outcomes separately in each cycle, and then sum
- them. Rather, the 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1053--1062
-\TU/lmr/m/n/10 method utilizes matrix calculus to solve for \TU/lmr/m/it/10 exp
-ected outcomes \TU/lmr/m/n/10 and other moments in 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1063--1067
+Underfull \hbox (badness 10000) in paragraph at lines 1009--1013
 []\TU/lmr/m/n/10 To calculate outcomes, we must next define “reward” matrices $
 [][]$, where $[]$ indexes 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1063--1067
+Underfull \hbox (badness 10000) in paragraph at lines 1009--1013
 \TU/lmr/m/n/10 the moment of interest (e.g., expected value, variance, etc.). T
 he structure and 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1068--1072
+Underfull \hbox (badness 10000) in paragraph at lines 1014--1018
 []\TU/lmr/m/n/10 To facilitate how we define rewards (i.e., payoffs), we briefl
 y classify each of our out- 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1068--1072
+Underfull \hbox (badness 10000) in paragraph at lines 1014--1018
 \TU/lmr/m/n/10 comes (LE, YLL, YLD, DALYs, QALYs) into broad classes correspond
 ing to whether 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1068--1072
+Underfull \hbox (badness 10000) in paragraph at lines 1014--1018
 \TU/lmr/m/n/10 the payoff or “reward” applies to occupancy, or to transitions, 
 within or to a given 
  []
 
-[14]
 
-LaTeX Warning: Reference `fig-H-le' on page 15 undefined on input line 1110.
+LaTeX Warning: Reference `fig-H-le' on page 14 undefined on input line 1056.
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1108--1111
+Underfull \hbox (badness 10000) in paragraph at lines 1054--1057
 []\TU/lmr/m/n/10 To calculate occupancy-based outcomes, we start with a reward 
 matrix $[]$, which has 
  []
@@ -2699,51 +2725,51 @@ matrix $[]$, which has
 File: images/H-LE.png Graphic file (type bmp)
 <images/H-LE.png>
 
-Underfull \hbox (badness 10000) in paragraph at lines 1128--1128
+Underfull \hbox (badness 10000) in paragraph at lines 1074--1074
 | [][][]\TU/lmr/m/n/8 This structure allows us, for example, to estimate outcom
 es for certain age ranges or other decision-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1124--1129
+Underfull \hbox (badness 10000) in paragraph at lines 1070--1075
 []\TU/lmr/m/n/10 Cell values within this matrix can be set to one if we want to
  “reward” that health 
  []
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 1130--1132
+[14]
+Underfull \hbox (badness 10000) in paragraph at lines 1076--1078
 []\TU/lmr/m/n/10 For occupancy-based outcomes, we define $[]$ such that each ce
 ll receives a value of 
  []
 
 File: images/H-LE2.png Graphic file (type bmp)
 <images/H-LE2.png>
-[15]
-Underfull \hbox (badness 10000) in paragraph at lines 1151--1153
+
+Underfull \hbox (badness 10000) in paragraph at lines 1097--1099
 \TU/lmr/m/n/10 We also define $[][]$ as the complement of $[]$, (i.e., values o
 f 1.0 become 0, and vice 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1154--1157
+Underfull \hbox (badness 10000) in paragraph at lines 1100--1103
 []\TU/lmr/m/n/10 Occupancy-based outcomes with partial rewards (e.g., YLDs, QAL
 Ys) require an 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1158--1161
+Underfull \hbox (badness 10000) in paragraph at lines 1104--1107
 []\TU/lmr/m/n/10 If $[]$ is the set of states that receive a reward (e.g., the 
 CVD state for both QALYs 
  []
 
 
-LaTeX Warning: Reference `fig-V-yld' on page 16 undefined on input line 1165.
+LaTeX Warning: Reference `fig-V-yld' on page 15 undefined on input line 1111.
 
 
-LaTeX Warning: Reference `fig-V-qaly' on page 16 undefined on input line 1166.
+LaTeX Warning: Reference `fig-V-qaly' on page 15 undefined on input line 1112.
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1164--1167
+Underfull \hbox (badness 10000) in paragraph at lines 1110--1113
 \TU/lmr/m/n/10 For YLD outcomes, $[]$ is defined as shown in Figure [], while f
 or QALY outcomes 
  []
@@ -2759,15 +2785,15 @@ See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.1188 ...ward matrix \mathbf{V} for QALY Outcome}
+l.1134 ...ward matrix \mathbf{V} for QALY Outcome}
                                                    
 Here is how much of TeX's memory you used:
- 23525 strings out of 476683
- 433362 string characters out of 5804046
- 1867018 words of memory out of 5000000
- 43357 multiletter control sequences out of 15000+600000
+ 23524 strings out of 476683
+ 433346 string characters out of 5804046
+ 1865018 words of memory out of 5000000
+ 43356 multiletter control sequences out of 15000+600000
  518276 words of font info for 91 fonts, out of 8000000 for 9000
  1354 hyphenation exceptions out of 8191
  98i,10n,121p,1002b,577s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on index.pdf (15 pages).
+Output written on index.pdf (14 pages).
