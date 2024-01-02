@@ -171,7 +171,7 @@ params_ <- list(
     v_ab_names = c("DOC","DS"), # absorbing health states
     n_states = 5, # total number of health states
     
-    horizon = 400,    # model time horizon (in years)  
+    horizon = 400,  # model time horizon (in years)  
     r_v_disc_h  = 0.03,     # annual discount rate for health outcomes
     r_v_disc_c = 0.03,     # annual discount rate for cost outcomes
     Delta_t = 1,      # time step (1 = yearly, 1/12 = monthly, etc.)
@@ -182,7 +182,7 @@ params_ <- list(
     r_HS1 = 0.15,   # disease onset rate
     r_S1H = 0.5,    # recovery rate
     r_S1S2 = 0.105,   # disease progression rate
-    r_HD = 0.002,    # background mortality rate
+    r_HD = .002,   # background mortality rate
     
     hr_S1 = 3.0,     # hazard rate of disease-related death from S1 state
     hr_S2 = 10.0,    # hazard rate of disease-related death from S1 state
@@ -273,13 +273,11 @@ To accommodate this need and to accurately model DALY outcomes, several options 
 
 2. **Non-Markovian Trackers (Intermediate)**: Include a non-Markovian transition state for cause-specific deaths in the transition matrix. This approach will maintain the Markovian components captured in @fig-model1, but will allow us to add a column to the Markov trace that separately tracks the number of new deaths from the disease in each cycle. We can then apply transition state payoffs (based on remaining life expectancy at each age/cycle) to calculate YLL outcomes. 
 
-3. **Markov Chain with Rewards (Advanced)** Define a block matrix Markov chain with rewards for occupancy (YLDs) and disease-relatd death transitions (YLLs) by adapting the methods in @caswell2021a and @caswell2018. This approach draws on matrix calculus and solves for expected outcomes as well as higher order moments such as variance and skewness. 
+3. **Markov Chain with Rewards (Advanced)** Define a block matrix Markov chain with rewards for occupancy (YLDs) and disease-relatd death transitions (YLLs) by adapting the methods in @caswell2021a. This approach draws on matrix calculus and solves for expected outcomes as well as higher order moments such as variance and skewness. 
 
 [^othcause]: In this example, disease-specific death rates are goverened by a hazard ratio applied to the background mortality rate. Because we are operating on the rate scale, we can separate out disease-related deaths from other-cause mortality by simply taking a difference in the rates. Other applications for prevalent conditions with high death rates, however, may require us to construct a cause-deleted life table to obtain background mortality rates that net out deaths from the modeled disease.
 
 Each of these approaches facilitate the design and execution of a decision-analytic model that correctly calculates YLD, YLL, and DALY outcomes---as well as other common outcomes such as QALYs and costs. In practice, Approaches (1) and (2)  will produce identical results.  Approach (3) draws on slightly different cycle correction techniques, but will yield results quite similar to (1) and (2). Other shortcut approaches previously used in the literature, such as modeling a QALY-like DALY and/or accumulating time in the absorbing death state, will not in general yield similar results; we discuss reasons for this in Section TK below. 
-
-Approaches (1) and (2) share common methods, so we will discuss them in tandem in the sections below. Approach (3) draws on more advanced matrix calculus methods, so we reserve exposition to Section TK. 
 
 ### Approach 1 (Beginner): Cause-Specific Death State
 
@@ -448,6 +446,17 @@ params1 <- with(params1,modifyList(params1,list(
       }))
 )))
 
+params1 <- with(params1,modifyList(params1,list(
+  m_P_ = m_P %>% map(~({
+    tmp <- .x
+    init <- diag(nrow=nrow(tmp[[1]]),ncol=ncol(tmp[[1]]))
+    dimnames(init) = dimnames(tmp[[1]])
+    append(.x,list(init),after=0)
+  }))
+)))
+params1$m_P = params1$m_P_
+params1[["m_P_"]] <- NULL
+
 params2 <- with(params,modifyList(params,list(
     v_tr_names = c("H","S1","S2"), # transient health states
     v_ab_names = c("D","trDS"), # absorbing health states
@@ -537,355 +546,19 @@ params2 <- with(params2,modifyList(params2,list(
       }))
 )))
 
+params2 <- with(params2,modifyList(params2,list(
+  m_P_ = m_P %>% map(~({
+    tmp <- .x
+    init <- diag(nrow=nrow(tmp[[1]]),ncol=ncol(tmp[[1]]))
+    dimnames(init) = dimnames(tmp[[1]])
+    append(.x,list(init),after=0)
+  }))
+)))
+params2$m_P = params2$m_P_
+params2[["m_P_"]] <- NULL
 ```
 
-## Construct the Markov Trace
-
-With $\mathbf{P}$ defined under either Approach 1 or Approach 2, we now have the necessary ingredients to construct a Markov trace. Define $\mathbf{s}_0$ as the initial state occupancy vector at time $t=0$. The vector $\mathbf{s}_0$ has size $k$, where $k$ is the total number of states captured in the $k \times k$ matrix $\mathbf{P}$ (including transition states, if using Approach 2). This vector summarizes the number or fraction of the population in each health state at baseline. Often, this vector will be set such that the entire cohort starts off healthy---though this need not always be the case.
-
-For a time-homogenous model such as considered here, health state occupancy at cycle $t$ is is calculated as:
-
-$$
-\mathbf{s}'_t=\mathbf{s}'_0 \mathbf{P}^t
-$$ {#eq-trace}
-
-For a time-inhomongenous model in which transition probabilities change over time (e.g., death rates increase due to aging), we must construct separate transition probability matrices for each cycle (i.e., $\mathbf{P}(t)$). State occupancy at cycle $t$ is calculated by sequentially applying the transition matrices corresponding to each time step leading up to cycle $t$, i.e., 
-
-$$
-\mathbf{s}'_t=\mathbf{s}'_0 \mathbf{P}(1)\mathbf{P}(2)\dots\mathbf{P}(t)
-$$ {#eq-trace-inhomo}
-
-@tbl-trace1 shows the Markov trace for the first five cycles under Approach 1, while @tbl-trace2 shows the trace under Approach 2.  @tbl-trace1 also includes a new column (```deaths_disease```) that is calculated as the difference in state occupancy in the ```DS``` column between cycles. This extra step will be necessary later for calculating YLL outcomes. The trace shown under Approach 2 (@tbl-trace2), by comparison, automatically calculates new deaths through the inclusion of the transition state ```trDS```; the values under ```deaths_disease``` and ```trDS``` are identical, again highlighting that either approach can be used to calculate the number of disease-related deaths in each cycle.  
-
-```{r trace}
-trace1 <- 
-    with(params1, {
-        m_P %>% map( ~ ({
-            P = .x
-            occ <- v_s0T
-            P %>% map(~({
-              occ <<- occ %*% .x
-            })) %>% 
-            map(~(data.frame(.x))) %>% 
-            bind_rows()
-        }))
-    })  %>% 
-    map(~({
-        tmp = .x[1,]
-        tmp[1,] = params1$v_s0T
-        tmp = rbind(tmp,.x)
-    }))
-
-trace2 <- 
-    with(params2, {
-        m_P %>% map( ~ ({
-            P = .x
-            occ <- v_s0T
-            P %>% map(~({
-              occ <<- occ %*% .x
-            })) %>% 
-            map(~(data.frame(.x))) %>% 
-            bind_rows()
-        }))
-    })  %>% 
-    map(~({
-        tmp = .x[1,]
-        tmp[1,] = params2$v_s0T
-        tmp = rbind(tmp,.x)
-    }))
-```
-
-
-```{r}
-#| tbl-cap: Markov Trace Under Approach 1
-#| label: tbl-trace1
-
-trace1$SoC %>% head() %>% 
-  data.frame() %>% 
-  mutate(deaths_disease = c(0,diff(DS))) %>% 
-  mutate(cycle = row_number()-1) %>% 
-  select(cycle,everything()) %>% 
-  kable(digits = c(0,rep(4,6))) 
-```
-
-```{r}
-#| tbl-cap: Markov Trace Under Approach 2
-#| label: tbl-trace2
-#|
-trace2$SoC %>% head() %>% data.frame() %>% 
-  mutate(cycle = row_number()-1) %>% 
-  select(cycle,everything()) %>% 
-  kable(digits = c(0,rep(4,5))) 
-```
-
-## Occupancy and Transition Rewards {#sec-occupancy}
-
-With the Markov trace constructed, we next turn our attention to defining payoff vectors for YLD and YLL outcomes. 
-
-### Years of Life Lived with Disability (YLD)
-
-To calculate YLDs, we define a disability weight payoff vector $\mathbf{d}_{YLD}$,
-
-![YLD Payoff Vector](images/d_yld.png){width="60%"}
-
-where $\texttt{dwS1}$ and $\texttt{dwS2}$ are the disability weights for the Sick and Sicker states, respectively. In addition, $r_{\Delta_t}$ is the cycle discount rate, which is calculated as,
-
-$$
-r_{\Delta_t} = r \Delta_t
-$$ {#eq-cycledisc} where $r$ is the annual discount rate and $\Delta_t$ is the time step. 
-
-In the YLD payoff vector, the term $\frac{1}{r_{\Delta_t}}(1-e^{-r_{\Delta_t}})$ is included as a continuous-time discounting adjustment factor for the defined cycle length $\Delta_t$. This term is included to discount time *within* each cycle in order to maintain the continuous-time discounting approach used in the original GBD equations.[^conttime] 
-
-
-[^conttime]: For example, if $r=0.03$ and $\Delta_t=1$ (i.e., annual cycle length), this adjustment factor will be $0.985 = \frac{1}{r_{\Delta_t}}(1-e^{-r_{\Delta_t}})$. If $\Delta_t=1/12$ (monthly cycle) the cycle discounting adjustment factor is 0.99875.
-
-To fully discount outcomes, we still must discount all future outcome values back to baseline ($t=0$). For a time-homogeneous model, discounted years of life lost to disability (YLD) at cycle $t$ is given by
-
-$$
-YLD(t)=\mathbf{s}'_0 \mathbf{P}^t \mathbf{d}_{YLD}  \times{e^{-r_{\Delta_t} t}}
-$$ {#eq-yldt}
-
-For a time-inhomogenous model, YLDs are calculated as
-$$
-YLD(t)=\mathbf{s}'_0 \mathbf{P}(1)\mathbf{P}(2)\dots\mathbf{P}(t)  \mathbf{d}_{YLD}  \times{e^{-r_{\Delta_t} t}}
-$$ {#eq-yldt-inhomo}
-
-### Years of Life Lost to Disease (YLLs)
-
-As noted in @sec-background and in @eq-yll, YLLs are based on the present value of remaining life expectancy among deaths that occur in each cycle $t$. Define $a(t)$ as the age of the cohort at cycle $t$, i.e., $a(t) = t \cdot \Delta t + a0$, where $a_0$ is the age of the cohort at $t=0$. Define $e(t)=e(a(t))$ as the present value of remaining life expectancy at cycle $t$. Following the GBD continuous time discounting approach, $e(a(t))$ is given by
-
-$$
-e(a(t)) = \frac{1}{r}\big (1 - e^{-rEx(a(t))} \big )
-$$ {#eq-pvEx}
-
-where $Ex(a)$ is the remaining life expectancy at age $a$. $Ex(a)$ is drawn from either an exogenous (reference) or an endogenous life table, depending on the objectives of the modeling exercise [@anand2019].
-
-We next define a remaining life expectancy payoff vector at cycle $t$:
-
-![YLL Payoff Vector](images/d_yll.png){width="60%"}
-
-
-This payoff vector reflects discounting, but only in terms of the present value of remaining life expectancy *at time* $t$.
-
-$$
-YLL(t)=\mathbf{s}'_t \mathbf{e}(t)  \times{e^{-r\Delta_t t}} =\mathbf{s}'_0 \mathbf{P}^t \mathbf{e}(t)  \times{e^{-r\Delta_t t}}
-$$ {#eq-yllt}
-
-Total discounted YLLs at time $t=0$ is given by:
-
-$$
-YLL=\sum_{t=0}^{N-1} YLL(t) =\sum_{t=0}^{N-1}\left(\mathbf{s}'_0 \mathbf{P}^t \mathbf{e}(t)  \times{e^{-r\Delta_t t}} \right) 
-$$ {#eq-yllcum}
-
-```{r}
-
-# YYs
-ly_ = with(params1,(matrix(c(1,
-              1 ,
-              1,
-              0,
-              0) * Delta_t,
-            dimnames = list(c(
-                c(v_tr_names,v_ab_names)
-            ), c("UW")))
-))
-ly_ <- 
-  with(params1,{
-    v_tx_names %>% map(~({
-         ly_
-    }))
-  })
-
-LYt <- trace1 %>% map2(.,ly_, ~ ({
-    tmp = as.matrix(.x) %*% .y
-    tmp 
-}))
-
-LY = LYt %>% map(~sum(.x * gen_wcc(params1$omega, method = params1$cycle_correction))) 
-
-# QALYs
-qaly_ = with(params1,(matrix(c(u_H,
-              u_S1 ,
-              u_S2,
-              u_D,
-              u_D) * Delta_t,
-            dimnames = list(c(
-                c(v_tr_names,v_ab_names)
-            ), c("UW")))
-))
-qaly_ <- 
-  with(params1,{
-    v_tx_names %>% map(~({
-        if (.x=="A" | .x=="AB") {
-          tmp_ <- qaly_
-          tmp_[2,1] = u_trtA * Delta_t
-          tmp_
-      } else qaly_
-    }))
-  })
-
-QALYt <- trace1 %>% map2(.,qaly_, ~ ({
-    tmp = as.matrix(.x) %*% .y
-    tmp 
-}))
-
-QALY = QALYt %>% map(~sum(.x * v_disc_h * gen_wcc(params1$omega, method = params1$cycle_correction))) 
-
-# YLD
-yld_ = with(params1,(matrix(c(0,
-              dw_S1 * Delta_t * (1/r_v_disc_h_Delta_t) * (1 - exp(-r_v_disc_h_Delta_t)) ,
-              dw_S2 * Delta_t * (1/r_v_disc_h_Delta_t) * (1 - exp(-r_v_disc_h_Delta_t)),
-              0,
-              0),
-            dimnames = list(c(
-                c(v_tr_names,v_ab_names)
-            ), c("DW")))
-))
-yld_ <- 
-  with(params1,{
-    v_tx_names %>% map(~({
-        if (.x=="A" | .x=="AB") {
-          tmp_ <- yld_
-          tmp_[2,1] = dw_trtA * Delta_t * (1/r_v_disc_h_Delta_t) * (1 - exp(-r_v_disc_h_Delta_t))
-          tmp_
-      } else yld_
-    }))
-  })
-
-YLDt <- trace1 %>% map2(.,yld_, ~ ({
-    tmp = as.matrix(.x) %*% .y
-    tmp 
-}))
-
-YLD = YLDt %>% map(~sum(.x*  v_disc_h * gen_wcc(params1$omega, method = params1$cycle_correction)))
-
-# YLL
-new_deaths_from_disease <- 
-    map(trace1,~({
-        c(0,diff(.x[,"DS"]))
-    })) 
-   
-remaining_life_expectancy <- 
-    with(params1,(1/r_v_disc_h) * (1 - exp(-r_v_disc_h * f_ExR(ages_trace))))
-    
-YLLt <- 
-    new_deaths_from_disease %>% map(~(.x * remaining_life_expectancy ))
-
-YLL <- 
-    YLLt %>% map(~(sum(.x * v_disc_h * gen_wcc(params1$omega,method = params1$cycle_correction))))
-
-DALY <- 
-    map2(YLL,YLD,~(.x + .y))
-
-# Accumualted Time in Absorbing Death State
-accdaly_ = with(params1,(matrix(c(0,
-              dw_S1 * Delta_t * (1/r_v_disc_h_Delta_t) * (1 - exp(-r_v_disc_h_Delta_t)) ,
-              dw_S2 * Delta_t * (1/r_v_disc_h_Delta_t) * (1 - exp(-r_v_disc_h_Delta_t)),
-              0,
-              1) * Delta_t,
-            dimnames = list(c(
-                c(v_tr_names,v_ab_names)
-            ), c("UW")))
-))
-accdaly_ <- 
-  with(params1,{
-    v_tx_names %>% map(~({
-        if (.x=="A" | .x=="AB") {
-          tmp_ <- accdaly_
-          tmp_[2,1] = dw_trtA * Delta_t * (1/r_v_disc_h_Delta_t) * (1 - exp(-r_v_disc_h_Delta_t))
-          tmp_
-      } else accdaly_
-    }))
-  })
-
-ACCDALYt <- trace1 %>% map2(.,accdaly_, ~ ({
-    tmp = as.matrix(.x) %*% .y
-    tmp 
-}))
-
-ACCDALY = ACCDALYt %>% map(~sum(.x * v_disc_h * gen_wcc(params1$omega, method = params1$cycle_correction))) 
-
-qaly_daly_ = with(params1,(matrix(c(u_H,
-              1-dw_S1 ,
-              1-dw_S2,
-              u_D,
-              u_D) * Delta_t,
-            dimnames = list(c(
-                c(v_tr_names,v_ab_names)
-            ), c("QALY_DALY_")))
-))
-qaly_daly_ <- 
-  with(params1,{
-    v_tx_names %>% map(~({
-        if (.x=="A" | .x=="AB") {
-          tmp_ <- qaly_daly_
-          tmp_[2,1] = (1-dw_trtA) * Delta_t
-          tmp_
-      } else qaly_daly_
-    }))
-  })
-
-QALY_DALYt <- trace1 %>% map2(.,qaly_daly_, ~ ({
-    tmp = as.matrix(.x) %*% .y
-    tmp 
-}))
-
-QALY_DALY = QALY_DALYt %>% map(~sum(.x * v_disc_h * gen_wcc(params1$omega, method = params1$cycle_correction))) 
-
-# Costs
-cost_ = with(params1,(matrix(c(c_H,
-              c_S1 ,
-              c_S2,
-              c_D,
-              c_D)*Delta_t,
-            dimnames = list(c(
-                c(v_tr_names,v_ab_names)
-            ), c("COST")))
-))
-cost_ <-
-  with(params1, {
-    v_tx_names %>% map( ~ ({
-      if (.x == "A") {
-        tmp_ <- cost_
-        tmp_["S1", 1] = (c_S1 + c_trtA)*Delta_t
-        tmp_["S2", 1] = (c_S2 + c_trtA)*Delta_t
-        tmp_
-      } else if (.x == "B") {
-        tmp_ <- cost_
-        tmp_["S1", 1] = (c_S1 + c_trtB)*Delta_t
-        tmp_["S2", 1] = (c_S2 + c_trtB)*Delta_t
-        tmp_
-      } else if (.x == "AB") {
-        tmp_ <- cost_
-        tmp_["S1", 1] = (c_S1 + c_trtA + c_trtB)*Delta_t
-        tmp_["S2", 1] = (c_S2 + c_trtA + c_trtB)*Delta_t
-        tmp_
-      } else cost_
-    }))
-  }) %>% 
-  set_names(params1$v_tx_names)
-
-COSTt <- trace1 %>% map2(.,cost_, ~ ({
-    tmp = as.matrix(.x) %*% .y
-    tmp 
-}))
-
-COST = COSTt %>% map(~sum(.x * v_disc_c * gen_wcc(params1$omega, method = params1$cycle_correction))) 
-
-result1 <- cbind(LY, YLD, YLL, DALY, ACCDALY, QALY_DALY, QALY,COST) %>%
-  as.data.frame() %>%
-  mutate_all( ~ as.numeric(.))  %>%
-  rownames_to_column(var = "strategy") %>%
-  mutate(approach = "Markov Trace") %>% 
-  dplyr::select(approach, strategy, everything()) 
-
-```
-
-```{r}
-
-```
-
-## Approach 3 (Advanced): Markov Chain With Rewards
+### Approach 3 (Advanced): Markov Chain With Rewards
 
 <!-- From Caswell (2021): MCWR methods were introduced by Howard (1960) as the basis for stochastic dynamic programming (e.g., Puterman 1994; Sheskin 2010). Extensions of the theory to random rewards and demographic models were introduced by Caswell (2011) and have been extended with applications to lifetime reproductive output (Caswell 2011; van Daalen and Caswell 2015; van Daalen and Caswell 2017), evolutionary biodemography (van Daalen and Caswell 2020), income and expenditures (Caswell and Kluge 2015), and healthy longevity in prevalence-based models (Caswell and Zarulli 2018; Owoeye, Oseni, and Gayawan 2020). -->
 
@@ -1025,6 +698,571 @@ etc.).[^expectedoutcomes]
 [^expectedoutcomes]: Again, for our purposes here we will focus on expected
     outcomes---though note that formulas for higher-order moments are
     provided in @caswell2021a and @caswell2018.
+
+
+```{r approach-3}
+params3_ <- with(params1,modifyList(params1,list(
+    alpha = length(v_ab_names),
+    tau = length(v_tr_names), 
+    s = length(v_tr_names)*omega + length(v_ab_names) #total number of states;s=τω+α
+)))
+params3_ <- with(params3_,modifyList(params3_,list(
+  m_R_t = m_R %>% map(~({
+    tmp <- .x
+    tmp %>% map(~(t(.x)))
+  }))
+)))
+
+# not sure why this is needed, but otherwise the length gets set too long...
+params3 <- with(params3_, modifyList(params3_, list(m_R_ = m_R_t %>% transpose())))
+params3$m_R = params3$m_R_
+
+params3 <- with(params3,modifyList(params3,list(
+    m_V = m_R %>% map(~({
+            R = .x
+            R %>% map(~({
+              m <- .x[v_tr_names,v_tr_names] 
+            }))
+            
+        })),
+     
+    m_Q = m_R %>% map(~({
+      R = .x 
+      R %>% map(~({
+                V = .x[v_tr_names,v_tr_names]
+                S = .x[v_ab_names,v_tr_names]
+                zero_ <- matrix(0, nrow = length(v_tr_names)+length(v_ab_names), ncol = length(v_ab_names))
+                tmp <- cbind(rbind(V,S),zero_)
+                dimnames(tmp) <- list(c(v_tr_names,v_ab_names),c(v_tr_names,v_ab_names))
+                tmp
+      }))
+    }))    
+)))
+
+params3 <- with(params3,modifyList(params3,list(
+    m_P3 = m_Q %>% map(~({
+          Q = .x
+          Q %>% map(~(expm(.x * Delta_t)))
+    }))
+)))
+# For some reason, can't replace m_P directly, so resorting to this .. 
+params3$m_P = params3$m_P3
+
+params3 <- with(params3,modifyList(params3,list(
+    m_U = m_P %>% map(~({
+          P <- .x 
+          P %>% map(~(.x[v_tr_names,v_tr_names]))
+    })),
+    m_M = m_P %>% map(~({
+        P = .x
+        P %>% map(~(.x[v_ab_names,v_tr_names]))
+        
+    }))
+)))
+
+params3 <- with(params3,modifyList(params3,list(
+    D = {
+        # Create diagonal age advancement matrix
+        D <- matrix(0, omega, omega)
+        vec <- rep(1, omega-1)
+        D[row(D)-1 == col(D)] <- vec
+        D[omega,omega] = 1
+        D
+    }
+)))
+
+vec <-  # a simple function to return the vec of an array
+    function(x) {
+        y <- c(x)
+        return(y)
+    }
+
+vecperm <- 
+    # vecperm
+    # function to calculate the vec permutation matrix K of index m,n
+    # let X be a m x n matrix, and X' the transpose of X
+    # then K satisfies 
+    # vec(X') = K*vec(X)
+    function(m, n) {
+        K <- matrix(0, m * n, m * n)
+        a <- matrix(0, m, n)
+        
+        for (i in 1:m) {
+            for (j in 1:n) {
+                e <- a
+                e[i, j] <- 1
+                K <- K + kronecker(e, t(e))
+            }
+        }
+        
+        return(K)
+    }
+
+params3 <- with(params3,modifyList(params3,list(
+    bbD_ = kronecker(diag(tau), D),
+    bbU_ =  m_U %>% 
+            map(~(bdiag(.x))),
+    K = vecperm(tau, omega)
+)))
+
+params3 <- with(params3,modifyList(params3,list(
+    mUtilde = bbU_ %>% map( ~ ({
+        t(K) %*% bbD_ %*% K %*% .x
+    }))
+)))
+
+params3 <- with(params3,modifyList(params3,list(
+    mMtilde = m_M %>% map(~({
+      do.call(cbind,.x) 
+    }))  
+)))
+
+params3 <- with(params3,modifyList(params3,list(
+    mPtilde =  map2(mUtilde, mMtilde,  ~ ({
+            rbind(cbind(.x, matrix(0, tau * omega, alpha)) ,
+                  cbind(.y, diag(alpha)))
+        }))
+)))
+
+healthy_longevity_occupancy <- function(params, H, V) {
+    with(params,{
+        map(v_tx_names,~({
+            U = mUtilde[[.x]]
+            P = mPtilde[[.x]]
+            v_ = V[[.x]]
+            N = solve(diag(tau*omega)-U)
+            h = vec(H) %>% as.matrix()
+            not_h = 1-h
+            v <- vec(v_) %>% as.matrix()
+            B1 <- h %*% t(v) + 0.5 * (not_h %*% t(v)) + 0.5 * (v %*% t(not_h)) # Eq. 46
+            C1 = 0.5 * (rep(1,alpha) %*%  t(v)) # Eq. 48
+            R1 = rbind(cbind(B1, matrix(0, tau * omega, alpha)) ,
+                              cbind(C1, diag(alpha))) 
+            R2 = R1 * R1
+            R3 = R1 * R1 * R1
+            Z = cbind(diag(tau*omega),matrix(0,nrow=tau*omega, ncol=alpha))
+            e = rep(1,s)
+            rho1_ <- t(N)%*% Z %*% t(P * R1) %*% e
+            # The following needs to be debugged
+            # rho2_ <-
+            #   N %*% (Z %*% t(.y * R1) %*% e + 2 * t(.x * B1) %*% rho1_)
+            # B2 <- R2[1:(tau * omega), 1:(tau * omega)]
+            # rho3_ <- t(N) %*% (Z %*% ((t(.y * R3) %*% e)) + 3 * (t(.x * B2) %*% rho1_) + 3 * (t(.x * B1) %*% rho2_))
+            rho1_
+        }))
+    })
+}
+
+healthy_longevity_yll <- function(params, life_expectancy, disc) {
+    with(params,{
+        map2(mUtilde,mPtilde,~({
+            U = .x
+            P = .y
+            N = solve(diag(tau*omega)-U)
+            Z = cbind(diag(tau*omega),matrix(0,nrow=tau*omega, ncol=alpha))
+            disc_ = rev(sort(rep(disc,length(v_tr_names))))
+            eta1_ex_ = rev(sort(rep(life_expectancy,length(v_tr_names))))
+            eta1_ex =  eta1_ex_
+            
+            B1 = matrix(0,nrow=tau*omega, ncol = tau*omega)
+            C1 = rbind(matrix(0,nrow=1,ncol=tau*omega),eta1_ex*disc_) 
+            R1 = cbind(rbind(B1,C1),matrix(0,nrow=tau*omega+2,ncol=2))
+            R2 = R1 * R1
+            R3 = R1 * R1 * R1
+            Z = cbind(diag(tau*omega),matrix(0,nrow=tau*omega, ncol=alpha))
+            e = rep(1,s)
+            rho1_ = t(N) %*% Z %*% t(.y * R1) %*% e
+            # The following needs to be debugged
+            # rho2_ <-
+            #   N %*% (Z %*% t(.y * R1) %*% e + 2 * t(.x * B1) %*% rho1_)
+            # B2 <- R2[1:(tau * omega), 1:(tau * omega)]
+            # rho3_ <- t(N) %*% (Z %*% ((t(.y * R3) %*% e)) + 3 * (t(.x * B2) %*% rho1_) + 3 * (t(.x * B1) %*% rho2_))
+            rho1_
+        }))
+    })
+}
+```
+
+## Outcomes
+
+With $\mathbf{P}$ defined under either Approach 1 or Approach 2, we now have the necessary ingredients to construct a Markov trace. Define $\mathbf{s}_0$ as the initial state occupancy vector at time $t=0$. The vector $\mathbf{s}_0$ has size $k$, where $k$ is the total number of states captured in the $k \times k$ matrix $\mathbf{P}$ (including transition states, if using Approach 2). This vector summarizes the number or fraction of the population in each health state at baseline. Often, this vector will be set such that the entire cohort starts off healthy---though this need not always be the case.
+
+For a time-homogenous model such as considered here, health state occupancy at cycle $t$ is is calculated as:
+
+$$
+\mathbf{s}'_t=\mathbf{s}'_0 \mathbf{P}^t
+$$ {#eq-trace}
+
+For a time-inhomongenous model in which transition probabilities change over time (e.g., death rates increase due to aging), we must construct separate transition probability matrices for each cycle (i.e., $\mathbf{P}(t)$). State occupancy at cycle $t$ is calculated by sequentially applying the transition matrices corresponding to each time step leading up to cycle $t$, i.e., 
+
+$$
+\mathbf{s}'_t=\mathbf{s}'_0 \mathbf{P}(1)\mathbf{P}(2)\dots\mathbf{P}(t)
+$$ {#eq-trace-inhomo}
+
+### Years of Life Lived with Disability (YLD)
+
+To calculate YLDs, we define a disability weight payoff vector $\mathbf{d}_{YLD}$,
+
+![YLD Payoff Vector](images/d_yld.png){width="60%"}
+
+where $\texttt{dwS1}$ and $\texttt{dwS2}$ are the disability weights for the Sick and Sicker states, respectively. In addition, $r_{\Delta_t}$ is the cycle discount rate, which is calculated as,
+
+$$
+r_{\Delta_t} = r \Delta_t
+$$ {#eq-cycledisc} where $r$ is the annual discount rate and $\Delta_t$ is the time step. 
+
+In the YLD payoff vector, the term $\frac{1}{r_{\Delta_t}}(1-e^{-r_{\Delta_t}})$ is included as a continuous-time discounting adjustment factor for the defined cycle length $\Delta_t$. This term is included to discount time *within* each cycle in order to maintain the continuous-time discounting approach used in the original GBD equations.[^conttime] 
+
+[^conttime]: For example, if $r=0.03$ and $\Delta_t=1$ (i.e., annual cycle length), this adjustment factor will be $0.985 = \frac{1}{r_{\Delta_t}}(1-e^{-r_{\Delta_t}})$. If $\Delta_t=1/12$ (monthly cycle) the cycle discounting adjustment factor is 0.99875.
+
+To fully discount outcomes, we still must discount all future outcome values back to baseline ($t=0$). For a time-homogeneous model, discounted years of life lost to disability (YLD) at cycle $t$ is given by
+
+$$
+YLD(t)=\mathbf{s}'_0 \mathbf{P}^t \mathbf{d}_{YLD}  \times{e^{-r_{\Delta_t} t}}
+$$ {#eq-yldt}
+
+For a time-inhomogenous model, YLDs are calculated as
+$$
+YLD(t)=\mathbf{s}'_0 \mathbf{P}(1)\mathbf{P}(2)\dots\mathbf{P}(t)  \mathbf{d}_{YLD}  \times{e^{-r_{\Delta_t} t}}
+$$ {#eq-yldt-inhomo}
+
+### Years of Life Lost to Disease (YLLs)
+
+As noted in @sec-background and in @eq-yll, YLLs are based on the present value of remaining life expectancy among deaths that occur in each cycle $t$. Define $a(t)$ as the age of the cohort at cycle $t$, i.e., $a(t) = t \cdot \Delta t + a0$, where $a_0$ is the age of the cohort at $t=0$. Define $e(t)=e(a(t))$ as the present value of remaining life expectancy at cycle $t$. Following the GBD continuous time discounting approach, $e(a(t))$ is given by
+
+$$
+e(a(t)) = \frac{1}{r}\big (1 - e^{-rEx(a(t))} \big )
+$$ {#eq-pvEx}
+
+where $Ex(a)$ is the remaining life expectancy at age $a$. $Ex(a)$ is drawn from either an exogenous (reference) or an endogenous life table, depending on the objectives of the modeling exercise [@anand2019].
+
+We next define a remaining life expectancy payoff vector at cycle $t$:
+
+![YLL Payoff Vector](images/d_yll.png){width="60%"}
+
+
+This payoff vector reflects discounting, but only in terms of the present value of remaining life expectancy *at time* $t$.
+
+$$
+YLL(t)=\mathbf{s}'_t \mathbf{e}(t)  \times{e^{-r\Delta_t t}} =\mathbf{s}'_0 \mathbf{P}^t \mathbf{e}(t)  \times{e^{-r\Delta_t t}}
+$$ {#eq-yllt}
+
+Total discounted YLLs at time $t=0$ is given by:
+
+$$
+YLL=\sum_{t=0}^{N-1} YLL(t) =\sum_{t=0}^{N-1}\left(\mathbf{s}'_0 \mathbf{P}^t \mathbf{e}(t)  \times{e^{-r\Delta_t t}} \right) 
+$$ {#eq-yllcum}
+
+```{r trace}
+trace1 <- 
+    with(params1, {
+        m_P %>% map( ~ ({
+            P = .x
+            occ <- v_s0T
+            P %>% map(~({
+              occ <<- occ %*% .x
+            })) %>% 
+            map(~(data.frame(.x))) %>% 
+            bind_rows()
+        }))
+    })  
+
+trace2 <- 
+    with(params2, {
+        m_P %>% map( ~ ({
+            P = .x
+            occ <- v_s0T
+            P %>% map(~({
+              occ <<- occ %*% .x
+            })) %>% 
+            map(~(data.frame(.x))) %>% 
+            bind_rows()
+        }))
+    })  %>% 
+    map(~({
+        tmp = .x[1,]
+        tmp[1,] = params2$v_s0T
+        tmp = rbind(tmp,.x)
+    }))
+```
+
+```{r}
+# YYs
+ly_ = with(params1,(matrix(c(1,
+              1 ,
+              1,
+              0,
+              0) * Delta_t,
+            dimnames = list(c(
+                c(v_tr_names,v_ab_names)
+            ), c("UW")))
+))
+ly_ <- 
+  with(params1,{
+    v_tx_names %>% map(~({
+         ly_
+    }))
+  }) %>% 
+  set_names(params1$v_tx_names)
+
+LYt <- 
+  with(params1, {
+    v_tx_names %>% map( ~ ({
+      P = m_P[[.x]]
+      occ <- v_s0T
+      d <- ly_[[.x]]
+      out <- 0
+      P %>% map(~({
+        occ <<- occ %*% .x 
+        out <<-  occ %*% d
+      })) %>% 
+        map(~(data.frame(.x))) %>% 
+        bind_rows()
+    }))
+  })  %>% 
+  set_names(params1$v_tx_names)
+
+LY = LYt %>% map(~sum(.x * gen_wcc(params1$omega, method = params1$cycle_correction))) 
+
+# QALYs
+qaly_ = with(params1,(matrix(c(u_H,
+              u_S1 ,
+              u_S2,
+              u_D,
+              u_D) * Delta_t,
+            dimnames = list(c(
+                c(v_tr_names,v_ab_names)
+            ), c("UW")))
+))
+qaly_ <- 
+  with(params1,{
+    v_tx_names %>% map(~({
+        if (.x=="A" | .x=="AB") {
+          tmp_ <- qaly_
+          tmp_[2,1] = u_trtA * Delta_t
+          tmp_
+      } else qaly_
+    }))
+  }) %>% 
+  set_names(params1$v_tx_names)
+
+QALYt <-  
+  with(params1, {
+    v_tx_names %>% map( ~ ({
+      P = m_P[[.x]]
+      occ <- v_s0T
+      d <- qaly_[[.x]]
+      out <- 0
+      P %>% map(~({
+        occ <<- occ %*% .x 
+        out <<-  occ %*% d
+      })) %>% 
+        map(~(data.frame(.x))) %>% 
+        bind_rows()
+    }))
+  })  %>% 
+  set_names(params1$v_tx_names)
+
+QALY = QALYt %>% map(~sum(.x * v_disc_h * gen_wcc(params1$omega, method = params1$cycle_correction))) 
+
+# YLD
+yld_ = with(params1,(matrix(c(0,
+              dw_S1 * Delta_t * (1/r_v_disc_h_Delta_t) * (1 - exp(-r_v_disc_h_Delta_t)) ,
+              dw_S2 * Delta_t * (1/r_v_disc_h_Delta_t) * (1 - exp(-r_v_disc_h_Delta_t)),
+              0,
+              0),
+            dimnames = list(c(
+                c(v_tr_names,v_ab_names)
+            ), c("DW")))
+))
+yld_ <- 
+  with(params1,{
+    v_tx_names %>% map(~({
+        if (.x=="A" | .x=="AB") {
+          tmp_ <- yld_
+          tmp_[2,1] = dw_trtA * Delta_t * (1/r_v_disc_h_Delta_t) * (1 - exp(-r_v_disc_h_Delta_t))
+          tmp_
+      } else yld_
+    }))
+  }) %>% 
+  set_names(params1$v_tx_names)
+
+YLDt <- 
+   with(params1, {
+    v_tx_names %>% map( ~ ({
+      P = m_P[[.x]]
+      occ <- v_s0T
+      d <- yld_[[.x]]
+      out <- 0
+      P %>% map(~({
+        occ <<- occ %*% .x 
+        out <<-  occ %*% d
+      })) %>% 
+        map(~(data.frame(.x))) %>% 
+        bind_rows()
+    }))
+  })  %>% 
+  set_names(params1$v_tx_names)
+YLD = YLDt %>% map(~sum(.x*  v_disc_h * gen_wcc(params1$omega, method = params1$cycle_correction)))
+
+# YLL
+new_deaths_from_disease <- 
+    map(trace1,~({
+        c(0,diff(.x[,"DS"]))
+    })) 
+   
+remaining_life_expectancy <- 
+    with(params1,(1/r_v_disc_h) * (1 - exp(-r_v_disc_h * f_ExR(ages_trace))))
+    
+YLLt <- 
+    new_deaths_from_disease %>% map(~(.x * remaining_life_expectancy ))
+
+YLL <- 
+    YLLt %>% map(~(sum(.x * v_disc_h * gen_wcc(params1$omega,method = params1$cycle_correction))))
+
+DALY <- 
+    map2(YLL,YLD,~(.x + .y))
+
+# Accumualted Time in Absorbing Death State
+accdaly_ = with(params1,(matrix(c(0,
+              dw_S1 * Delta_t * (1/r_v_disc_h_Delta_t) * (1 - exp(-r_v_disc_h_Delta_t)) ,
+              dw_S2 * Delta_t * (1/r_v_disc_h_Delta_t) * (1 - exp(-r_v_disc_h_Delta_t)),
+              0,
+              1) * Delta_t,
+            dimnames = list(c(
+                c(v_tr_names,v_ab_names)
+            ), c("UW")))
+))
+accdaly_ <- 
+  with(params1,{
+    v_tx_names %>% map(~({
+        if (.x=="A" | .x=="AB") {
+          tmp_ <- accdaly_
+          tmp_[2,1] = dw_trtA * Delta_t * (1/r_v_disc_h_Delta_t) * (1 - exp(-r_v_disc_h_Delta_t))
+          tmp_
+      } else accdaly_
+    }))
+  }) %>% 
+  set_names(params1$v_tx_names)
+
+ACCDALYt <- 
+   with(params1, {
+    v_tx_names %>% map( ~ ({
+      P = m_P[[.x]]
+      occ <- v_s0T
+      d <- accdaly_[[.x]]
+      out <- 0
+      P %>% map(~({
+        occ <<- occ %*% .x 
+        out <<-  occ %*% d
+      })) %>% 
+        map(~(data.frame(.x))) %>% 
+        bind_rows()
+    }))
+  })  %>% 
+  set_names(params1$v_tx_names)
+ACCDALY = ACCDALYt %>% map(~sum(.x * v_disc_h * gen_wcc(params1$omega, method = params1$cycle_correction))) 
+
+qaly_daly_ = with(params1,(matrix(c(u_H,
+              1-dw_S1 ,
+              1-dw_S2,
+              u_D,
+              u_D) * Delta_t,
+            dimnames = list(c(
+                c(v_tr_names,v_ab_names)
+            ), c("QALY_DALY_")))
+))
+qaly_daly_ <- 
+  with(params1,{
+    v_tx_names %>% map(~({
+        if (.x=="A" | .x=="AB") {
+          tmp_ <- qaly_daly_
+          tmp_[2,1] = (1-dw_trtA) * Delta_t
+          tmp_
+      } else qaly_daly_
+    }))
+  }) %>% 
+  set_names(params1$v_tx_names)
+
+QALY_DALYt <-    
+  with(params1, {
+    v_tx_names %>% map( ~ ({
+      P = m_P[[.x]]
+      occ <- v_s0T
+      d <- qaly_daly_[[.x]]
+      out <- 0
+      P %>% map(~({
+        occ <<- occ %*% .x 
+        out <<-  occ %*% d
+      })) %>% 
+        map(~(data.frame(.x))) %>% 
+        bind_rows()
+    }))
+  })  %>% 
+  set_names(params1$v_tx_names)
+
+QALY_DALY = QALY_DALYt %>% map(~sum(.x * v_disc_h * gen_wcc(params1$omega, method = params1$cycle_correction))) 
+
+# Costs
+cost_ = with(params1,(matrix(c(c_H,
+              c_S1 ,
+              c_S2,
+              c_D,
+              c_D)*Delta_t,
+            dimnames = list(c(
+                c(v_tr_names,v_ab_names)
+            ), c("COST")))
+))
+cost_ <-
+  with(params1, {
+    v_tx_names %>% map( ~ ({
+      if (.x == "A") {
+        tmp_ <- cost_
+        tmp_["S1", 1] = (c_S1 + c_trtA)*Delta_t
+        tmp_["S2", 1] = (c_S2 + c_trtA)*Delta_t
+        tmp_
+      } else if (.x == "B") {
+        tmp_ <- cost_
+        tmp_["S1", 1] = (c_S1 + c_trtB)*Delta_t
+        tmp_["S2", 1] = (c_S2 + c_trtB)*Delta_t
+        tmp_
+      } else if (.x == "AB") {
+        tmp_ <- cost_
+        tmp_["S1", 1] = (c_S1 + c_trtA + c_trtB)*Delta_t
+        tmp_["S2", 1] = (c_S2 + c_trtA + c_trtB)*Delta_t
+        tmp_
+      } else cost_
+    }))
+  }) %>% 
+  set_names(params1$v_tx_names)
+
+COSTt <- 
+  with(params1, {
+    v_tx_names %>% map( ~ ({
+      P = m_P[[.x]]
+      occ <- v_s0T
+      d <- cost_[[.x]]
+      out <- 0
+      P %>% map(~({
+        occ <<- occ %*% .x 
+        out <<-  occ %*% d
+      })) %>% 
+        map(~(data.frame(.x))) %>% 
+        bind_rows()
+    }))
+  })  %>% 
+  set_names(params1$v_tx_names)
+
+COST = COSTt %>% map(~sum(.x * v_disc_c * gen_wcc(params1$omega, method = params1$cycle_correction))) 
+
+result1 <- cbind(LY, YLD, YLL, DALY, ACCDALY, QALY_DALY, QALY,COST) %>%
+  as.data.frame() %>%
+  mutate_all( ~ as.numeric(.))  %>%
+  rownames_to_column(var = "strategy") %>%
+  mutate(approach = "Markov Trace") %>% 
+  dplyr::select(approach, strategy, everything()) 
+```
+
 
 To calculate outcomes, we must next define "reward" matrices
 $\mathbf{R}_m$, where $m$ indexes the moment of interest (e.g., expected
@@ -1261,189 +1499,6 @@ $$
 $$
 
 
-```{r approach-3}
-params3_ <- with(params1,modifyList(params1,list(
-    alpha = length(v_ab_names),
-    tau = length(v_tr_names), 
-    s = length(v_tr_names)*omega + length(v_ab_names) #total number of states;s=τω+α
-)))
-params3_ <- with(params3_,modifyList(params3_,list(
-  m_R_t = m_R %>% map(~({
-    tmp <- .x
-    tmp %>% map(~(t(.x)))
-  }))
-)))
-
-# not sure why this is needed, but otherwise the length gets set too long...
-params3 <- with(params3_, modifyList(params3_, list(m_R_ = m_R_t %>% transpose())))
-params3$m_R = params3$m_R_
-
-params3 <- with(params3,modifyList(params3,list(
-    m_V = m_R %>% map(~({
-            R = .x
-            R %>% map(~({
-              m <- .x[v_tr_names,v_tr_names] 
-            }))
-            
-        })),
-     
-    m_Q = m_R %>% map(~({
-      R = .x 
-      R %>% map(~({
-                V = .x[v_tr_names,v_tr_names]
-                S = .x[v_ab_names,v_tr_names]
-                zero_ <- matrix(0, nrow = length(v_tr_names)+length(v_ab_names), ncol = length(v_ab_names))
-                tmp <- cbind(rbind(V,S),zero_)
-                dimnames(tmp) <- list(c(v_tr_names,v_ab_names),c(v_tr_names,v_ab_names))
-                tmp
-      }))
-    }))    
-)))
-
-params3 <- with(params3,modifyList(params3,list(
-    m_P3 = m_Q %>% map(~({
-          Q = .x
-          Q %>% map(~(expm(.x * Delta_t)))
-    }))
-)))
-# For some reason, can't replace m_P directly, so resorting to this .. 
-params3$m_P = params3$m_P3
-
-params3 <- with(params3,modifyList(params3,list(
-    m_U = m_P %>% map(~({
-          P <- .x 
-          P %>% map(~(.x[v_tr_names,v_tr_names]))
-    })),
-    m_M = m_P %>% map(~({
-        P = .x
-        P %>% map(~(.x[v_ab_names,v_tr_names]))
-        
-    }))
-)))
-
-params3 <- with(params3,modifyList(params3,list(
-    D = {
-        # Create diagonal age advancement matrix
-        D <- matrix(0, omega, omega)
-        vec <- rep(1, omega-1)
-        D[row(D)-1 == col(D)] <- vec
-        D[omega,omega] = 1
-        D
-    }
-)))
-
-vec <-  # a simple function to return the vec of an array
-    function(x) {
-        y <- c(x)
-        return(y)
-    }
-
-vecperm <- 
-    # vecperm
-    # function to calculate the vec permutation matrix K of index m,n
-    # let X be a m x n matrix, and X' the transpose of X
-    # then K satisfies 
-    # vec(X') = K*vec(X)
-    function(m, n) {
-        K <- matrix(0, m * n, m * n)
-        a <- matrix(0, m, n)
-        
-        for (i in 1:m) {
-            for (j in 1:n) {
-                e <- a
-                e[i, j] <- 1
-                K <- K + kronecker(e, t(e))
-            }
-        }
-        
-        return(K)
-    }
-
-params3 <- with(params3,modifyList(params3,list(
-    bbD_ = kronecker(diag(tau), D),
-    bbU_ =  m_U %>% 
-            map(~(bdiag(.x))),
-    K = vecperm(tau, omega)
-)))
-
-params3 <- with(params3,modifyList(params3,list(
-    mUtilde = bbU_ %>% map( ~ ({
-        t(K) %*% bbD_ %*% K %*% .x
-    }))
-)))
-
-params3 <- with(params3,modifyList(params3,list(
-    mMtilde = m_M %>% map(~({
-      do.call(cbind,.x) 
-    }))  
-)))
-
-params3 <- with(params3,modifyList(params3,list(
-    mPtilde =  map2(mUtilde, mMtilde,  ~ ({
-            rbind(cbind(.x, matrix(0, tau * omega, alpha)) ,
-                  cbind(.y, diag(alpha)))
-        }))
-)))
-
-healthy_longevity_occupancy <- function(params, H, V) {
-    with(params,{
-        map(v_tx_names,~({
-            U = mUtilde[[.x]]
-            P = mPtilde[[.x]]
-            v_ = V[[.x]]
-            N = solve(diag(tau*omega)-U)
-            h = vec(H) %>% as.matrix()
-            not_h = 1-h
-            v <- vec(v_) %>% as.matrix()
-            B1 <- h %*% t(v) + 0.5 * (not_h %*% t(v)) + 0.5 * (v %*% t(not_h)) # Eq. 46
-            C1 = 0.5 * (rep(1,alpha) %*%  t(v)) # Eq. 48
-            R1 = rbind(cbind(B1, matrix(0, tau * omega, alpha)) ,
-                              cbind(C1, diag(alpha))) 
-            R2 = R1 * R1
-            R3 = R1 * R1 * R1
-            Z = cbind(diag(tau*omega),matrix(0,nrow=tau*omega, ncol=alpha))
-            e = rep(1,s)
-            rho1_ <- t(N)%*% Z %*% t(P * R1) %*% e
-            # The following needs to be debugged
-            # rho2_ <-
-            #   N %*% (Z %*% t(.y * R1) %*% e + 2 * t(.x * B1) %*% rho1_)
-            # B2 <- R2[1:(tau * omega), 1:(tau * omega)]
-            # rho3_ <- t(N) %*% (Z %*% ((t(.y * R3) %*% e)) + 3 * (t(.x * B2) %*% rho1_) + 3 * (t(.x * B1) %*% rho2_))
-            rho1_
-        }))
-    })
-}
-
-healthy_longevity_yll <- function(params, life_expectancy, disc) {
-    with(params,{
-        map2(mUtilde,mPtilde,~({
-            U = .x
-            P = .y
-            N = solve(diag(tau*omega)-U)
-            Z = cbind(diag(tau*omega),matrix(0,nrow=tau*omega, ncol=alpha))
-            disc_ = rev(sort(rep(disc,length(v_tr_names))))
-            eta1_ex_ = rev(sort(rep(life_expectancy,length(v_tr_names))))
-            eta1_ex =  eta1_ex_
-            
-            B1 = matrix(0,nrow=tau*omega, ncol = tau*omega)
-            C1 = rbind(matrix(0,nrow=1,ncol=tau*omega),eta1_ex*disc_) 
-            R1 = cbind(rbind(B1,C1),matrix(0,nrow=tau*omega+2,ncol=2))
-            R2 = R1 * R1
-            R3 = R1 * R1 * R1
-            Z = cbind(diag(tau*omega),matrix(0,nrow=tau*omega, ncol=alpha))
-            e = rep(1,s)
-            rho1_ = t(N) %*% Z %*% t(.y * R1) %*% e
-            # The following needs to be debugged
-            # rho2_ <-
-            #   N %*% (Z %*% t(.y * R1) %*% e + 2 * t(.x * B1) %*% rho1_)
-            # B2 <- R2[1:(tau * omega), 1:(tau * omega)]
-            # rho3_ <- t(N) %*% (Z %*% ((t(.y * R3) %*% e)) + 3 * (t(.x * B2) %*% rho1_) + 3 * (t(.x * B1) %*% rho2_))
-            rho1_
-        }))
-    })
-}
-```
-
 ```{r markov-chain-rewards}
 H = with(params3,matrix(1,nrow=tau, ncol=omega))
 
@@ -1555,6 +1610,34 @@ result3 <- cbind(LY3, YLD3, YLL3, DALY3, QALY3,COST3) %>%
 ```
 
 ## Results
+
+@tbl-trace1 shows the Markov trace for the first five cycles under Approach 1, while @tbl-trace2 shows the trace under Approach 2.  @tbl-trace1 also includes a new column (```deaths_disease```) that is calculated as the difference in state occupancy in the ```DS``` column between cycles. This extra step will be necessary later for calculating YLL outcomes. The trace shown under Approach 2 (@tbl-trace2), by comparison, automatically calculates new deaths through the inclusion of the transition state ```trDS```; the values under ```deaths_disease``` and ```trDS``` are identical, again highlighting that either approach can be used to calculate the number of disease-related deaths in each cycle.  
+
+
+
+```{r}
+#| tbl-cap: Markov Trace Under Approach 1
+#| label: tbl-trace1
+
+trace1$SoC %>% head() %>% 
+  data.frame() %>% 
+  mutate(deaths_disease = c(0,diff(DS))) %>% 
+  mutate(cycle = row_number()-1) %>% 
+  select(cycle,everything()) %>% 
+  kable(digits = c(0,rep(4,6))) 
+```
+
+```{r}
+#| tbl-cap: Markov Trace Under Approach 2
+#| label: tbl-trace2
+#|
+trace2$SoC %>% head() %>% data.frame() %>% 
+  mutate(cycle = row_number()-1) %>% 
+  select(cycle,everything()) %>% 
+  kable(digits = c(0,rep(4,5))) 
+```
+
+
 
 ```{r}
 result1 %>% 
