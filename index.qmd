@@ -23,6 +23,11 @@ editor_options:
 prefer-html: true  
 ---
 
+## To Do
+
+- Just use matrices indexed by $t$ and note that a homogeneous model will have them all the same. 
+- Going to need to redo some of the LaTeX figures to do this. 
+
 ## Introduction {#sec-introduction}
 
 ```{r}
@@ -358,11 +363,19 @@ $$
 \mathbf{P} = e^{\mathbf{Q}\Delta t}
 $$ {#eq-embed}
 
-This results in a transition probability matrix with the following probabilities defined:
+
+For a time-inhomogeneous model in which transition rates vary as a function of time/age, we can define $\mathbf{Q}_t$ as the transition rate matrix at time $t$. We obtain the transition probability matrix at time $t$ by taking the matrix exponential, i.e., 
+
+$$
+\mathbf{P}_t = e^{\mathbf{Q_t}\Delta t}
+$$ {#eq-embed-inhomo}
+
+
+Embedding results in a transition probability matrix $\mathbf{P}$ (or $\mathbf{P}_t$) with the following probabilities defined:
 
 ![Transition Probability Matrix for Approach 1](images/P_model2.png){width=60%}
 
-[^embed]: In Markov theory, $\mathbf{P}$ is called the "discrete skeleton" of the continuous model [@iosifescu1980]. The conversion formula used to calculate $\widetilde{\mathbf{P}}$ is the matrix analogue to the standard rate-to-probability formula commonly taught in health economics textbooks, i.e., $p = 1 - e^{r\Delta t}$, where $r$ is the rate and $\Delta t$ is the time step (i.e., "cycle length").
+[^embed]: In Markov theory, $\mathbf{P}$ is called the "discrete skeleton" of the continuous model [@iosifescu1980]. The conversion formula used to calculate $mathbf{P}$ is the matrix analogue to the standard rate-to-probability formula commonly taught in health economics textbooks, i.e., $p = 1 - e^{r\Delta t}$, where $r$ is the rate and $\Delta t$ is the time step (i.e., "cycle length").
 
 Embedding the transition probability matrix using the matrix exponential ensures that the resulting transition probabilities capture the underlying continuous time disease process. In particular, $\mathbf{P}$ will capture the probability of compound ("jumpover") transitions within a single cycle.[^jumpover] 
 
@@ -394,7 +407,7 @@ Second, two transition intensities---from the S1 (Sick) and S2 (Sicker) states t
 
 [^causedeleted]: For an example of how to do this using Global Burden of Disease cause of death and life table data, see the [example here](https://graveja0.github.io/vchem-website/blog/posts/modeling-dalys/modeling-dalys.html)
 
-As above, we obtain the transition probability matrix by embedding $\mathbf{Q}$ into the discrete time step (@eq-embed). However, the resulting transition probability matrix treats $\texttt{trDS}$ as an absorbing state (i.e., individuals are retained in the $\texttt{trDS}$ with probability one). Using the terminology introduced above, this absorbing state could serve as an **accumulator** state that (in the constructed Markov trace) records the total number of people who have died from the disease up to any given cycle. This may be a decision-relevant health outcome to consider on its own; indeed, so long as the Markovian submatrix remains closed, there is no limit to the number of accumulator and/or transition states one might add along the "edges" of a model.[^transex]
+As above, we obtain the transition probability matrix by embedding $\mathbf{Q}$ into the discrete time step (@eq-embed, or @eq-embed-inhomo if needed). However, the resulting transition probability matrix treats $\texttt{trDS}$ as an absorbing state (i.e., individuals are retained in the $\texttt{trDS}$ with probability one). Using the terminology introduced above, this absorbing state could serve as an **accumulator** state that (in the constructed Markov trace) records the total number of people who have died from the disease up to any given cycle. This may be a decision-relevant health outcome to consider on its own; indeed, so long as the Markovian submatrix remains closed, there is no limit to the number of accumulator and/or transition states one might add along the "edges" of a model.[^transex]
 
 [^transex]: To build on the example of compound "jumpover" transitions above, suppose an individual starts off healthy in a cycle, then rapidly transitions through the Sick and Sicker state and dies due to disease-related causes within the same cycle. If there is some treatment cost associated with being in the Sicker state, a traditional approach that applies cost payoffs to state occupancy at the (beginning) end of the cycle would miss treatment costs for this individual because they *transition* through the Sicker state, but never occupy it at the beginning or end of a cycle. Adding a non-Markovian transition state to the model facilitates more accurate bookkeeping because the transition state would pick up on this transition through the Sicker state. 
 
@@ -633,61 +646,57 @@ $$
 \alpha &= \text{Number of absorbing states}\\
 \omega &= \text{Number of cycles} \\
 s &= \text{Total number of states; }s=\tau\omega+\alpha \\
-\mathbf{U}_{x} &= \text{Transition matrix for age }x, \text{for }x=1,\dots,\omega\\
+\mathbf{U}_{t} &= \text{Transition matrix at time }t, \text{for }t=1,\dots,\omega\\
 \mathbf{D}_{j} &=\text{Age advancement matrix for stage }j, \text{for }j=1,\dots,\tau \\
-\mathbf{M}_{i} &= \text{Mortality matrix for age class }x, \text{for } x = 1,\dots\omega \\
+\mathbf{M}_{t} &= \text{Mortality matrix at time  }t, \text{for } t = 1,\dots\omega \\
 \mathbf{K} &= \text{vec-permutation matrix; parameters }\tau,\omega
 \end{aligned}
 $$
-In the above notation, the matrix $\mathbf{U}_x$ captures transition
+In the above notation, the matrix $\mathbf{U}_t$ captures transition
 probabilities among transient (i.e., non-absorbing) health states, while
-$\mathbf{M}_x$ captures transitions from transient health states to the
+$\mathbf{M}_t$ captures transitions from transient health states to the
 absorbing death states (non-disease mortality and disease-related mortality). Indexing
-by age class $x$ indicates that separate matrices are defined for each
-age in the Markov model.
+by time $t$ indicates that separate matrices are defined for each time step (age class) in the Markov model. 
 
-To construct $\mathbf{U}_x$ and $\mathbf{M}_x$ we define transition rate
+To construct $\mathbf{U}_t$ and $\mathbf{M}_t$ we define transition rate
 ("intensity") matrices as in Approaches 1 and 2 above. The overall
 intensity matrix $\mathbf{Q_x}$ is given by
 
 $$
-\mathbf{Q}_x=\left(\begin{array}{c|c}
-\mathbf{V}_x & \mathbf{0} \\
-\hline \mathbf{S}_x  & \mathbf{0}
+\mathbf{Q}_t=\left(\begin{array}{c|c}
+\mathbf{V}_t & \mathbf{0} \\
+\hline \mathbf{S}_t  & \mathbf{0}
 \end{array}\right)
-$$ {#eq-Qx} where $\mathbf{V}_x$ is the rate matrix for the transitory (i.e.,
-non-absorbing) states and $\mathbf{S}_x$ is the rate matrix for the
-absorbing states. The diagonal elements of $\mathbf{Q}_x$ are the negative sum of
+$$ {#eq-Qx} where $\mathbf{V}_t$ is the rate matrix for the transitory (i.e.,
+non-absorbing) states and $\mathbf{S}_t$ is the rate matrix for the
+absorbing states. The diagonal elements of $\mathbf{Q}_t$ are the negative sum of
 the non-diagonal column elements, thus making the column sums of
-$\mathbf{Q}_x$ zero.
+$\mathbf{Q}_t$ zero.
 
-A key difference between Approach 3 and Approaches 1 and 2 is that the rows
-in $\mathbf{Q}_x$, $\mathbf{V}_x$, and $\mathbf{S}_x$correspond to the final state, while the
-columns correspond to the starting state; this is the opposite of
-the rate matrices defined for Approaches 1 and 2, where the rows corresponded to the
-starting health state and the columns to the ending health state in
-a given cycle.
+One important (if minor) difference between the current appraoch and Approaches 1 and 2 is that the rows
+in $\mathbf{Q}_t$, $\mathbf{V}_t$, and $\mathbf{S}_t$ correspond to the final state, while the
+columns correspond to the starting state; this is essentially the transpose of the rate matrices defined above, where rows corresponded to the initial health state and columns to the final health state. 
 
 For the defined time step $\Delta_t$, the discrete time
-transition probability matrix $\mathbf{P}_x$ is again obtained by taking the
-matrix exponential of the intensity matrix ($\mathbf{Q}_x$) multipled by
-the time step ($\Delta_t$):
+transition probability matrix $\mathbf{P}_t$ is again obtained by taking the
+matrix exponential of the intensity matrix ($\mathbf{Q}_t$) multipled by
+the time step ($\Delta_t$), i.e., @eq-embed:
 
 $$
-\mathbf{P}_x =e^{\mathbf{Q}_x  \Delta t}
-$$ {#eq-Px}
+\mathbf{P}_t =e^{\mathbf{Q}_t  \Delta t}
+$$ 
 
-We can then obtain $\mathbf{U}_x$ and $\mathbf{M}_x$ based on:
+We can then obtain $\mathbf{U}_t$ and $\mathbf{M}_t$ based on:
 
 $$
-\mathbf{P}_x =\left(\begin{array}{c|c}
-\mathbf{U}_x  & \mathbf{0} \\
-\hline \mathbf{M}_x  & \mathbf{0}
+\mathbf{P}_t =\left(\begin{array}{c|c}
+\mathbf{U}_t  & \mathbf{0} \\
+\hline \mathbf{M}_t  & \mathbf{0}
 \end{array}\right)
 $$ {#eq-P3}
 
 In addition, the matrix $\mathbf{D}_j$ defines age advancement in the
-Markov chain. Using the example from @caswell2021a, if $\omega=3$ then
+Markov chain. Borrowing from an example from @caswell2021a, if $\omega=3$ then
 
 $$
 \mathbf{D}_j=\left(\begin{array}{ccc}
