@@ -280,15 +280,17 @@ time discrete event simulation (DES) models. As such, our study provides
 a comprehensive roadmap for incorporating DALY outcomes into common
 decision modeling frameworks.
 
-To maintain consistency within the literature, our tutorial builds on an
-existing didactic disease progression model (Alarid-Escudero et al.,
+To maintain consistency within the literature, this tutorial builds on
+an existing didactic disease progression model (Alarid-Escudero et al.,
 2023). The underlying discrete time Markov cohort model is time
 homogeneous---that is, transition probabilities do not vary as a
 function of age/time in model. However, the methods and code provided
 are easily adapted for time inhomogenous models. Finally, recognizing
 the wide spectrum of experience and programming comfort level among
-those constructing DALY-based models, we provide replication materials
-for implementing our approach in both R and Microsoft Excel.
+those constructing DALY-based models, we offer three approaches for
+modeling DALYs (beginner, intermediate and advanced) and provide
+replication materials for implementing our approaches in both R and
+Microsoft Excel.
 
 \subsection{Background}\label{sec-background}
 
@@ -325,27 +327,23 @@ over future years of illness by discounting YLD and YLL measures by 3\%
 per year. From 2010 onwards, both practices were discontinued to make
 the DALY a more descriptive measure (WHO, 2013).
 
-While the GBD no longer uses age and time discounting for the purposes
-of documenting disease burdens worldwide, the World Health
+While the GBD no longer uses age and time discounting, the World Health
 Organization's Choosing Interventions that are Cost-Effective
 (WHO-CHOICE) program recommends consideration of time discounting of
 health outcomes (Bertram et al., 2021; C. J. L. Murray et al., 2020). We
-therefore adopt the WHO-CHOICE recommendation and include
-continuous-time discounting in our DALY modeling approach.\footnote{Practitioners
-  who do not wish to discount DALY outcomes can simply set the annual
-  discount rate \(r\) to zero. In addition, our approach differentiates
-  from common practice in the use of a continuous-time discount factor
-  (i.e., \(\frac{1}{r}(1-e^{rt})\)), rather than a discrete-time
-  discount factor (i.e., \(1/(1+r)^t\)). We do so to maintain
-  consistency with the original GBD equations---though an approach based
-  on discrete-time discounting could be used and will yield broadly
-  similar results.}
+therefore adopt the WHO-CHOICE recommendation and include discounting in
+our DALY modeling approach.\footnote{Practitioners who do not wish to
+  discount DALY outcomes can simply set the annual discount rate \(r\)
+  to zero.} We do, however, maintain the continuous-time discounting
+used in the original GBD DALY equations---which differs slightly from
+the more common use of discrete time discounting in Markov cohort
+models.
 
 For an annual discount rate \(r\), and at age \(a\), the equation for
 YLDs is,
 
 \begin{equation}\phantomsection\label{eq-yld}{
-YLD(a,L) = D  \left ( \frac{1}{r}\left(1-e^{-r(L+a) }\right) \right ).
+YLD(a,L) = D  \left ( \frac{1}{r}\left(1-e^{-r(L) }\right) \right ).
 }\end{equation}
 
 Similarly, YLLs are calculated as,
@@ -353,6 +351,19 @@ Similarly, YLLs are calculated as,
 \begin{equation}\phantomsection\label{eq-yll}{
 YLL(a)= \frac{1}{r}\left(1-e^{-r Ex(a)}\right).
 }\end{equation}
+
+It is important to note that the discounting shown in
+Equation~\ref{eq-yld} and Equation~\ref{eq-yll} yield the present value
+of YLD and YLL outcomes at a single point in time, when the duration of
+disease (\(L\)) and time of death from disease (\(a\)) are known. For a
+decision model where not all cohort members start off ill, that point in
+time very likely occurs at some point after the baseline period---and
+different illness durations and death times will, of course, occur
+across different individuals in the modeled cohort. As such, to be
+consistent with standard practice, we must discount YLL and YLD outcomes
+further---all the way back to the baseline period. This additional
+discounting step will become apparent in the discrete time YLD and YLL
+equations introduced in \textbf{?@sec-occupancy} below.
 
 \subsubsection{Reference Life
 Expectancy}\label{reference-life-expectancy}
@@ -364,9 +375,9 @@ the use of a reference life table that provides an estimate of \ldots{}
 
 \subsection{Model Overview}\label{model-overview}
 
-This tutorial builds on an existing progressive disease model in which
-healthy individuals develop a disease with two health states (``Sick''
-and ``Sicker'') (Alarid-Escudero et al., 2023). Individuals can also
+We build on an existing progressive disease model in which healthy
+individuals develop a disease with two health states (``Sick'' and
+``Sicker'') (Alarid-Escudero et al., 2023). Individuals can also
 transition to an absorbing death state due to causes unrelated to the
 disease (i.e., ``background'' mortality), or due to disease-specific
 causes. In addition, the model structure is homogeneous (i.e.,
@@ -398,6 +409,11 @@ A state transition diagram is shown in Figure~\ref{fig-model1}. In the
 figure, nodes are health states and edges depict possible transitions
 among them. Edge labels are defined in terms of transition intensities
 (rates). Other key model parameters are summarized in TK\ldots.
+
+We note that in our implementation of the Sick-Sicker model, we define
+the disability weight as one minus the utility weight. In general, this
+will not be the case as disability weights and utility weights are
+estimated in different ways. TK
 
 \begin{figure}
 
@@ -431,48 +447,57 @@ need to separately track the timing and number of deaths \emph{due to
 disease}.
 
 To accommodate this need and to accurately model DALY outcomes, several
-options are available:
+options are available. We categorize each approach based on the level of
+experience and skill needed to execute it (beginner, intermediate,
+advanced):
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \item
-  Re-define the health states to include a separate cause-specific death
-  state as depicted in Figure~\ref{fig-modelDS}.\footnote{In this
-    example, disease-specific death rates are goverened by a hazard
-    ratio applied to the background mortality rate. Because we are
-    operating on the rate scale, we can separate out disease-related
-    deaths from other-cause mortality by simply taking a difference in
-    the rates. Other applications for prevalent conditions with high
-    death rates, however, may require us to construct a cause-deleted
-    life table to obtain background mortality rates that net out deaths
-    from the modeled disease.} We can then draw on the resulting Markov
-  trace and use changes in the number of cause-specific deaths in each
-  cycle to calculate YLLs.
+  \textbf{Separate Death State (Beginner)}: Re-define the health states
+  to include a separate cause-specific death state as depicted in
+  Figure~\ref{fig-modelDS}.\footnote{In this example, disease-specific
+    death rates are goverened by a hazard ratio applied to the
+    background mortality rate. Because we are operating on the rate
+    scale, we can separate out disease-related deaths from other-cause
+    mortality by simply taking a difference in the rates. Other
+    applications for prevalent conditions with high death rates,
+    however, may require us to construct a cause-deleted life table to
+    obtain background mortality rates that net out deaths from the
+    modeled disease.} We then draw on the resulting Markov trace and use
+  changes in the number of cause-specific deaths in each cycle to
+  calculate YLLs.
 \item
-  Include a non-Markovian transition state for cause-specific deaths in
-  the transition matrix. This approach will maintain the Markovian
+  \textbf{Non-Markovian Trackers (Intermediate)}: Include a
+  non-Markovian transition state for cause-specific deaths in the
+  transition matrix. This approach will maintain the Markovian
   components captured in Figure~\ref{fig-model1}, but will allow us to
   add a column to the Markov trace that separately tracks the number of
   new deaths from the disease in each cycle. We can then apply
   transition state payoffs (based on remaining life expectancy at each
   age/cycle) to calculate YLL outcomes.
 \item
-  Define a block matrix Markov chain with rewards for occupancy (YLDs)
-  and disease-relatd death transitions (YLLs) by adapting the methods in
-  Caswell \& van Daalen (2021) and Caswell \& Zarulli (2018). This
-  approach draws on matrix calculus and solves for expected outcomes as
-  well as higher order moments such as variance and skewness.
+  \textbf{Markov Chain with Rewards (Advanced)} Define a block matrix
+  Markov chain with rewards for occupancy (YLDs) and disease-relatd
+  death transitions (YLLs) by adapting the methods in Caswell \& van
+  Daalen (2021). This approach draws on matrix calculus and solves for
+  expected outcomes as well as higher order moments such as variance and
+  skewness.
 \end{enumerate}
 
-Each of the above approaches facilitate the design and execution of a
-decision-analytic model that accomodates any number or types of outcomes
-(e.g., QALYs, DALYs, life-years, etc.). In practice, approaches (1) and
-(2) draw on similar transition matrices and payoff vectors, as we will
-show immediately below. Approach (3) is quite distinct, however, so we
-will demonstrate this method separately in Section TK.
+Each of these approaches facilitate the design and execution of a
+decision-analytic model that correctly calculates YLD, YLL, and DALY
+outcomes---as well as other common outcomes such as QALYs and costs. In
+practice, Approaches (1) and (2) will produce identical results.
+Approach (3) draws on slightly different cycle correction techniques,
+but will yield results quite similar to (1) and (2). Other shortcut
+approaches previously used in the literature, such as modeling a
+QALY-like DALY and/or accumulating time in the absorbing death state,
+will not in general yield similar results; we discuss reasons for this
+in Section TK below.
 
-\subsubsection{Approach 1: Cause-Specific Death
-State}\label{approach-1-cause-specific-death-state}
+\subsubsection{Approach 1 (Beginner): Cause-Specific Death
+State}\label{approach-1-beginner-cause-specific-death-state}
 
 Under this approach, we separate out deaths from disease vs.~other
 causes by defining a separate health state for cause-specific mortality;
@@ -572,8 +597,8 @@ and Iosifescu (1980) for additional theory.\footnote{Because we embed
   technically correct way to construct a transition probability matrix
   from underlying transition rates.}
 
-\subsubsection{Approach 2: Non-Markovian Tracking
-States}\label{approach-2-non-markovian-tracking-states}
+\subsubsection{Approach 2 (Intermediate): Non-Markovian Tracking
+States}\label{approach-2-intermediate-non-markovian-tracking-states}
 
 This section will outline an approach similar to Approach 1, but that
 draws on a non-Markovian ``transition'' state that tracks the number of
@@ -707,225 +732,8 @@ highlighted in grey in the bottom right cell of \(\mathbf{P}\) below:
 \href{https://graveja0.github.io/dalys/index.qmd.html}{Article
 Notebook}}
 
-\subsection{Construct the Markov
-Trace}\label{construct-the-markov-trace}
-
-With \(\mathbf{P}\) defined under either Approach 1 or Approach 2, we
-now have the necessary ingredients to construct a Markov trace. Define
-\(\mathbf{s}_0\) as the initial state occupancy vector at time \(t=0\).
-The vector \(\mathbf{s}_0\) has size \(k\), where \(k\) is the total
-number of states captured in the \(k \times k\) matrix \(\mathbf{P}\)
-(including transition states, if using Approach 2). This vector
-summarizes the number or fraction of the population in each health state
-at baseline. Often, this vector will be set such that the entire cohort
-starts off healthy---though this need not always be the case.
-
-For a time-homogenous model such as considered here, health state
-occupancy at cycle \(t\) is is calculated as:
-
-\begin{equation}\phantomsection\label{eq-trace}{
-\mathbf{s}'_t=\mathbf{s}'_0 \mathbf{P}^t
-}\end{equation}
-
-For a time-inhomongenous model in which transition probabilities change
-over time (e.g., death rates increase due to aging), we must construct
-separate transition probability matrices for each cycle (i.e.,
-\(\mathbf{P}(t)\)). State occupancy at cycle \(t\) is calculated by
-sequentially applying the transition matrices corresponding to each time
-step leading up to cycle \(t\), i.e.,
-
-\begin{equation}\phantomsection\label{eq-trace-inhomo}{
-\mathbf{s}'_t=\mathbf{s}'_0 \mathbf{P}(1)\mathbf{P}(2)\dots\mathbf{P}(t)
-}\end{equation}
-
-Table~\ref{tbl-trace1} shows the Markov trace for the first five cycles
-under Approach 1, while Table~\ref{tbl-trace2} shows the trace under
-Approach 2. Table~\ref{tbl-trace1} also includes a new column
-(\texttt{deaths\_disease}) that is calculated as the difference in state
-occupancy in the \texttt{DS} column between cycles. This extra step will
-be necessary later for calculating YLL outcomes. The trace shown under
-Approach 2 (Table~\ref{tbl-trace2}), by comparison, automatically
-calculates new deaths through the inclusion of the transition state
-\texttt{trDS}; the values under \texttt{deaths\_disease} and
-\texttt{trDS} are identical, again highlighting that either approach can
-be used to calculate the number of disease-related deaths in each cycle.
-
-\textsubscript{Source:
-\href{https://graveja0.github.io/dalys/index.qmd.html}{Article
-Notebook}}
-
-\begin{table}
-
-\caption{\label{tbl-trace1}Markov Trace Under Approach 1}
-
-\centering{
-
-\begin{tabular}{r|r|r|r|r|r|r}
-\hline
-cycle & H & S1 & S2 & DOC & DS & deaths\_disease\\
-\hline
-0 & 1.0000 & 0.0000 & 0.0000 & 0.0000 & 0.0000 & 0.0000\\
-\hline
-1 & 0.8870 & 0.1046 & 0.0062 & 0.0020 & 0.0003 & 0.0003\\
-\hline
-2 & 0.8232 & 0.1521 & 0.0197 & 0.0040 & 0.0010 & 0.0008\\
-\hline
-3 & 0.7832 & 0.1723 & 0.0363 & 0.0060 & 0.0022 & 0.0012\\
-\hline
-4 & 0.7547 & 0.1796 & 0.0540 & 0.0080 & 0.0037 & 0.0015\\
-\hline
-5 & 0.7321 & 0.1808 & 0.0717 & 0.0099 & 0.0056 & 0.0019\\
-\hline
-\end{tabular}
-
-}
-
-\end{table}%
-
-\textsubscript{Source:
-\href{https://graveja0.github.io/dalys/index.qmd.html}{Article
-Notebook}}
-
-\begin{table}
-
-\caption{\label{tbl-trace2}Markov Trace Under Approach 2}
-
-\centering{
-
-\begin{tabular}{r|r|r|r|r|r}
-\hline
-cycle & H & S1 & S2 & D & trDS\\
-\hline
-0 & 1.0000 & 0.0000 & 0.0000 & 0.0000 & 0.0000\\
-\hline
-1 & 0.8870 & 0.1046 & 0.0062 & 0.0023 & 0.0003\\
-\hline
-2 & 0.8232 & 0.1521 & 0.0197 & 0.0050 & 0.0008\\
-\hline
-3 & 0.7832 & 0.1723 & 0.0363 & 0.0082 & 0.0012\\
-\hline
-4 & 0.7547 & 0.1796 & 0.0540 & 0.0117 & 0.0015\\
-\hline
-5 & 0.7321 & 0.1808 & 0.0717 & 0.0155 & 0.0019\\
-\hline
-\end{tabular}
-
-}
-
-\end{table}%
-
-\textsubscript{Source:
-\href{https://graveja0.github.io/dalys/index.qmd.html}{Article
-Notebook}}
-
-\subsection{Occupancy and Transition
-Rewards}\label{occupancy-and-transition-rewards}
-
-With the Markov trace constructed, we next turn our attention to
-defining payoff vectors for YLD and YLL outcomes.
-
-\subsubsection{Years of Life Lived with Disability
-(YLD)}\label{years-of-life-lived-with-disability-yld}
-
-To calculate YLDs, we define a disability weight payoff vector
-\(\mathbf{d}_{YLD}\),
-
-\begin{figure}[H]
-
-{\centering \includegraphics[width=0.6\textwidth,height=\textheight]{images/d_yld.png}
-
-}
-
-\caption{YLD Payoff Vector}
-
-\end{figure}%
-
-where \(\texttt{dwS1}\) and \(\texttt{dwS2}\) are the disability weights
-for the Sick and Sicker states, respectively. In addition,
-\(r_{\Delta_t}\) is the cycle discount rate, which is calculated as,
-
-\begin{equation}\phantomsection\label{eq-cycledisc}{
-r_{\Delta_t} = r \Delta_t
-}\end{equation} where \(r\) is the annual discount rate and \(\Delta_t\)
-is the time step.
-
-In the YLD payoff vector, the term
-\(\frac{1}{r_{\Delta_t}}(1-e^{-r_{\Delta_t}})\) is included as a
-continuous-time discounting adjustment factor for the defined cycle
-length \(\Delta_t\). This term is included to discount time
-\emph{within} each cycle in order to maintain the continuous-time
-discounting approach used in the original GBD equations.\footnote{For
-  example, if \(r=0.03\) and \(\Delta_t=1\) (i.e., annual cycle length),
-  this adjustment factor will be
-  \(0.985 = \frac{1}{r_{\Delta_t}}(1-e^{-r_{\Delta_t}})\). If
-  \(\Delta_t=1/12\) (monthly cycle) the cycle discounting adjustment
-  factor is 0.99875.}
-
-To fully discount outcomes, we still must discount all future outcome
-values back to baseline (\(t=0\)). For a time-homogeneous model,
-discounted years of life lost to disability (YLD) at cycle \(t\) is
-given by
-
-\begin{equation}\phantomsection\label{eq-yldt}{
-YLD(t)=\mathbf{s}'_0 \mathbf{P}^t \mathbf{d}_{YLD}  \times{e^{-r_{\Delta_t} t}}
-}\end{equation}
-
-For a time-inhomogenous model, YLDs are calculated as
-\begin{equation}\phantomsection\label{eq-yldt-inhomo}{
-YLD(t)=\mathbf{s}'_0 \mathbf{P}(1)\mathbf{P}(2)\dots\mathbf{P}(t)  \mathbf{d}_{YLD}  \times{e^{-r_{\Delta_t} t}}
-}\end{equation}
-
-\subsubsection{Years of Life Lost to Disease
-(YLLs)}\label{years-of-life-lost-to-disease-ylls}
-
-As noted in Section~\ref{sec-background} and in Equation~\ref{eq-yll},
-YLLs are based on the present value of remaining life expectancy among
-deaths that occur in each cycle \(t\). Define \(a(t)\) as the age of the
-cohort at cycle \(t\), i.e., \(a(t) = t \cdot \Delta t + a0\), where
-\(a_0\) is the age of the cohort at \(t=0\). Define \(e(t)=e(a(t))\) as
-the present value of remaining life expectancy at cycle \(t\). Following
-the GBD continuous time discounting approach, \(e(a(t))\) is given by
-
-\begin{equation}\phantomsection\label{eq-pvEx}{
-e(a(t)) = \frac{1}{r}\big (1 - e^{-rEx(a(t))} \big )
-}\end{equation}
-
-where \(Ex(a)\) is the remaining life expectancy at age \(a\). \(Ex(a)\)
-is drawn from either an exogenous (reference) or an endogenous life
-table, depending on the objectives of the modeling exercise (Anand \&
-Reddy, 2019).
-
-We next define a remaining life expectancy payoff vector at cycle \(t\):
-
-\begin{figure}[H]
-
-{\centering \includegraphics[width=0.6\textwidth,height=\textheight]{images/d_yll.png}
-
-}
-
-\caption{YLL Payoff Vector}
-
-\end{figure}%
-
-This payoff vector reflects discounting, but only in terms of the
-present value of remaining life expectancy \emph{at time} \(t\).
-
-\begin{equation}\phantomsection\label{eq-yllt}{
-YLL(t)=\mathbf{s}'_t \mathbf{e}(t)  \times{e^{-r\Delta_t t}} =\mathbf{s}'_0 \mathbf{P}^t \mathbf{e}(t)  \times{e^{-r\Delta_t t}}
-}\end{equation}
-
-Total discounted YLLs at time \(t=0\) is given by:
-
-\begin{equation}\phantomsection\label{eq-yllcum}{
-YLL=\sum_{t=0}^{N-1} YLL(t) =\sum_{t=0}^{N-1}\left(\mathbf{s}'_0 \mathbf{P}^t \mathbf{e}(t)  \times{e^{-r\Delta_t t}} \right) 
-}\end{equation}
-
-\textsubscript{Source:
-\href{https://graveja0.github.io/dalys/index.qmd.html}{Article
-Notebook}}
-
-\subsection{Approach 3: Markov Chain With
-Rewards}\label{approach-3-markov-chain-with-rewards}
+\subsubsection{Approach 3 (Advanced): Markov Chain With
+Rewards}\label{approach-3-advanced-markov-chain-with-rewards}
 
 Define
 
@@ -1059,6 +867,144 @@ distribution (e.g., variance, skewness, etc.).\footnote{Again, for our
   purposes here we will focus on expected outcomes---though note that
   formulas for higher-order moments are provided in Caswell \& van
   Daalen (2021) and Caswell \& Zarulli (2018).}
+
+\textsubscript{Source:
+\href{https://graveja0.github.io/dalys/index.qmd.html}{Article
+Notebook}}
+
+\subsection{Outcomes}\label{outcomes}
+
+With \(\mathbf{P}\) defined under either Approach 1 or Approach 2, we
+now have the necessary ingredients to construct a Markov trace. Define
+\(\mathbf{s}_0\) as the initial state occupancy vector at time \(t=0\).
+The vector \(\mathbf{s}_0\) has size \(k\), where \(k\) is the total
+number of states captured in the \(k \times k\) matrix \(\mathbf{P}\)
+(including transition states, if using Approach 2). This vector
+summarizes the number or fraction of the population in each health state
+at baseline. Often, this vector will be set such that the entire cohort
+starts off healthy---though this need not always be the case.
+
+For a time-homogenous model such as considered here, health state
+occupancy at cycle \(t\) is is calculated as:
+
+\begin{equation}\phantomsection\label{eq-trace}{
+\mathbf{s}'_t=\mathbf{s}'_0 \mathbf{P}^t
+}\end{equation}
+
+For a time-inhomongenous model in which transition probabilities change
+over time (e.g., death rates increase due to aging), we must construct
+separate transition probability matrices for each cycle (i.e.,
+\(\mathbf{P}(t)\)). State occupancy at cycle \(t\) is calculated by
+sequentially applying the transition matrices corresponding to each time
+step leading up to cycle \(t\), i.e.,
+
+\begin{equation}\phantomsection\label{eq-trace-inhomo}{
+\mathbf{s}'_t=\mathbf{s}'_0 \mathbf{P}(1)\mathbf{P}(2)\dots\mathbf{P}(t)
+}\end{equation}
+
+\subsubsection{Years of Life Lived with Disability
+(YLD)}\label{years-of-life-lived-with-disability-yld}
+
+To calculate YLDs, we define a disability weight payoff vector
+\(\mathbf{d}_{YLD}\),
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.6\textwidth,height=\textheight]{images/d_yld.png}
+
+}
+
+\caption{YLD Payoff Vector}
+
+\end{figure}%
+
+where \(\texttt{dwS1}\) and \(\texttt{dwS2}\) are the disability weights
+for the Sick and Sicker states, respectively. In addition,
+\(r_{\Delta_t}\) is the cycle discount rate, which is calculated as,
+
+\begin{equation}\phantomsection\label{eq-cycledisc}{
+r_{\Delta_t} = r \Delta_t
+}\end{equation} where \(r\) is the annual discount rate and \(\Delta_t\)
+is the time step.
+
+In the YLD payoff vector, the term
+\(\frac{1}{r_{\Delta_t}}(1-e^{-r_{\Delta_t}})\) is included as a
+continuous-time discounting adjustment factor for the defined cycle
+length \(\Delta_t\). This term is included to discount time
+\emph{within} each cycle in order to maintain the continuous-time
+discounting approach used in the original GBD equations.\footnote{For
+  example, if \(r=0.03\) and \(\Delta_t=1\) (i.e., annual cycle length),
+  this adjustment factor will be
+  \(0.985 = \frac{1}{r_{\Delta_t}}(1-e^{-r_{\Delta_t}})\). If
+  \(\Delta_t=1/12\) (monthly cycle) the cycle discounting adjustment
+  factor is 0.99875.}
+
+To fully discount outcomes, we still must discount all future outcome
+values back to baseline (\(t=0\)). For a time-homogeneous model,
+discounted years of life lost to disability (YLD) at cycle \(t\) is
+given by
+
+\begin{equation}\phantomsection\label{eq-yldt}{
+YLD(t)=\mathbf{s}'_0 \mathbf{P}^t \mathbf{d}_{YLD}  \times{e^{-r_{\Delta_t} t}}
+}\end{equation}
+
+For a time-inhomogenous model, YLDs are calculated as
+\begin{equation}\phantomsection\label{eq-yldt-inhomo}{
+YLD(t)=\mathbf{s}'_0 \mathbf{P}(1)\mathbf{P}(2)\dots\mathbf{P}(t)  \mathbf{d}_{YLD}  \times{e^{-r_{\Delta_t} t}}
+}\end{equation}
+
+\subsubsection{Years of Life Lost to Disease
+(YLLs)}\label{years-of-life-lost-to-disease-ylls}
+
+As noted in Section~\ref{sec-background} and in Equation~\ref{eq-yll},
+YLLs are based on the present value of remaining life expectancy among
+deaths that occur in each cycle \(t\). Define \(a(t)\) as the age of the
+cohort at cycle \(t\), i.e., \(a(t) = t \cdot \Delta t + a0\), where
+\(a_0\) is the age of the cohort at \(t=0\). Define \(e(t)=e(a(t))\) as
+the present value of remaining life expectancy at cycle \(t\). Following
+the GBD continuous time discounting approach, \(e(a(t))\) is given by
+
+\begin{equation}\phantomsection\label{eq-pvEx}{
+e(a(t)) = \frac{1}{r}\big (1 - e^{-rEx(a(t))} \big )
+}\end{equation}
+
+where \(Ex(a)\) is the remaining life expectancy at age \(a\). \(Ex(a)\)
+is drawn from either an exogenous (reference) or an endogenous life
+table, depending on the objectives of the modeling exercise (Anand \&
+Reddy, 2019).
+
+We next define a remaining life expectancy payoff vector at cycle \(t\):
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.6\textwidth,height=\textheight]{images/d_yll.png}
+
+}
+
+\caption{YLL Payoff Vector}
+
+\end{figure}%
+
+This payoff vector reflects discounting, but only in terms of the
+present value of remaining life expectancy \emph{at time} \(t\).
+
+\begin{equation}\phantomsection\label{eq-yllt}{
+YLL(t)=\mathbf{s}'_t \mathbf{e}(t)  \times{e^{-r\Delta_t t}} =\mathbf{s}'_0 \mathbf{P}^t \mathbf{e}(t)  \times{e^{-r\Delta_t t}}
+}\end{equation}
+
+Total discounted YLLs at time \(t=0\) is given by:
+
+\begin{equation}\phantomsection\label{eq-yllcum}{
+YLL=\sum_{t=0}^{N-1} YLL(t) =\sum_{t=0}^{N-1}\left(\mathbf{s}'_0 \mathbf{P}^t \mathbf{e}(t)  \times{e^{-r\Delta_t t}} \right) 
+}\end{equation}
+
+\textsubscript{Source:
+\href{https://graveja0.github.io/dalys/index.qmd.html}{Article
+Notebook}}
+
+\textsubscript{Source:
+\href{https://graveja0.github.io/dalys/index.qmd.html}{Article
+Notebook}}
 
 To calculate outcomes, we must next define ``reward'' matrices
 \(\mathbf{R}_m\), where \(m\) indexes the moment of interest (e.g.,
@@ -1362,37 +1308,109 @@ different starting ages, and for a specified starting health state
 \href{https://graveja0.github.io/dalys/index.qmd.html}{Article
 Notebook}}
 
+\subsection{Results}\label{results}
+
+Table~\ref{tbl-trace1} shows the Markov trace for the first five cycles
+under Approach 1, while Table~\ref{tbl-trace2} shows the trace under
+Approach 2. Table~\ref{tbl-trace1} also includes a new column
+(\texttt{deaths\_disease}) that is calculated as the difference in state
+occupancy in the \texttt{DS} column between cycles. This extra step will
+be necessary later for calculating YLL outcomes. The trace shown under
+Approach 2 (Table~\ref{tbl-trace2}), by comparison, automatically
+calculates new deaths through the inclusion of the transition state
+\texttt{trDS}; the values under \texttt{deaths\_disease} and
+\texttt{trDS} are identical, again highlighting that either approach can
+be used to calculate the number of disease-related deaths in each cycle.
+
+\begin{table}
+
+\caption{\label{tbl-trace1}Markov Trace Under Approach 1}
+
+\centering{
+
+\begin{tabular}{r|r|r|r|r|r|r}
+\hline
+cycle & H & S1 & S2 & DOC & DS & deaths\_disease\\
+\hline
+0 & 1.0000 & 0.0000 & 0.0000 & 0.0000 & 0.0000 & 0.0000\\
+\hline
+1 & 0.8870 & 0.1046 & 0.0062 & 0.0020 & 0.0003 & 0.0003\\
+\hline
+2 & 0.8232 & 0.1521 & 0.0197 & 0.0040 & 0.0010 & 0.0008\\
+\hline
+3 & 0.7832 & 0.1723 & 0.0363 & 0.0060 & 0.0022 & 0.0012\\
+\hline
+4 & 0.7547 & 0.1796 & 0.0540 & 0.0080 & 0.0037 & 0.0015\\
+\hline
+5 & 0.7321 & 0.1808 & 0.0717 & 0.0099 & 0.0056 & 0.0019\\
+\hline
+\end{tabular}
+
+}
+
+\end{table}%
+
 \textsubscript{Source:
 \href{https://graveja0.github.io/dalys/index.qmd.html}{Article
 Notebook}}
 
-\subsection{Results}\label{results}
+\begin{table}
+
+\caption{\label{tbl-trace2}Markov Trace Under Approach 2}
+
+\centering{
+
+\begin{tabular}{r|r|r|r|r|r}
+\hline
+cycle & H & S1 & S2 & D & trDS\\
+\hline
+0 & 1.0000 & 0.0000 & 0.0000 & 0.0000 & 0.0000\\
+\hline
+1 & 1.0000 & 0.0000 & 0.0000 & 0.0000 & 0.0000\\
+\hline
+2 & 0.8870 & 0.1046 & 0.0062 & 0.0023 & 0.0003\\
+\hline
+3 & 0.8232 & 0.1521 & 0.0197 & 0.0050 & 0.0008\\
+\hline
+4 & 0.7832 & 0.1723 & 0.0363 & 0.0082 & 0.0012\\
+\hline
+5 & 0.7547 & 0.1796 & 0.0540 & 0.0117 & 0.0015\\
+\hline
+\end{tabular}
+
+}
+
+\end{table}%
+
+\textsubscript{Source:
+\href{https://graveja0.github.io/dalys/index.qmd.html}{Article
+Notebook}}
 
 \begin{table}
 \centering
-\begin{tabular}{l|r|r|r|r|r|r|r}
+\begin{tabular}{l|r|r|r|r|r|r|r|r}
 \hline
-Scenario & YLDs & YLLs & DALYs & DALY-hack & QALY-like DALY & QALY & Costs\\
+Scenario & Life-Years & YLDs & YLLs & DALYs & DALY-Hack & QALY-like DALY & QALY & Costs\\
 \hline
-\multicolumn{8}{l}{\textbf{Approaches 1 and 2 (Markov Trace)}}\\
+\multicolumn{9}{l}{\textbf{Approaches 1 and 2 (Markov Trace)}}\\
 \hline
-\hspace{1em}SoC & 4.607 & 2.683 & 7.290 & 9.558 & 21.870 & 21.870 & 158522.6\\
+\hspace{1em}SoC & 86.567 & 4.608 & 2.683 & 7.291 & 9.624 & 21.872 & 21.872 & 158566.1\\
 \hline
-\hspace{1em}A & 4.006 & 2.683 & 6.689 & 8.957 & 22.480 & 22.588 & 292273.9\\
+\hspace{1em}A & 86.567 & 3.901 & 2.683 & 6.584 & 8.917 & 22.590 & 22.590 & 292352.4\\
 \hline
-\hspace{1em}B & 3.817 & 2.028 & 5.845 & 7.679 & 23.695 & 23.695 & 255483.2\\
+\hspace{1em}B & 103.352 & 3.820 & 2.028 & 5.847 & 7.741 & 23.699 & 23.699 & 255608.1\\
 \hline
-\hspace{1em}AB & 3.081 & 2.028 & 5.109 & 6.943 & 24.442 & 24.574 & 374862.0\\
+\hspace{1em}AB & 103.352 & 2.953 & 2.028 & 4.981 & 6.875 & 24.579 & 24.579 & 375043.1\\
 \hline
-\multicolumn{8}{l}{\textbf{Approach 3 (Markov Chain With Rewards)}}\\
+\multicolumn{9}{l}{\textbf{Approach 3 (Markov Chain With Rewards)}}\\
 \hline
-\hspace{1em}SoC & 4.571 & 2.810 & 7.381 &  &  & 22.312 & 158440.8\\
+\hspace{1em}SoC & 86.644 & 4.569 & 2.810 & 7.379 &  &  & 22.309 & 158365.5\\
 \hline
-\hspace{1em}A & 3.972 & 2.810 & 6.782 &  &  & 23.027 & 291264.5\\
+\hspace{1em}A & 86.644 & 3.864 & 2.810 & 6.674 &  &  & 23.024 & 291128.7\\
 \hline
-\hspace{1em}B & 3.794 & 2.124 & 5.919 &  &  & 24.150 & 255156.7\\
+\hspace{1em}B & 103.717 & 3.790 & 2.124 & 5.914 &  &  & 24.142 & 254886.6\\
 \hline
-\hspace{1em}AB & 3.060 & 2.124 & 5.184 &  &  & 25.028 & 373906.6\\
+\hspace{1em}AB & 103.717 & 2.926 & 2.124 & 5.050 &  &  & 25.019 & 373515.0\\
 \hline
 \end{tabular}
 \end{table}
@@ -1409,63 +1427,63 @@ Strategy & Cost & Effect & Inc\_Cost & Inc\_Effect & ICER & Status\\
 \hline
 \multicolumn{7}{l}{\textbf{QALY - Approaches 1 \& 2}}\\
 \hline
-\hspace{1em}SoC & 158523 & 21.870 &  &  &  & \vphantom{1} ND\\
+\hspace{1em}SoC & 158566 & 21.872 &  &  &  & \vphantom{1} ND\\
 \hline
-\hspace{1em}B & 255483 & 23.695 & 96961 & 1.825 & 53142 & \vphantom{1} ND\\
+\hspace{1em}B & 255608 & 23.699 & 97042 & 1.827 & 53119 & \vphantom{1} ND\\
 \hline
-\hspace{1em}AB & 374862 & 24.574 & 119379 & 0.879 & 135763 & ND\\
+\hspace{1em}AB & 375043 & 24.579 & 119435 & 0.879 & 135813 & \vphantom{1} ND\\
 \hline
-\hspace{1em}A & 292274 & 22.588 &  &  &  & D\\
+\hspace{1em}A & 292352 & 22.590 &  &  &  & \vphantom{1} D\\
 \hline
 \multicolumn{7}{l}{\textbf{QALY - Approach 3}}\\
 \hline
-\hspace{1em}SoC & 158441 & 22.312 &  &  &  & ND\\
+\hspace{1em}SoC & 158365 & 22.309 &  &  &  & ND\\
 \hline
-\hspace{1em}B & 255157 & 24.150 & 96716 & 1.839 & 52604 & ND\\
+\hspace{1em}B & 254887 & 24.142 & 96521 & 1.833 & 52656 & ND\\
 \hline
-\hspace{1em}AB & 373907 & 25.028 & 118750 & 0.877 & 135383 & ND\\
+\hspace{1em}AB & 373515 & 25.019 & 118628 & 0.877 & 135271 & ND\\
 \hline
-\hspace{1em}A & 291264 & 23.027 &  &  &  & D\\
+\hspace{1em}A & 291129 & 23.024 &  &  &  & D\\
 \hline
 \multicolumn{7}{l}{\textbf{DALY - Approaches 1 \& 2}}\\
 \hline
-\hspace{1em}SoC & 158523 & 7.290 &  &  &  & ND\\
+\hspace{1em}SoC & 158566 & 7.291 &  &  &  & ND\\
 \hline
-\hspace{1em}B & 255483 & 5.845 & 96961 & 1.445 & 67111 & ND\\
+\hspace{1em}B & 255608 & 5.847 & 97042 & 1.444 & 67203 & ND\\
 \hline
-\hspace{1em}AB & 374862 & 5.109 & 119379 & 0.736 & 162129 & ND\\
+\hspace{1em}AB & 375043 & 4.981 & 119435 & 0.866 & 137860 & ND\\
 \hline
-\hspace{1em}A & 292274 & 6.689 &  &  &  & D\\
+\hspace{1em}A & 292352 & 6.584 &  &  &  & D\\
 \hline
 \multicolumn{7}{l}{\textbf{DALY - Approach 3}}\\
 \hline
-\hspace{1em}SoC & 158441 & 7.381 &  &  &  & ND\\
+\hspace{1em}SoC & 158365 & 7.379 &  &  &  & ND\\
 \hline
-\hspace{1em}B & 255157 & 5.919 & 96716 & 1.463 & 66122 & ND\\
+\hspace{1em}B & 254887 & 5.914 & 96521 & 1.465 & 65884 & ND\\
 \hline
-\hspace{1em}AB & 373907 & 5.184 & 118750 & 0.734 & 161675 & ND\\
+\hspace{1em}AB & 373515 & 5.050 & 118628 & 0.864 & 137310 & ND\\
 \hline
-\hspace{1em}A & 291264 & 6.782 &  &  &  & D\\
+\hspace{1em}A & 291129 & 6.674 &  &  &  & D\\
 \hline
-\multicolumn{7}{l}{\textbf{DALY-Shortcut}}\\
+\multicolumn{7}{l}{\textbf{DALY-Hack}}\\
 \hline
-\hspace{1em}SoC & 158523 & 9.558 &  &  &  & ND\\
+\hspace{1em}SoC & 158566 & 9.624 &  &  &  & ND\\
 \hline
-\hspace{1em}B & 255483 & 7.679 & 96961 & 1.879 & 51608 & ND\\
+\hspace{1em}B & 255608 & 7.741 & 97042 & 1.883 & 51524 & ND\\
 \hline
-\hspace{1em}AB & 374862 & 6.943 & 119379 & 0.736 & 162129 & ND\\
+\hspace{1em}AB & 375043 & 6.875 & 119435 & 0.866 & 137860 & ND\\
 \hline
-\hspace{1em}A & 292274 & 8.957 &  &  &  & D\\
+\hspace{1em}A & 292352 & 8.917 &  &  &  & D\\
 \hline
 \multicolumn{7}{l}{\textbf{QALY-like DALY}}\\
 \hline
-\hspace{1em}SoC & 158523 & 21.870 &  &  &  & ND\\
+\hspace{1em}SoC & 158566 & 21.872 &  &  &  & ND\\
 \hline
-\hspace{1em}B & 255483 & 23.695 & 96961 & 1.825 & 53142 & ND\\
+\hspace{1em}B & 255608 & 23.699 & 97042 & 1.827 & 53119 & ND\\
 \hline
-\hspace{1em}AB & 374862 & 24.442 & 119379 & 0.747 & 159721 & ND\\
+\hspace{1em}AB & 375043 & 24.579 & 119435 & 0.879 & 135813 & ND\\
 \hline
-\hspace{1em}A & 292274 & 22.480 &  &  &  & D\\
+\hspace{1em}A & 292352 & 22.590 &  &  &  & D\\
 \hline
 \end{tabular}
 \end{table}
