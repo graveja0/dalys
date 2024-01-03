@@ -121,7 +121,7 @@ We consider outcomes under four strategies:
  
 A state transition diagram is shown in @fig-model1. In the figure, nodes are health states and edges depict possible transitions among them. Edge labels are defined in terms of transition intensities (rates).  Other key model parameters are summarized in @tbl-params. 
 
-As depicted in @fig-model1, and as parameterized in our replication code, the underlying Markov model is time homogeneous---that is, transition rates do not vary as a function of time (e.g., the background mortality rate is fixed and does not increase with age). This is merely a simplification that builds on an existing time-homogeneous model constructed for didactic purposes [@alarid2023introductory]. We do, however, index all formulas and other model-relevant objects with the subscript $t$ to allow for time-inhomogenous models. Our replication code is also written to easily accomodate time-homogeneous models. 
+As depicted in @fig-model1, and as parameterized in our replication code, the underlying Markov model is time homogeneous---that is, transition rates do not vary as a function of time (e.g., the background mortality rate is fixed and does not increase with age). This is merely a simplification that builds on an existing time-homogeneous model constructed for didactic purposes [@alarid2023introductory]. We do, however, index all formulas and other model-relevant objects with the subscript $t$ to allow for time-inhomogenous models. Our replication code is also written to easily accomodate time-inhomogeneous models. 
 
 An additional observation is worth highlighting. In our implementation of the Sick-Sicker model, disability weights are defined as one minus the utility weight. This is not generally the case, as DALY disability weights are derived from expert valuations and are standardized across countries and regions [@who2013methods; @sassi2006calculating]. Utility weights, by contrast, are often derived from general population and/or patient samples and therefore differ across geographies [@sassi2006calculating]. We have elected to parameterize our model in this way to hold this methodological difference fixed---that is, we aim to show how differences in methodological choices shape estimates of DALYs while holding fixed *additional* differences that might occur due to differences in the derivation of disability and utility weights. 
 
@@ -355,14 +355,14 @@ Transitions among health states are defined in terms of continuous rates ("inten
 
 Cell values in row $i$, column $j$ of $\mathbf{Q}_t$ capture the (continuous time) transition rate from health state $i$ to health state $j$. $\mathbf{Q}_t$ has diagonal elements defined as the negative sum of the off-diagonal row values (i.e., the row sums of $\mathbf{Q}_t$ are zero). This ensures that the Markov model is "closed"---that is, the total cohort size neither grows nor shrinks over time.
 
-We next embed the continuous transition intensity matrix into a discrete time transition probability matrix by taking the matrix exponential of $\mathbf{Q}_t$ for a defined time step (i.e., "cycle length") $\Delta t$:[^embed]
+We next embed the  transition intensity matrix into a discrete time transition probability matrix by taking the matrix exponential of $\mathbf{Q}_t$ for a defined time step (i.e., "cycle length") $\Delta t$:[^embed]
 
 $$
 \mathbf{P}_t = e^{\mathbf{Q}_t\Delta t}
 $$ {#eq-embed}
 
 
-Embedding results in a transition probability matrix $\mathbf{P}_t$ with the following probabilities defined:
+Embedding the Sick-Sicker model results in a transition probability matrix $\mathbf{P}_t$ with the following probabilities defined:
 
 ![Transition Probability Matrix for Approach 1](images/P_model2.png){width=60%}
 
@@ -376,7 +376,7 @@ Embedding the transition probability matrix using the matrix exponential ensures
 
 ### Approach 2 (Intermediate): Non-Markovian Tracking States
 
-Under this approach, we maintain the overall structure as depicted in the original model (@fig-model1), but augment the transition probability matrix with non-Markovian components to facilitate accounting of disease-related deaths.[^tracking]  Approach 2 offers a more generalized method that allows practitioners to accurately account for costs and/or health payoffs (such as YLLs) that are defined by *transitions* among health states, rather than occupancy in a health state. DALY outcomes can also be calculated directly, without the need to derive a vector of disease-related death transitions from the Markov trace (as required for Approach 1). 
+Under this approach, we maintain the overall structure as depicted in the original @fig-model1, but augment the transition probability matrix with non-Markovian components to facilitate accounting of disease-related deaths.[^tracking]  Approach 2 offers a more generalized method that allows practitioners to accurately account for costs and/or health payoffs (such as YLLs) that are defined by *transitions* among health states, rather than occupancy in a health state. DALY outcomes can also be calculated directly, without the need to derive a vector of disease-related death transitions from the Markov trace (as required for Approach 1). 
 
 @fig-transition shows a state transition diagram with the tracking state added. The tracking state (shown as red nodes)  simply records transitions as cohort members move from either diseased state to the absorbing death state due to causes related to the disease. 
 
@@ -393,7 +393,7 @@ To implement Approach 2, we add a transition state row and column to the transit
 ![Transition intensity matrix with transition state added](images/Q_model1.png)
 
 
-Two aspects of $\mathbf{Q}_t$ are worth highlighting. First, $\mathbf{Q}_t$ is divided into a Markovian submatrix and the non-Markovian tracking row and column. This division is made apparent using dotted vertical and horizontal lines. Critically, the Markovian submatrix remains closed---that is, the diagonal elements remain unchanged so that the row sums of the submatrix remain zero, even after the addition of the tracking column along the "edges" of $\mathbf{Q}_t$. This ensures that the Markovian submatrix can be used to calculate state occupancy for a closed cohort that neither gains nor loses cohort members over the modeled time horizon.
+Two aspects of $\mathbf{Q}_t$ are worth highlighting. First, $\mathbf{Q}_t$ is divided into a Markovian submatrix and the non-Markovian tracking row and column. This division is made apparent using dotted vertical and horizontal lines. Critically, the Markovian submatrix remains closed---that is, the diagonal elements remain unchanged so that the row sums of the submatrix remain zero, even after the addition of the tracking column along the "edges" of $\mathbf{Q}_t$. This ensures that the Markovian submatrix can be used to calculate state occupancy for a closed cohort that neither gains nor loses cohort members over  time.
 
 Second, two transition intensities---from the S1 (Sick) and S2 (Sicker) states to Death---appear in the tracking column. This ensures that $\texttt{trDeadDisease}$ will track all relevant transitions to death due to the disease. Because we are operating on the rate scale, we can net out non-disease related deaths as captured by the background mortality rate among healthy individuals (i.e., $\texttt{r\_HD}$). Other approaches might draw on cause-deleted life tables to incorporate death transition rates that net out deaths from the disease itself.[^causedeleted]
 
@@ -628,37 +628,49 @@ params2[["m_P_"]] <- NULL
 
 <!-- From Caswell (2021): MCWR methods were introduced by Howard (1960) as the basis for stochastic dynamic programming (e.g., Puterman 1994; Sheskin 2010). Extensions of the theory to random rewards and demographic models were introduced by Caswell (2011) and have been extended with applications to lifetime reproductive output (Caswell 2011; van Daalen and Caswell 2015; van Daalen and Caswell 2017), evolutionary biodemography (van Daalen and Caswell 2020), income and expenditures (Caswell and Kluge 2015), and healthy longevity in prevalence-based models (Caswell and Zarulli 2018; Owoeye, Oseni, and Gayawan 2020). -->
 
-Our final approach adapts methods from mathematical demography to estimate DALY outcomes [@caswell2021a]. This approach requires a separate disease-related absorbing state as shown in the state transition diagram in @fig-modelDS. While our focus here is on expected outcomes, this method can also be used to estimate higher order moments (e.g., variance, skewness); see @caswell2018 and @caswell2021a for details. 
+Our final approach adapts methods from mathematical demography to estimate YLD, YLL and DALY outcomes [@caswell2021a].[^otherout] This approach requires a separate disease-related absorbing state as shown in  @fig-modelDS. While our focus here is on expected outcomes, this method can also be used to estimate higher order moments (e.g., variance, skewness). It is also quite flexible and can estimate separate outcomes for any combination of health states and age classes (e.g., disease-free survival among those aged 40-45, etc.); see @caswell2018 and @caswell2021a for details. 
 
-To implement this method we define some additional parameters:
+[^otherout]: The method also easily accomodates other common outcomes such as QALYs and costs. 
+
+To implement Approach 3 we define some additional parameters:
 
 $$
 \begin{aligned}
 \tau &= \text{Number of transient (non-absorbing) states}\\
 \alpha &= \text{Number of absorbing states}\\
-\omega &= \text{Number of cycles} \\
+\omega &= \text{Number of cycles (age classes)} \\
 s &= \text{Total number of states; }s=\tau\omega+\alpha \\
+\mathbf{K} &= \text{vec-permutation matrix; parameters }\tau,\omega\\
 \mathbf{U}_{t} &= \text{Transition matrix at time }t, \text{for }t=1,\dots,\omega\\
-\mathbf{D}_{j} &=\text{Age advancement matrix for stage }j, \text{for }j=1,\dots,\tau \\
 \mathbf{M}_{t} &= \text{Mortality matrix at time  }t, \text{for } t = 1,\dots\omega \\
-\mathbf{K} &= \text{vec-permutation matrix; parameters }\tau,\omega
+\mathbf{D}_{j} &=\text{Age advancement matrix for stage }j, \text{for }j=1,\dots,\tau 
 \end{aligned}
 $$
-In the above notation, the matrix $\mathbf{U}_t$ captures transition
+In the above notation, $\mathbf{K}$ is a permutation matrix known as the vec-permutation matrix.[^vecperm] The matrix $\mathbf{U}_t$ captures transition
 probabilities among transient (i.e., non-absorbing) health states, while
-$\mathbf{M}_t$ captures transitions from transient health states to the
-absorbing death states (non-disease mortality and disease-related mortality). Finally, $\mathbf{K}$ is a permutation matrix known as the vec-permutation matrix.[^vecperm] See @henderson1981 and Appendix B in @caswell2021a for
-further information.
-
-[^vecperm]: A function to construct a vec-permultation matrix is provided
-    within our replication code.
+$\mathbf{M}_t$ contains transition probabilities from transient health states to the
+absorbing (death) states. 
 
 To construct $\mathbf{U}_t$ and $\mathbf{M}_t$ we define transition rate
 ("intensity") matrices as in Approaches 1 and 2 above. One important (minor) difference is that the rows
 in $\mathbf{Q}_t$, $\mathbf{V}_t$, and $\mathbf{S}_t$ now correspond to the final state, while the
 columns correspond to the starting state; this is essentially the transpose of the rate matrices defined for Approaches 1 and 2, where rows corresponded to the initial health state and columns to the final health state. 
 
-The overall intensity matrix $\mathbf{Q_x}$ is given by
+[^vecperm]: See @henderson1981 and Appendix B in @caswell2021a for
+further information. A function to construct a vec-permultation matrix is provided
+within our replication code.
+
+
+
+
+<!-- $$ -->
+<!-- \mathbf{P}_t=\left(\begin{array}{c|c} -->
+<!-- \mathbf{U} & \mathbf{0} \\ -->
+<!-- \hline \mathbf{M} & \mathbf{I} -->
+<!-- \end{array}\right) -->
+<!-- $$ -->
+
+The overall intensity matrix $\mathbf{Q}_t$ is given by
 
 $$
 \mathbf{Q}_t=\left(\begin{array}{c|c}
@@ -669,7 +681,7 @@ $$ {#eq-Qx} where $\mathbf{V}_t$ is the rate matrix for the transitory (i.e.,
 non-absorbing) states and $\mathbf{S}_t$ is the rate matrix for the
 absorbing states. The diagonal elements of $\mathbf{Q}_t$ are the negative sum of
 the non-diagonal column elements, thus making the column sums of
-$\mathbf{Q}_t$ zero.
+$\mathbf{Q}_t$ zero (i.e., the model is "closed" and does not gain or lose cohort members over time). 
 
 For the defined time step $\Delta_t$, the discrete time
 transition probability matrix $\mathbf{P}_t$ is again obtained by taking the
@@ -707,7 +719,7 @@ transition probabilities defined for the last age class. If this value
 is zero, the model will assume that everyone dies after the last cycle.
 
 
-We next combine the transition matrices (for all age classes) together
+We next combine the transition matrices (for all age classes as defined by discrete time cycles) together
 into a series of block-structured matrices as follows:
 
 $$
@@ -727,29 +739,27 @@ $$
 $$ {#eq-BBD}
 
 $$
-\tilde{\mathbf{U}}=\mathbf{K}^{\top} \mathbb{D} \mathbf{K} \mathbb{U} \quad \tau \omega \times \tau \omega
-$$ {#eq-Utilde}
-
-
+\widetilde{\mathbf{U}}=\mathbf{K}^{\top} \mathbb{D} \mathbf{K} \mathbb{U} \quad \tau \omega \times \tau \omega
+$$ {#eq-Utilde} where $^\top$ is the transpose. 
 
 We also define
 
 $$
-\tilde{\mathbf{M}}=\left(\begin{array}{lll}
+\widetilde{\mathbf{M}}=\left(\begin{array}{lll}
 \mathbf{M}_1 & \cdots & \mathbf{M}_\omega
 \end{array}\right) \quad \alpha \times \tau \omega
 $$ {#eq-Mtilde}
 
-and
+Finally, we capture the entire Markov chain in a block transition matrix,
 
 $$
-\tilde{\mathbf{P}}=\left(\begin{array}{c|c}
-\tilde{\mathbf{U}} & \mathbf{0}_{\tau \omega \times \alpha} \\
-\hline \tilde{\mathbf{M}} & \mathbf{I}_{\alpha \times \alpha}
+\widetilde{\mathbf{P}}=\left(\begin{array}{c|c}
+\widetilde{\mathbf{U}} & \mathbf{0}_{\tau \omega \times \alpha} \\
+\hline \widetilde{\mathbf{M}} & \mathbf{I}_{\alpha \times \alpha}
 \end{array}\right) \quad(\tau \omega+\alpha) \times(\tau \omega+\alpha)
 $$ {#eq-Ptilde} where $\mathbf{I}$ is the identity matrix and $\mathbf{0}$ is a matrix of zeros. 
 
-The block matrix $\tilde{\mathbf{P}}$ is the analogue to the transition matrix $\mathbf{P}$ (@eq-embed) under Approaches 1 and 2 above.
+$\widetilde{\mathbf{P}}$ is the analogue to the transition matrix $\mathbf{P}$ (@eq-embed) under Approaches 1 and 2 above.
 
 ```{r approach-3}
 params3_ <- with(params1,modifyList(params1,list(
@@ -936,21 +946,21 @@ healthy_longevity_yll <- function(params, life_expectancy, disc) {
 
 ## Estimating Outcomes Under Approaches 1 and 2 {#sec-outcomes}
 
-With transition matrices and other relevant model objects defined, we next define formulas for estimating outcomes. Our three approaches differ, however, in how total (or expected) outcomes are calculated. Approach 1 requires a Markov trace that tracks occupancy in each cycle; for YLL outcomes, we use this information to calculate the number of new disease-related deaths in each cycle. Approach 2 does not require this extra step, as both cycle-specific and total outcomes are calculated directly. Finally, Approach 3 differs insofar as it solves for expected outcomes (i.e., the approach does not require cycle-specific values as found in a Markov trace). 
+With transition matrices and other relevant model objects defined, we next define formulas for estimating outcomes. Our three approaches differ, however, in how total (or expected) outcomes are calculated. Approach 1 requires a Markov trace that tracks occupancy in each cycle; for YLL outcomes, we use this information to calculate the number of new disease-related deaths in each cycle. Approach 2 does not require this extra step, as both cycle-specific and total outcomes are calculated directly. Finally, Approach 3 differs insofar as it directly solves for expected outcomes (i.e., the approach does not require cycle-specific values as found in a Markov trace). 
 
 ### Markov Trace 
 
-YLL outcomes calculated under Approach 1 requires a markov trace, or a matrix summarizing occupancy in each health state in each cycle. Define $\mathbf{s}_0$ as the initial state occupancy (column) vector at time $t=0$. The vector $\mathbf{s}_0$ has size $k$, where $k$ is the total number of states (including transition tracking states, if applicable) in our model. This vector summarizes the number or fraction of the population in each health state at baseline. Often, this vector will be set such that the entire cohort starts off healthy---though this need not always be the case.
+YLL outcomes calculated under Approach 1 requires a Markov trace, or a matrix summarizing occupancy in each health state in each cycle. Define $\mathbf{s}_0$ as the initial state occupancy (column) vector at time $t=0$. The vector $\mathbf{s}_0$ has size $k$, where $k$ is the total number of states (including transition tracking states, if applicable). This vector summarizes the number or fraction of the population in each health state at baseline. Often, this vector will be set such that the entire cohort starts off healthy---though this need not always be the case.
 
 Health state occupancy at time $t$ is is calculated as:
 
 $$
-\mathbf{s}'_t=\mathbf{s}'_0 \mathbf{P}_1\mathbf{P}_2\dots\mathbf{P}_t
+\mathbf{s}^\top_t=\mathbf{s}^\top_0 \mathbf{P}_1\mathbf{P}_2\dots\mathbf{P}_t
 $$ {#eq-trace} where $\mathbf{P}_t$ is the $k \times k$ transition probability matrix at time $t$.[^simplify] 
 
 [^simplify]: For a time-homogeneous model, @eq-trace simplifies to $\mathbf{s}'_t=\mathbf{s}'_0 \mathbf{P}^t$.
 
-We apply @eq-trace at each cycle to construct a Markov trace $\mathbf{S}$, which has dimensions $\omega \times k$. 
+We apply @eq-trace at each cycle to construct a Markov trace $\mathbf{S}$, which has dimensions $\omega \times k$,
 
 $$
 \mathbf{S} = \begin{bmatrix}
@@ -1005,17 +1015,32 @@ $$ {#eq-yldtrace}
 
 ### Years of Life Lost to Disease (YLLs)
 
-As noted in @sec-background and in @eq-yll, YLLs are based on the present value of remaining life expectancy among deaths that occur in each cycle $t$. Define $a(t)$ as the age of the cohort at cycle $t$, i.e., $a(t) = t \cdot \Delta t + a0$, where $a_0$ is the age of the cohort at $t=0$. 
-
-We next define $e(t)=e(a(t))$ as the present value of remaining life expectancy at cycle $t$. Following the GBD continuous time discounting approach, $e(a(t))$ is given by
+As noted in @sec-background and in @eq-yll, YLLs are based on the present value of remaining life expectancy among deaths that occur in each cycle $t$. Define $a(t)$ as the age of the cohort at cycle $t$, i.e., 
 
 $$
-e(a(t)) = \frac{1}{r}\big (1 - e^{-rEx(a(t))} \big )
+a(t) = a0 +t \cdot \Delta_t 
+$$ {#eq-aget} where $a_0$ is the age of the cohort at $t=0$. 
+
+We next define $e(a(t))$ as the present value of remaining life expectancy at cycle $t$. Following the GBD continuous time discounting approach, $e(t)$ is given by
+
+$$
+e(t) = \frac{1}{r}\big (1 - e^{-rEx(a(t))} \big )
 $$ {#eq-pvEx}
 
 where $Ex(a)$ is the remaining life expectancy at age $a$. $Ex(a)$ is drawn from either an exogenous (reference) or an endogenous life table, depending on the objectives of the modeling exercise [@anand2019].
 
-We next define a remaining life expectancy payoff vector at cycle $t$:
+To calculate YLLs under Approach 1, we use the Markov trace to calculate $m(t)$, the total number of new deaths from disease in each cycle. Discounted YLLs in each cycle are then estimated as
+
+$$
+YLL(t)=m(t) e(t)  \times{e^{-r\Delta_t t}} 
+$$ {#eq-yllt1}
+Total discounted YLLs are then calculated as,
+
+$$
+YLL=\sum_{t=0}^{\omega-1}m(t) e(t)  \times{e^{-r\Delta_t t}} 
+$$ {#eq-yllcum1}
+
+For Approach 2, we define a remaining life expectancy payoff vector at cycle $t$:
 
 ![YLL Payoff Vector](images/d_yll.png){width="60%"}
 
@@ -1445,35 +1470,35 @@ reward matrices $\mathbf{h}$ and $\mathbf{v}$ to obtain the following:
 
 $$
 \begin{aligned}
-\tilde{\mathbf{B}}_{1} & =\mathbf{h} \mathbf{v}_{1}^{\top}+\frac{1}{2}(\neg \mathbf{h})\left(\mathbf{v}_{1}^{\top}\right)+\frac{1}{2}\left(\mathbf{v}_{1}\right)\left(\neg \mathbf{h}^{\top}\right) \\
+\widetilde{\mathbf{B}}_{1} & =\mathbf{h} \mathbf{v}_{1}^{\top}+\frac{1}{2}(\neg \mathbf{h})\left(\mathbf{v}_{1}^{\top}\right)+\frac{1}{2}\left(\mathbf{v}_{1}\right)\left(\neg \mathbf{h}^{\top}\right) \\
 \end{aligned}
 $$ and
 
 $$
-\tilde{\mathbf{C}}_{1}=\frac{1}{2} \mathbf{1}_{\alpha} \mathbf{v_1}^{\top}
+\widetilde{\mathbf{C}}_{1}=\frac{1}{2} \mathbf{1}_{\alpha} \mathbf{v_1}^{\top}
 $$
 
-We combine $\tilde{\mathbf{B}}_{1}$ and $\tilde{\mathbf{C}}_{1}$ to
+We combine $\widetilde{\mathbf{B}}_{1}$ and $\widetilde{\mathbf{C}}_{1}$ to
 obtain:
 
 $$
-\tilde{\mathbf{R}}_{1}=\left(\begin{array}{c|c}
-\tilde{\mathbf{B}}_{1} & \mathbf{0} \\
-\hline \tilde{\mathbf{C}}_{1} & \mathbf{0}
+\widetilde{\mathbf{R}}_{1}=\left(\begin{array}{c|c}
+\widetilde{\mathbf{B}}_{1} & \mathbf{0} \\
+\hline \widetilde{\mathbf{C}}_{1} & \mathbf{0}
 \end{array}\right) 
 $$ which has same block structure as the transition probability matrix
-$\tilde{\mathbf{P}}$.
+$\widetilde{\mathbf{P}}$.
 
 Expected outcomes are based on
 
 $$
 \begin{aligned}
-& \tilde{\boldsymbol{\rho}}_{1}=\tilde{\mathbf{N}}^{\top} \mathbf{Z}\left(\tilde{\mathbf{P}} \circ \tilde{\mathbf{R}}_{1}\right)^{\top} \mathbf{1}_{s} 
+& \widetilde{\boldsymbol{\rho}}_{1}=\widetilde{\mathbf{N}}^{\top} \mathbf{Z}\left(\widetilde{\mathbf{P}} \circ \widetilde{\mathbf{R}}_{1}\right)^{\top} \mathbf{1}_{s} 
 \end{aligned}
-$$ where $\tilde{\mathbf{N}}$ is the fundamental matrix
+$$ where $\widetilde{\mathbf{N}}$ is the fundamental matrix
 
 $$
-\tilde{\mathbf{N}}=(\mathbf{I}-\tilde{\mathbf{U}})^{-1}
+\widetilde{\mathbf{N}}=(\mathbf{I}-\widetilde{\mathbf{U}})^{-1}
 $$ and $\mathbf{Z}$ is
 
 $$
@@ -1484,11 +1509,11 @@ $$
 ### Transition-Based Outcomes
 
 For transition-based outcomes such as YLLs, we define the first moment of remaining life expectancy as the
-vector $\tilde{\boldsymbol{\eta}}^{\top}$. This vector has dimensions
+vector $\widetilde{\boldsymbol{\eta}}^{\top}$. This vector has dimensions
 $\tau\omega \times 1$ and has the following basic structure:
 
 $$
-\tilde{\mathbf{\eta}}=\left(\begin{array}{c}
+\widetilde{\mathbf{\eta}}=\left(\begin{array}{c}
 \eta_{11} \\
 \vdots \\
 \eta_{\tau 1} \\
@@ -1508,15 +1533,15 @@ based on the maximum potential life span among humans [@globalburdenofdiseasecol
 
 The distinction between *exogenous* and *endogenous* rewards for YLLs boils down to whether the remaining life expectancy value used originates from *outside* the population under study (i.e., mortality risks used to calculate remaining life expectancy at a given age are independent of the mortality risks of the population being assessed), or not. 
 
-For YLLs based on exogenous life tables, such as the reference life table published by the GBD, we define $\tilde{\boldsymbol{\eta}}^{\top}$ based on the reference life table value at each age. For YLLs based on an endogenous life table, we could simply swap in external life table values from our country or region of interest, *or* use the model itself to estimate remaining life expectancy for a given age and initial health state. 
+For YLLs based on exogenous life tables, such as the reference life table published by the GBD, we define $\widetilde{\boldsymbol{\eta}}^{\top}$ based on the reference life table value at each age. For YLLs based on an endogenous life table, we could simply swap in external life table values from our country or region of interest, *or* use the model itself to estimate remaining life expectancy for a given age and initial health state. 
 
 We next construct the reward matrices:
 
 $$
 \begin{aligned}
-\tilde{\mathbf{B}}_{1} & =\left(\mathbf{0}_{\tau \omega \times \tau \omega}\right) \\
-\tilde{\mathbf{C}}_{1} & =\left(\begin{array}{c}
-\tilde{\boldsymbol{\eta}}_{1}^{\top} \\
+\widetilde{\mathbf{B}}_{1} & =\left(\mathbf{0}_{\tau \omega \times \tau \omega}\right) \\
+\widetilde{\mathbf{C}}_{1} & =\left(\begin{array}{c}
+\widetilde{\boldsymbol{\eta}}_{1}^{\top} \\
 \mathbf{0}_{1 \times \tau \omega}
 \end{array}\right) .
 \end{aligned}
@@ -1525,9 +1550,9 @@ $$
 and
 
 $$
-\tilde{\mathbf{R}}_{1}=\left(\begin{array}{c|c}
+\widetilde{\mathbf{R}}_{1}=\left(\begin{array}{c|c}
 \mathbf{0}_{\tau \omega \times \tau \omega} & \mathbf{0}_{\tau \omega \times 2} \\
-\hline \tilde{\boldsymbol{\eta}}_{1}^{\top} & \mathbf{0}_{1 \times 2} \\
+\hline \widetilde{\boldsymbol{\eta}}_{1}^{\top} & \mathbf{0}_{1 \times 2} \\
 \mathbf{0}_{1 \times \tau \omega} & \mathbf{0}_{1 \times 2}
 \end{array}\right)
 $$
@@ -1537,12 +1562,12 @@ Echoing the approach to occupancy-based rewards above, expected outcomes are bas
 
 $$
 \begin{aligned}
-& \tilde{\boldsymbol{\rho}}_{1}=\tilde{\mathbf{N}}^{\top} \mathbf{Z}\left(\tilde{\mathbf{P}} \circ \tilde{\mathbf{R}}_{1}\right)^{\top} \mathbf{1}_{s} 
+& \widetilde{\boldsymbol{\rho}}_{1}=\widetilde{\mathbf{N}}^{\top} \mathbf{Z}\left(\widetilde{\mathbf{P}} \circ \widetilde{\mathbf{R}}_{1}\right)^{\top} \mathbf{1}_{s} 
 \end{aligned}
-$$ where $\circ$ denotes element-wise multiplication, $\tilde{\mathbf{N}}$ is the fundamental matrix
+$$ where $\circ$ denotes element-wise multiplication, $\widetilde{\mathbf{N}}$ is the fundamental matrix
 
 $$
-\tilde{\mathbf{N}}=(\mathbf{I}-\tilde{\mathbf{U}})^{-1}
+\widetilde{\mathbf{N}}=(\mathbf{I}-\widetilde{\mathbf{U}})^{-1}
 $$ and $\mathbf{Z}$ is
 
 $$
@@ -1553,11 +1578,11 @@ $$
 
 <!-- $$ -->
 <!-- \begin{aligned} -->
-<!-- E(\tilde{\boldsymbol{\rho}}) & =\tilde{\boldsymbol{\rho}}_1 \\ -->
-<!-- V(\tilde{\boldsymbol{\rho}}) & =\tilde{\boldsymbol{\rho}}_2-\left(\tilde{\boldsymbol{\rho}}_1 \circ \tilde{\boldsymbol{\rho}}_1\right) \\ -->
-<!-- S D(\tilde{\boldsymbol{\rho}}) & =\sqrt{V(\tilde{\boldsymbol{\rho}})} \\ -->
-<!-- C V(\tilde{\boldsymbol{\rho}}) & =\mathcal{D}\left(\tilde{\boldsymbol{\rho}}_1\right)^{-1} S D(\tilde{\boldsymbol{\rho}}) \\ -->
-<!-- S k(\tilde{\boldsymbol{\rho}}) & =\mathcal{D}[V(\tilde{\boldsymbol{\rho}})]^{-3 / 2}\left(\tilde{\boldsymbol{\rho}}_3-3 \tilde{\boldsymbol{\rho}}_1 \circ \tilde{\boldsymbol{\rho}}_2+2 \tilde{\boldsymbol{\rho}}_1 \circ \tilde{\boldsymbol{\rho}}_1 \circ \tilde{\boldsymbol{\rho}}_1\right) -->
+<!-- E(\widetilde{\boldsymbol{\rho}}) & =\widetilde{\boldsymbol{\rho}}_1 \\ -->
+<!-- V(\widetilde{\boldsymbol{\rho}}) & =\widetilde{\boldsymbol{\rho}}_2-\left(\widetilde{\boldsymbol{\rho}}_1 \circ \widetilde{\boldsymbol{\rho}}_1\right) \\ -->
+<!-- S D(\widetilde{\boldsymbol{\rho}}) & =\sqrt{V(\widetilde{\boldsymbol{\rho}})} \\ -->
+<!-- C V(\widetilde{\boldsymbol{\rho}}) & =\mathcal{D}\left(\widetilde{\boldsymbol{\rho}}_1\right)^{-1} S D(\widetilde{\boldsymbol{\rho}}) \\ -->
+<!-- S k(\widetilde{\boldsymbol{\rho}}) & =\mathcal{D}[V(\widetilde{\boldsymbol{\rho}})]^{-3 / 2}\left(\widetilde{\boldsymbol{\rho}}_3-3 \widetilde{\boldsymbol{\rho}}_1 \circ \widetilde{\boldsymbol{\rho}}_2+2 \widetilde{\boldsymbol{\rho}}_1 \circ \widetilde{\boldsymbol{\rho}}_1 \circ \widetilde{\boldsymbol{\rho}}_1\right) -->
 <!-- \end{aligned} -->
 <!-- $$ -->
 
@@ -1565,7 +1590,7 @@ For both occupancy- and transition-based outcomes, total (across all ages) outco
 calculated as
 
 $$
-\boldsymbol{\rho}_{m}^{\text {stage }}(\operatorname{age} x)=\left(\mathbf{e}_{x}^{\top} \otimes \mathbf{I}_{\tau}\right) \tilde{\boldsymbol{\rho}}_{m} \quad \tau \times 1
+\boldsymbol{\rho}_{m}^{\text {stage }}(\operatorname{age} x)=\left(\mathbf{e}_{x}^{\top} \otimes \mathbf{I}_{\tau}\right) \widetilde{\boldsymbol{\rho}}_{m} \quad \tau \times 1
 $$ where $\otimes$ is the Kronecker operator.
 
 
@@ -1574,7 +1599,7 @@ different starting ages, and for a specified starting health state
 (e.g., healthy). This is given by
 
 $$
-\boldsymbol{\rho}_{m}^{\text {age }}(\text { stage } i)=\left(\mathbf{I}_{\omega} \otimes \mathbf{e}_{i}^{\top}\right) \tilde{\boldsymbol{\rho}}_{m} \quad \omega \times 1,
+\boldsymbol{\rho}_{m}^{\text {age }}(\text { stage } i)=\left(\mathbf{I}_{\omega} \otimes \mathbf{e}_{i}^{\top}\right) \widetilde{\boldsymbol{\rho}}_{m} \quad \omega \times 1,
 $$
 
 
