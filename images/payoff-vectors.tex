@@ -25,12 +25,36 @@
 \smaller \text{H} & 0  \\
 \smaller \text{S1} & 0\\
 \smaller \text{S2} & 0 \\
-\smaller \text{DOC} & 0 \\\
-\smaller \text{DS} & \frac{1}{r}\big (1 - e^{-rEx(a(t))}  \\
+\smaller \text{D} & 0 \\\
+\smaller \text{trDS} & \frac{1}{r}\big (1 - e^{-rEx(a(t))}  \\
 \end{pNiceArray}
 \]
 
+Let $S$ be an $\omega \times k$ matrix, $d$ be an $\omega \times k$ matrix, and $c$ be an $\omega \times 1$ vector.
 
+The Hadamard product of $S$ and $d$ is given by:
+\[ S \odot d = \begin{bmatrix}
+s_{11}d_{11} & s_{12}d_{12} & \cdots & s_{1k}d_{1k} \\
+s_{21}d_{21} & s_{22}d_{22} & \cdots & s_{2k}d_{2k} \\
+\vdots & \vdots & \ddots & \vdots \\
+s_{\omega 1}d_{\omega 1} & s_{\omega 2}d_{\omega 2} & \cdots & s_{\omega k}d_{\omega k}
+\end{bmatrix} \]
+
+Summing across the columns of $S \odot d$ to obtain a vector:
+\[ \text{sum}(S \odot d) = \begin{bmatrix}
+\sum_{j=1}^{k} s_{1j}d_{1j} \\
+\sum_{j=1}^{k} s_{2j}d_{2j} \\
+\vdots \\
+\sum_{j=1}^{k} s_{\omega j}d_{\omega j}
+\end{bmatrix} \]
+
+Finally, performing the element-wise multiplication with vector $c$:
+\[ \text{sum}(S \odot d) \odot c = \begin{bmatrix}
+\left( \sum_{j=1}^{k} s_{1j}d_{1j} \right) c_1 \\
+\left( \sum_{j=1}^{k} s_{2j}d_{2j} \right) c_2 \\
+\vdots \\
+\left( \sum_{j=1}^{k} s_{\omega j}d_{\omega j} \right) c_\omega
+\end{bmatrix} \]
 
 
 

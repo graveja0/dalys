@@ -61,7 +61,7 @@ As a consequence, and in practice, health economic applications often resort to 
 
 This tutorial outlines a framework for direct incorporation of DALY outcomes in common decision modeling environments. Our primary focus is on discrete-time Markov cohort models---however, our framework extends directly to microsimulation and is also easily adapted for continuous time discrete event simulation (DES) models. As such, our study provides a comprehensive roadmap for incorporating DALY outcomes into common decision modeling frameworks.
 
-To maintain consistency within the literature, this tutorial builds on an existing didactic disease progression model [@alarid2023introductory]. The underlying discrete time Markov cohort model is time homogeneous---that is, transition probabilities do not vary as a function of age/time in model. However, the methods and code provided are easily adapted for time inhomogenous models. Finally, recognizing the wide spectrum of experience and programming comfort level among those constructing DALY-based models, we offer three approaches for modeling DALYs (beginner, intermediate and advanced) and provide replication materials for implementing our approaches in both R and Microsoft Excel. 
+To maintain consistency within the literature, we build on an existing didactic disease progression model [@alarid2023introductory]. The underlying discrete time Markov cohort model is time homogeneous---that is, transition probabilities do not vary as a function of age/time in model. However, our methods and code are developed to accomodate time-inhomogenous models. Finally, recognizing the wide spectrum of experience and programming comfort level among practitioners, we offer three approaches for modeling DALYs (beginner, intermediate and advanced) and provide replication materials for implementing our approaches in R and Microsoft Excel. 
 
 ## Background {#sec-background}
 
@@ -103,10 +103,6 @@ YLL(a)= \frac{1}{r}\left(1-e^{-r Ex(a)}\right).
 $$ {#eq-yll} 
 
 It is important to note that the discounting shown in @eq-yld and @eq-yll yield the present value of YLD and YLL outcomes at a single point in time, when the duration of disease ($L$) and time of death from disease ($a$) are known. For a decision model where not all cohort members start off ill, that point in time very likely occurs at some point after the baseline period---and different illness durations and death times will, of course, occur across different individuals in the modeled cohort. As such, to be consistent with standard practice, we must discount YLL and YLD outcomes further---all the way back to the baseline period. This additional discounting step will become apparent in the discrete time YLD and YLL equations introduced in @sec-outcomes below. 
-
-### Reference Life Expectancy
-
-While the creation of the DALY measure was an important step in global health research, it has received scrutiny due to its inherent assumptions and value judgements. For example, calculating YLLs requires the use of a reference life table that provides an estimate of ...
 
 ## Model Overview {#sec-overview}
 
@@ -740,7 +736,7 @@ $$ {#eq-BBD}
 
 $$
 \widetilde{\mathbf{U}}=\mathbf{K}^{\top} \mathbb{D} \mathbf{K} \mathbb{U} \quad \tau \omega \times \tau \omega
-$$ {#eq-Utilde} where $^\top$ is the transpose. 
+$$ {#eq-Utilde} where $^\top$ is the transpose operator. 
 
 We also define
 
@@ -946,11 +942,11 @@ healthy_longevity_yll <- function(params, life_expectancy, disc) {
 
 ## Estimating Outcomes Under Approaches 1 and 2 {#sec-outcomes}
 
-With transition matrices and other relevant model objects defined, we next define formulas for estimating outcomes. Our three approaches differ, however, in how total (or expected) outcomes are calculated. Approach 1 requires a Markov trace that tracks occupancy in each cycle; for YLL outcomes, we use this information to calculate the number of new disease-related deaths in each cycle. Approach 2 does not require this extra step, as both cycle-specific and total outcomes are calculated directly. Finally, Approach 3 differs insofar as it directly solves for expected outcomes (i.e., the approach does not require cycle-specific values as found in a Markov trace). 
+With transition matrices and other relevant model objects defined, we next define formulas for estimating outcomes. Our three approaches differ, however, in how total (or expected) outcomes are calculated. Approach 1 requires a Markov trace that tracks occupancy in each cycle; for YLL outcomes, we use this information to calculate the number of new disease-related deaths in each cycle. Approach 2 does not require this extra step, as both cycle-specific and total outcomes are calculated directly. Finally, Approach 3 differs insofar as it directly solves for expected outcomes (i.e., the approach does not require calculation of cycle-specific values). 
 
 ### Markov Trace 
 
-YLL outcomes calculated under Approach 1 requires a Markov trace, or a matrix summarizing occupancy in each health state in each cycle. Define $\mathbf{s}_0$ as the initial state occupancy (column) vector at time $t=0$. The vector $\mathbf{s}_0$ has size $k$, where $k$ is the total number of states (including transition tracking states, if applicable). This vector summarizes the number or fraction of the population in each health state at baseline. Often, this vector will be set such that the entire cohort starts off healthy---though this need not always be the case.
+YLL outcomes calculated under Approach 1 requires a Markov trace, or a matrix summarizing occupancy in each health state in each cycle. Define $\mathbf{s}_0$ as the initial state occupancy (column) vector at time $t=0$. The vector $\mathbf{s}_0$ has size $k$, where $k$ is the total number of states (including transition tracking states, if applicable). This vector summarizes the number or fraction of the population in each health state at baseline. 
 
 Health state occupancy at time $t$ is is calculated as:
 
@@ -975,15 +971,15 @@ Note that the rows in $\mathbf{S}$ run from $t=0$ to $\omega-1$; this assumes th
 
 ### Years of Life Lived with Disability (YLD)
 
-To calculate YLDs, we define a $k \times 1$ disability weight payoff vector $\mathbf{d}_{YLD}$,
+To calculate YLDs, we define a $k \times 1$ disability weight payoff vector $\mathbf{d}_{YLD}$. For the model as represented in @fig-modelDS, define,
 
-![YLD Payoff Vector](images/d_yld.png){width="60%"}
+![](images/d_yld.png){width="40%" fig-align="center"}
 
 where $\texttt{dwS1}$ and $\texttt{dwS2}$ are the disability weights for the Sick and Sicker states, respectively. In addition, $r_{\Delta_t}$ is the cycle discount rate, which is calculated as,
 
 $$
 r_{\Delta_t} = r \Delta_t
-$$ {#eq-cycledisc} where $r$ is the annual discount rate and $\Delta_t$ is the time step. 
+$$ {#eq-cycledisc} where $r$ is the annual discount rate and $\Delta_t$ is the cycle length. 
 
 In the YLD payoff vector, the term $\frac{1}{r_{\Delta_t}}(1-e^{-r_{\Delta_t}})$ is included as a continuous-time discounting adjustment factor for the defined cycle length $\Delta_t$. This term is included to discount time *within* each cycle in order to maintain the continuous-time discounting approach used in the original GBD equations.[^conttime] 
 
@@ -1001,61 +997,68 @@ $$
 YLD=\sum_{t=0}^{\omega-1} YLD(t)=\sum_{t=0}^{\omega-1}\left(\mathbf{s}'_0 \mathbf{P}_1\mathbf{P}_2\dots\mathbf{P}_t \mathbf{d}_{YLD}  \times{e^{-r_{\Delta_t} t}}\right)
 $$ {#eq-yldcum} 
 
-We can incorporate additional cycle adjustments (e.g., half-cycle adjustment or an adjustment based on Simpson's rule) by defining an $\omega \times 1$ cycle adjustment vector $\mathbf{c}$ that multiplies the cycle-specific discounting value ($e^{-r_{\Delta_t} t}$) with other cycle-specific adjustment values and performing element-wise multiplication on the YLD(t) vector before summing up,
+We can incorporate additional cycle adjustments (e.g., half-cycle adjustment or an adjustment based on Simpson's rule) by defining a adjustment factor $c_t$ that multiplies the cycle-specific discounting factor with other cycle-specific adjustment values,
 
 $$
-YLD=\sum_{t=0}^{\omega-1} YLD(t)=\sum_{t=0}^{\omega-1}\left(\mathbf{s}'_0 \mathbf{P}_1\mathbf{P}_2\dots\mathbf{P}_t \mathbf{d}_{YLD}  \odot \mathbf{c}\right)
-$$ {#eq-yldcum2}  where $\odot$ is the element-wise multiplication (Hadamard product) operator.
+YLD=\sum_{t=0}^{\omega-1} YLD(t)=\sum_{t=0}^{\omega-1}\left(\mathbf{s}'_0 \mathbf{P}_1\mathbf{P}_2\dots\mathbf{P}_t \mathbf{d}_{YLD}  \times c_t \right)
+$$ {#eq-yldcum2} where, at a minimum, $c_t=e^{-r\Delta_t t}$ and can also include any other cycle-correction value (e.g., 0.5 for half-cycle correction or a Simpson's rule coefficient, etc.). 
 
-Finally, an equivalent way to calculate YLD outcomes is through matrix multiplication of the Markov trace matrix and the YLD payoff vector $\mathbf{S}$. 
-
-$$
-YLD = \sum_{t=0}^{\omega-1} \mathbf{S}\mathbf{d}_{YLD} \odot \mathbf{r} 
-$$ {#eq-yldtrace}  
-
-### Years of Life Lost to Disease (YLLs)
-
-As noted in @sec-background and in @eq-yll, YLLs are based on the present value of remaining life expectancy among deaths that occur in each cycle $t$. Define $a(t)$ as the age of the cohort at cycle $t$, i.e., 
+Finally, an equivalent way to calculate YLD outcomes is through matrix multiplication of the Markov trace matrix and the YLD payoff vector, 
 
 $$
-a(t) = a0 +t \cdot \Delta_t 
+YLD = \sum_{t=0}^{\omega-1} \mathbf{S}\mathbf{d}_{YLD} \odot \mathbf{c}
+$$ {#eq-yldtrace}   where $\mathbf{c}$ is an $\omega \times 1$ vector of cycle discoutning/correction factors $c_t$ and $\odot$ is the element-wise multiplication (Hadamard product) operator. 
+
+### Years of Life Lost to Disease (YLLs): Approach 1
+
+As noted in @sec-background and in @eq-yll, YLLs are based on the present value of remaining life expectancy among disease-related deaths. In a discrete time Markov model, these deaths may occur in any cycle $t$---though, like YLDs, the fully-discounted present value is calculated relative to baseline ($t=0$). 
+
+Define $a_{t}$ as the age of the cohort at cycle $t$, i.e., 
+
+$$
+a_t = a_0 +t \cdot \Delta_t 
 $$ {#eq-aget} where $a_0$ is the age of the cohort at $t=0$. 
 
-We next define $e(a(t))$ as the present value of remaining life expectancy at cycle $t$. Following the GBD continuous time discounting approach, $e(t)$ is given by
+We next define $Ex_t$ as the present value of remaining life expectancy of the cohort in cycle $t$. Following the GBD discounting approach, $Ex_{t}$ is given by
 
 $$
-e(t) = \frac{1}{r}\big (1 - e^{-rEx(a(t))} \big )
+Ex_{t} = \frac{1}{r}\big (1 - e^{-rEx(a_{t})} \big )
 $$ {#eq-pvEx}
 
-where $Ex(a)$ is the remaining life expectancy at age $a$. $Ex(a)$ is drawn from either an exogenous (reference) or an endogenous life table, depending on the objectives of the modeling exercise [@anand2019].
+where $Ex(a_t)$ is the remaining life expectancy at age $a$. $Ex(a_t)$ is drawn from either an exogenous (reference) life table, or an endogenous life table, depending on the objectives of the modeling exercise [@anand2019].
 
-To calculate YLLs under Approach 1, we use the Markov trace to calculate $m(t)$, the total number of new deaths from disease in each cycle. Discounted YLLs in each cycle are then estimated as
-
-$$
-YLL(t)=m(t) e(t)  \times{e^{-r\Delta_t t}} 
-$$ {#eq-yllt1}
-Total discounted YLLs are then calculated as,
+To calculate YLLs, we use the Markov trace to calculate $m_t$, the total number of new deaths (or fraction of the cohort that died) from disease-related causes in each cycle; we calculate $m_t$ by taking the difference in state occupancy in the disease-related death column (```DS```) in adjacent cycles.  As above, we can incorporate additional discounting and cycle adjustments into a cycle correction term $c_t$ and calculate total discounted (and cycle-corrected) YLLs as 
 
 $$
-YLL=\sum_{t=0}^{\omega-1}m(t) e(t)  \times{e^{-r\Delta_t t}} 
+YLL_t=m_t Ex_t  \times{c_t} 
+$$ {#eq-yllt1} 
+
+Total discounted YLLs are given by,
+
+$$
+YLL=\sum_{t=1}^{\omega-1} YLL_t = \sum_{t=1}^{\omega-1}m_t Ex_{t}  \times{c_t} 
 $$ {#eq-yllcum1}
 
-For Approach 2, we define a remaining life expectancy payoff vector at cycle $t$:
 
-![YLL Payoff Vector](images/d_yll.png){width="60%"}
+### Years of Life Lost to Disease (YLLs): Approach 2
 
+YLLs under Approach 2 are calculated in a similar way as YLDs, since we have constructed the model to directly estimate new deaths in each cycle. Define the YLL payoff vector $\mathbf{d}_{YLL,t}$, which has value $Ex_{t}$ for the transition tracker health state (```trDS```) and zeros elsewhere,
 
-This payoff vector reflects discounting, but only in terms of the present value of remaining life expectancy *at time* $t$. We therefore discount to $t=0$ using,
+TK NEED TO FIX THIS
+![YLL Payoff Vector](images/d_yll.png){width="40%"}
 
-$$
-YLL(t)=\mathbf{s}'_t \mathbf{e}(t)  \times{e^{-r\Delta_t t}} =\mathbf{s}'_0 \mathbf{P}^t \mathbf{e}(t)  \times{e^{-r\Delta_t t}}
-$$ {#eq-yllt}
-
-Total discounted YLLs at time $t=0$ is given by:
+We can now apply similar equations as used for YLD outcomes to calculate fully discounted YLLs,
 
 $$
-YLL=\sum_{t=0}^{N-1} YLL(t) =\sum_{t=0}^{N-1}\left(\mathbf{s}'_0 \mathbf{P}^t \mathbf{e}(t)  \times{e^{-r\Delta_t t}} \right) 
-$$ {#eq-yllcum}
+YLL=\sum_{t=0}^{\omega-1} YLD(t)=\sum_{t=0}^{\omega-1}\left(\mathbf{s}'_0 \mathbf{P}_1\mathbf{P}_2\dots\mathbf{P}_t \mathbf{d}_{YLL,t}  \times c_t \right)
+$$ {#eq-yllcum}  
+
+Or alternatively, using the Markov trace, we stack each $k \times 1$ payoff vector (using $\mathbf{d}_{YLL,t}^\top$ as rows) into an $\omega \times k$ payoff matrix $\mathbf{D}$, and obtain total adjusted YLLs as
+
+$$
+YLL = \sum_{t=0}^{\omega-1} \text{sum}(\mathbf{S} \odot \mathbf{D}) \odot \mathbf{c}
+$$ {#eq-ylltrace}   where the $\text{sum}()$ operator sums each row across the $k$ columns that result from $\mathbf{S} \odot \mathbf{D}$. 
+
 
 ```{r trace}
 trace1 <- 
@@ -1368,6 +1371,8 @@ result1 <- cbind(LY, YLD, YLL, DALY, ACCDALY, QALY_DALY, QALY,COST) %>%
 ```
 
 
+## Estimating Outcomes Under Approach 3 {#sec-outcomes3}
+
 To calculate outcomes, we must next define "reward" matrices
 $\mathbf{R}_m$, where $m$ indexes the moment of interest (e.g., expected
 value, variance, etc.). The structure and values of $\mathbf{R}_m$ will
@@ -1574,7 +1579,7 @@ $$
 \mathbf{Z}=\left(\mathbf{I}_{\tau \omega} \mid \mathbf{0}_{\tau \omega \times \alpha}\right)
 $$
 
-## Total Expected Outcomes
+### Expected Outcomes
 
 <!-- $$ -->
 <!-- \begin{aligned} -->
