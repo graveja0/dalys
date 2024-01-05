@@ -65,35 +65,44 @@ To maintain consistency within the literature, we build on an existing didactic 
 
 ## Background {#sec-background}
 
-DALYs are calculated from two components. First, conditions are assigned disability weights ($D$) ranging from zero to one, with zero representing the absence of the condition and one representing the highest burden a condition can inflict, equivocal to death. Years lost to disability (YLD) is defined as the disability weight multiplied by the number of years a person lives with the condition ($L$):
+This section provides background information sufficient for conceptual understaning of DALYs and how to estimate them in a decision-analytic model; it is not intended as a comprehensive treatment of the subject. For extensive discussion of the history, assumptions and controversies around DALYs, see TK.  
+
+DALYs are the sum of two components: a morbidity component called years lost to disability (YLD), and a premature mortality component called years of life lost to disease (YLL) [@who2020methods]. To quantify YLDs, conditions are assigned disability weights ($D$) ranging from zero to one, with zero representing the absence of the condition and one representing the highest burden a condition can inflict. Disability weights are elicited from expert panels, are standardized across geographies, and are routinely updated and published as part of the GBD [@who2020methods].
+
+For a given condition $c$, YLDs are defined as the condition's disability weight multiplied by the average number of years a person lives with the disease ($L_c$):
 
 $$
-YLD(L) = D \cdot L
+YLD(c) = D_c \cdot L_c
 $$ {#eq-yld1} 
 
-The impact of disease on mortality is quantified using years of life lost to disease (YLL), which is based on remaining life expectancy $Ex(a)$ at the age of premature death from the disease ($a$). 
+YLLs are determined by a loss function, which is typically defined as the number of years lost to premature mortality at age $a$. This value is often taken directly from a life table that provides information on remaining life expectancy ($Ex(a)$) at a given age. 
 
 $$
 YLL(a)= Ex(a)
 $$ {#eq-yll1} .
 
-DALYs are the sum of the two components:
+Choices over the specific value of remaining life expectancy will depend on the context and research question at hand [@anand2019]. Historically, the GBD
+has utilized an *exogenous*, external reference life table based on the maximum potential life span among humans [@who2020methods; @globalburdenofdiseasecollaborativenetwork2021]. More recent GBD estimates draw on reference life tables based on the lowest observed age-specific mortality rates among geographies with populations over 5 million in 2016 [@globalburdenofdiseasecollaborativenetwork2021]. 
+
+Finally, DALYS are simply the sum of these two components:
 
 $$
-DALY(L,a) = YLD(L) + YLL(a)
-$$ {#eq-daly}
+DALY(c,a) = YLD(c) + YLL(a)
+$$ {#eq-daly} 
 
-In the original GBD study, age-weighting and time discounting practices were applied to DALY calculations [@Murray1997]. These methods respectively weighted the burden of illness more during adulthood than early childhood and old age, and valued present health over future years of illness by discounting YLD and YLL measures by 3% per year. From 2010 onwards, both practices were discontinued to make the DALY a more descriptive measure [@who2013methods].
+### Discounting
+
+In the original GBD study, additional age-weighting and time discounting practices were applied to DALY calculations [@Murray1997]. These methods respectively weighted the burden of illness more during adulthood than early childhood and old age, and valued present health over future years of illness by discounting YLD and YLL measures by 3% per year. From 2010 onwards, both practices were discontinued to make the DALY a more descriptive measure [@who2020methods].
 
 While the GBD no longer uses age and time discounting, the World Health Organization's Choosing Interventions that are Cost-Effective (WHO-CHOICE) program recommends consideration of time discounting of health outcomes [@murray2020; @bertram2021]. We therefore adopt the WHO-CHOICE recommendation and include discounting in our DALY modeling approach.[^whodisc] We do, however, maintain the continuous-time discounting used in the original GBD DALY equations---which differs slightly from the more common use of discrete time discounting in Markov cohort models. 
 
 [^whodisc]: Practitioners who do not wish to discount DALY outcomes can simply set the annual discount rate $r$ to zero. 
 <!-- In addition, our approach differentiates from common practice in the use of a continuous-time discount factor (i.e., $\frac{1}{r}(1-e^{rt})$), rather than a discrete-time discount factor (i.e., $1/(1+r)^t$). We do so to maintain consistency with the original GBD equations---though an approach based on discrete-time discounting could be used and will yield broadly similar results.  -->
 
-For an annual discount rate $r$, and at age $a$, the equation for YLDs is,
+For an annual discount rate $r$, for condition $c$, and at age $a$, the equation for YLDs is,
 
 $$
-YLD(a,L) = D  \left ( \frac{1}{r}\left(1-e^{-r(L) }\right) \right ).
+YLD(c) = D_c  \left ( \frac{1}{r}\left(1-e^{-r(L_c) }\right) \right ).
 $$ {#eq-yld}
 
 Similarly, YLLs are calculated as,
@@ -102,7 +111,7 @@ $$
 YLL(a)= \frac{1}{r}\left(1-e^{-r Ex(a)}\right).
 $$ {#eq-yll} 
 
-It is important to note that the discounting shown in @eq-yld and @eq-yll yield the present value of YLD and YLL outcomes at a single point in time, when the duration of disease ($L$) and time of death from disease ($a$) are known. For a decision model where not all cohort members start off ill, that point in time very likely occurs at some point after the baseline period---and different illness durations and death times will, of course, occur across different individuals in the modeled cohort. As such, to be consistent with standard practice, we must discount YLL and YLD outcomes further---all the way back to the baseline period. This additional discounting step will become apparent in the discrete time YLD and YLL equations introduced in @sec-outcomes below. 
+It is important to note that the discounting shown in @eq-yld and @eq-yll yield the present value of YLD and YLL outcomes at a single point in time, when the duration of disease ($L_c$) and time of death from disease ($a$) are known. For a decision model where not all cohort members start off ill, that point in time very likely occurs at some point after the baseline period---and different illness durations and death times will, of course, occur across individuals in a modeled cohort. As such, to be consistent with standard practice with WHO-CHOICE, we must discount YLL and YLD outcomes further---all the way back to the baseline (time $t=0$) period. This additional discounting step will become apparent in  @sec-outcomes below. 
 
 ## Model Overview {#sec-overview}
 
@@ -119,7 +128,7 @@ A state transition diagram is shown in @fig-model1. In the figure, nodes are hea
 
 As depicted in @fig-model1, and as parameterized in our replication code, the underlying Markov model is time homogeneous---that is, transition rates do not vary as a function of time (e.g., the background mortality rate is fixed and does not increase with age). This is merely a simplification that builds on an existing time-homogeneous model constructed for didactic purposes [@alarid2023introductory]. We do, however, index all formulas and other model-relevant objects with the subscript $t$ to allow for time-inhomogenous models. Our replication code is also written to easily accomodate time-inhomogeneous models. 
 
-An additional observation is worth highlighting. In our implementation of the Sick-Sicker model, disability weights are defined as one minus the utility weight. This is not generally the case, as DALY disability weights are derived from expert valuations and are standardized across countries and regions [@who2013methods; @sassi2006calculating]. Utility weights, by contrast, are often derived from general population and/or patient samples and therefore differ across geographies [@sassi2006calculating]. We have elected to parameterize our model in this way to hold this methodological difference fixed---that is, we aim to show how differences in methodological choices shape estimates of DALYs while holding fixed *additional* differences that might occur due to differences in the derivation of disability and utility weights. 
+An additional observation is worth highlighting. In our implementation of the Sick-Sicker model, disability weights are defined as one minus the utility weight. This is not generally the case, as DALY disability weights are derived from expert valuations and are standardized across countries and regions [@who2020methods; @sassi2006calculating]. Utility weights, by contrast, are often derived from general population and/or patient samples and therefore differ across geographies [@sassi2006calculating]. We have elected to parameterize our model in this way to hold this methodological difference fixed---that is, we aim to show how differences in methodological choices shape estimates of DALYs while holding fixed *additional* differences that might occur due to differences in the derivation of disability and utility weights. 
 
 ![State transition diagram for progressive disease model](images/state-transition-diagram-1.svg){#fig-model1}
 
@@ -940,14 +949,13 @@ healthy_longevity_yll <- function(params, life_expectancy, disc) {
 }
 ```
 
-## Estimating Outcomes Under Approaches 1 and 2 {#sec-outcomes}
+## DALY Outcomes Under Approaches 1 and 2 {#sec-outcomes}
 
-With transition matrices and other relevant model objects defined, we next define formulas for estimating outcomes. Our three approaches differ, however, in how total (or expected) outcomes are calculated. Approach 1 requires a Markov trace that tracks occupancy in each cycle; for YLL outcomes, we use this information to calculate the number of new disease-related deaths in each cycle. Approach 2 does not require this extra step, as both cycle-specific and total outcomes are calculated directly. Finally, Approach 3 differs insofar as it directly solves for expected outcomes (i.e., the approach does not require calculation of cycle-specific values). 
+With transition matrices and other relevant model objects defined, we next define formulas for estimating outcomes. Our three approaches differ in how total (or expected) outcomes are calculated. Approach 1 requires a Markov trace that tracks occupancy in each cycle; for YLL outcomes, we use this information to calculate the number of new disease-related deaths in each cycle. Approach 2 does not require this extra step, as both cycle-specific and total outcomes are calculated directly. Finally, Approach 3 differs insofar as it directly solves for expected outcomes (i.e., the approach does not require calculation of cycle-specific values). 
 
 ### Markov Trace 
 
-YLL outcomes calculated under Approach 1 requires a Markov trace, or a matrix summarizing occupancy in each health state in each cycle. Define $\mathbf{s}_0$ as the initial state occupancy (column) vector at time $t=0$. The vector $\mathbf{s}_0$ has size $k$, where $k$ is the total number of states (including transition tracking states, if applicable). This vector summarizes the number or fraction of the population in each health state at baseline. 
-
+YLL outcomes calculated under Approach 1 requires a Markov trace, or a matrix summarizing occupancy in each health state in each cycle. Define $\mathbf{s}_0$ as the initial state occupancy (column) vector at time $t=0$. The vector $\mathbf{s}_0$ has size $k$, where $k$ is the total number of states (including transition tracking states, if applicable). This vector summarizes the number or fraction of the cohort in each health state at baseline. 
 Health state occupancy at time $t$ is is calculated as:
 
 $$
@@ -965,7 +973,7 @@ s_{11} & s_{12} & \ldots & s_{1k} \\
 \vdots & \vdots & \ddots & \vdots \\
 s_{\omega-1, 1} & s_{\omega-1, 2} & \ldots & s_{\omega-1, k}
 \end{bmatrix}
-$$ {#eq-markovtrace} where each row represents state occupancy at time $t = 0, 1, \ldots, \omega$. 
+$$ {#eq-markovtrace} where each row represents state occupancy at time $t = 0, 1, \ldots, \omega-1$. 
 
 Note that the rows in $\mathbf{S}$ run from $t=0$ to $\omega-1$; this assumes that all health state transitions occur at the end of each cycle. If we were to instead assume transitions occur at the beginning of the cycle, we would set the matrix to run from $t=1$ to $\omega$.
 
@@ -981,23 +989,23 @@ $$
 r_{\Delta_t} = r \Delta_t
 $$ {#eq-cycledisc} where $r$ is the annual discount rate and $\Delta_t$ is the cycle length. 
 
-In the YLD payoff vector, the term $\frac{1}{r_{\Delta_t}}(1-e^{-r_{\Delta_t}})$ is included as a continuous-time discounting adjustment factor for the defined cycle length $\Delta_t$. This term is included to discount time *within* each cycle in order to maintain the continuous-time discounting approach used in the original GBD equations.[^conttime] 
+In the YLD payoff vector, the term $\frac{1}{r_{\Delta_t}}(1-e^{-r_{\Delta_t}})$ is included as a continuous-time discounting factor for the defined time step $\Delta_t$. This term is included to discount time *within* each cycle in order to maintain the continuous-time discounting approach used in the original GBD equations.[^conttime] 
 
 [^conttime]: For example, if $r=0.03$ and $\Delta_t=1$ (i.e., annual cycle length), this adjustment factor will be $0.985 = \frac{1}{r_{\Delta_t}}(1-e^{-r_{\Delta_t}})$. If $\Delta_t=1/12$ (monthly cycle) the cycle discounting adjustment factor is 0.99875.
 
 To fully discount outcomes, we still must discount all future outcome values back to baseline ($t=0$).  Discounted years of life lost to disability (YLD) at cycle $t$ is given by
 
 $$
-YLD(t)=\mathbf{s}'_0 \mathbf{P}_1\mathbf{P}_2\dots\mathbf{P}_t \mathbf{d}_{YLD}  \times{e^{-r_{\Delta_t} t}}
+YLD_t=\mathbf{s}'_0 \mathbf{P}_1\mathbf{P}_2\dots\mathbf{P}_t \mathbf{d}_{YLD}  \times{e^{-r_{\Delta_t} t}}
 $$ {#eq-yldt}
 
 Total discounted YLDs are obtained by summing cycle-specific discounted YLD outcomes,
 
 $$
-YLD=\sum_{t=0}^{\omega-1} YLD(t)=\sum_{t=0}^{\omega-1}\left(\mathbf{s}'_0 \mathbf{P}_1\mathbf{P}_2\dots\mathbf{P}_t \mathbf{d}_{YLD}  \times{e^{-r_{\Delta_t} t}}\right)
+YLD=\sum_{t=0}^{\omega-1} YLD_t
 $$ {#eq-yldcum} 
 
-We can incorporate additional cycle adjustments (e.g., half-cycle adjustment or an adjustment based on Simpson's rule) by defining a adjustment factor $c_t$ that multiplies the cycle-specific discounting factor with other cycle-specific adjustment values,
+We can incorporate additional cycle adjustments (e.g., half-cycle adjustment or an adjustment based on Simpson's rule) by defining a adjustment factor $c_t$ that multiplies the cycle-specific discounting factor (i.e., $e^{-r_{\Delta_t} t}$) with other cycle-specific adjustment values,
 
 $$
 YLD=\sum_{t=0}^{\omega-1} YLD(t)=\sum_{t=0}^{\omega-1}\left(\mathbf{s}'_0 \mathbf{P}_1\mathbf{P}_2\dots\mathbf{P}_t \mathbf{d}_{YLD}  \times c_t \right)
@@ -1011,7 +1019,7 @@ $$ {#eq-yldtrace}   where $\mathbf{c}$ is an $\omega \times 1$ vector of cycle d
 
 ### Years of Life Lost to Disease (YLLs): Approach 1
 
-As noted in @sec-background and in @eq-yll, YLLs are based on the present value of remaining life expectancy among disease-related deaths. In a discrete time Markov model, these deaths may occur in any cycle $t$---though, like YLDs, the fully-discounted present value is calculated relative to baseline ($t=0$). 
+As noted in @sec-background and in @eq-yll, YLLs are based on the present value of remaining life expectancy among disease-related deaths. In a discrete time Markov model, these deaths may occur in any cycle---though, like YLDs, the fully-discounted value is calculated relative to baseline ($t=0$). 
 
 Define $a_{t}$ as the age of the cohort at cycle $t$, i.e., 
 
@@ -1019,7 +1027,9 @@ $$
 a_t = a_0 +t \cdot \Delta_t 
 $$ {#eq-aget} where $a_0$ is the age of the cohort at $t=0$. 
 
-We next define $Ex_t$ as the present value of remaining life expectancy of the cohort in cycle $t$. Following the GBD discounting approach, $Ex_{t}$ is given by
+We next define $Ex_t$ as the present value of remaining life expectancy of the cohort in cycle $t$. 
+
+Following the GBD discounting approach, $Ex_{t}$ is given by
 
 $$
 Ex_{t} = \frac{1}{r}\big (1 - e^{-rEx(a_{t})} \big )
@@ -1027,7 +1037,7 @@ $$ {#eq-pvEx}
 
 where $Ex(a_t)$ is the remaining life expectancy at age $a$. $Ex(a_t)$ is drawn from either an exogenous (reference) life table, or an endogenous life table, depending on the objectives of the modeling exercise [@anand2019].
 
-To calculate YLLs, we use the Markov trace to calculate $m_t$, the total number of new deaths (or fraction of the cohort that died) from disease-related causes in each cycle; we calculate $m_t$ by taking the difference in state occupancy in the disease-related death column (```DS```) in adjacent cycles.  As above, we can incorporate additional discounting and cycle adjustments into a cycle correction term $c_t$ and calculate total discounted (and cycle-corrected) YLLs as 
+To calculate YLLs, we use the Markov trace to calculate $m_t$, the total number of new deaths from disease-related causes in each cycle. We calculate $m_t$ by taking the difference in state occupancy in the disease-related death column (```DS```) in adjacent cycles.  As above, we can incorporate additional discounting and cycle adjustments into a cycle correction term $c_t$ and calculate total discounted (and cycle-corrected) YLLs as 
 
 $$
 YLL_t=m_t Ex_t  \times{c_t} 
@@ -1042,10 +1052,9 @@ $$ {#eq-yllcum1}
 
 ### Years of Life Lost to Disease (YLLs): Approach 2
 
-YLLs under Approach 2 are calculated in a similar way as YLDs, since we have constructed the model to directly estimate new deaths in each cycle. Define the YLL payoff vector $\mathbf{d}_{YLL,t}$, which has value $Ex_{t}$ for the transition tracker health state (```trDS```) and zeros elsewhere,
+YLLs under Approach 2 can be calculated in a similar way as YLDs, since we have augmented the model with a transition tracking state that directly etimates new deaths in each cycle. Define the YLL payoff vector $\mathbf{d}_{YLL,t}$, which has value $Ex_{t}$ for the transition tracker health state (```trDS```) and zeros elsewhere,
 
-TK NEED TO FIX THIS
-![YLL Payoff Vector](images/d_yll.png){width="40%"}
+![](images/d_yll.png){width="40%" fig-align="center"}
 
 We can now apply similar equations as used for YLD outcomes to calculate fully discounted YLLs,
 
@@ -1053,7 +1062,7 @@ $$
 YLL=\sum_{t=0}^{\omega-1} YLD(t)=\sum_{t=0}^{\omega-1}\left(\mathbf{s}'_0 \mathbf{P}_1\mathbf{P}_2\dots\mathbf{P}_t \mathbf{d}_{YLL,t}  \times c_t \right)
 $$ {#eq-yllcum}  
 
-Or alternatively, using the Markov trace, we stack each $k \times 1$ payoff vector (using $\mathbf{d}_{YLL,t}^\top$ as rows) into an $\omega \times k$ payoff matrix $\mathbf{D}$, and obtain total adjusted YLLs as
+Alternatively, using the Markov trace, we stack each $k \times 1$ payoff vector (using $\mathbf{d}_{YLL,t}^\top$ as rows) into an $\omega \times k$ payoff matrix $\mathbf{D}$, and obtain total adjusted YLLs as
 
 $$
 YLL = \sum_{t=0}^{\omega-1} \text{sum}(\mathbf{S} \odot \mathbf{D}) \odot \mathbf{c}
@@ -1371,48 +1380,23 @@ result1 <- cbind(LY, YLD, YLL, DALY, ACCDALY, QALY_DALY, QALY,COST) %>%
 ```
 
 
-## Estimating Outcomes Under Approach 3 {#sec-outcomes3}
+## DALY Outcomes Under Approach 3 {#sec-outcomes3}
 
-To calculate outcomes, we must next define "reward" matrices
-$\mathbf{R}_m$, where $m$ indexes the moment of interest (e.g., expected
-value, variance, etc.). The structure and values of $\mathbf{R}_m$ will
-differ, however, depending on the outcome.
 
-To facilitate how we define rewards (i.e., payoffs), we briefly classify
-each of our outcomes (LE, YLL, YLD, DALYs, QALYs) into broad classes
-corresponding to whether the payoff or "reward" applies to occupancy, or
-to transitions, within or to a given health state:
+Our advanced approach draws on Markov chain with rewards methods that define reward matrices for occupancy-based (YLD) and transition-based (YLL) outcomes. These reward matrices allow us to estimate outcomes for any combination of health states and/or ages. Reward matrices have notation $\mathbf{R}_m$, where $m$ indexes the moment of interest (e.g., expected
+value, variance, etc.). We focus here on expected outcomes (i.e., outcomes based on $\mathbf{R}_1$)---though equations are available to estimate higher-order moments and objects such as variance, skewness, the coefficient of variation, etc. 
 
-| Outcome                                   | Reward Class                                                            |
-|---------------------------|---------------------------------------------|
-| Life Expectancy                           | Occupancy (1.0 for each alive health state)                             |
-| Years of life lived with disability (YLD) | Occupancy (disability weight applied to time in CVD state)              |
-| Yearls of life lost to disease (YLL)      | Transition (remaining life expectancy applied to CVD death transitions) |
-| Disability-Adjusted Life Years (DALYs)    | Occupancy (YLD) + Transition (YLL)                                      |
-| Quality-Adjusted Life Years               | Occupancy (utility weights applied to living health states)             |
+### Years of Life Lived With Disease (YLD)
 
-: Classification of Health Outcomes
-
-### Occupancy-Based Outcomes
-
-To calculate occupancy-based outcomes, we start with a reward matrix
+To calculate occupancy-based outcomes such as YLDs, we first define a $\tau \times \omega$ reward matrix
 $\mathbf{H}$, which has dimensions $\tau \times \omega$ and is
 structured as shown in @fig-H-le:
 
-![Reward matrix $\mathbf{H}$](images/H-LE.png){#fig-H-le fig-align="center" width="50%"}
+![YLD reward matrix $\mathbf{H}$](images/H-LE.png){#fig-H-le fig-align="center" width="40%"}
 
-Cell values within this matrix can be set to one if we want to "reward"
+Cell values within this matrix can be set to one if we want to potentially "reward"
 that health state-age combination in our outcome measure, and zero
-otherwise.[^rewards]
-
-[^rewards]: This structure allows us, for example, to estimate outcomes for
-    certain age ranges or other decision-relevant combinations of health
-    state and age.
-
-For occupancy-based outcomes, we define $\mathbf{H}$ such that each cell
-receives a value of one.
-
-![Reward matrix $\mathbf{H}$](images/H-LE2.png){#fig-H fig-align="center" width="50%"}
+otherwise.
 
 We use this matrix to define the reward vector $\mathbf{h}$:[^stackreward]
 
@@ -1424,54 +1408,23 @@ $$
 $$ We also define $\neg \mathbf{h}$ as the complement of $\mathbf{h}$,
 (i.e., values of 1.0 become 0, and vice versa).
 
-Occupancy-based outcomes with partial rewards (e.g., YLDs, QALYs)
-require an additional matrix $\mathbf{V}$, which has the same structure
-as $\mathbf{H}$:
+We next define additional matrix $\mathbf{V}$, which has the same structure
+as $\mathbf{H}$ but includes the (fully discounted) disability weight:
 
-If $\mathbf{S}$ is the set of states that receive a reward (e.g., the
-CVD state for both QALYs and YLDs), then a cycle spent in state $i$ at
-age $j$ is defined by
+![YLD reward matrix $\mathbf{V}$](images/H-YLD.png){#fig-H-yld fig-align="center" width="60%"} 
 
-$$
-\mathbf{V}(i, j)= \begin{cases}E\left[v(i, j)\right] & \text { if }(i, j) \in \mathcal{S} \\ 0 & \text { otherwise }\end{cases}
-$$ For YLD outcomes, $\mathbf{V}$ is defined as shown in @fig-V-yld,
-while for QALY outcomes $\mathbf{V}$ is defined as shown in @fig-V-qaly
-.
+where $\texttt{dwS1}* = \texttt{dwS1} \times \Delta_t  \times  \frac{1}{r_{\Delta_t}}(1-e^{-r_{\Delta_t}}) \times e^{-r_{\Delta_t} t}$, etc.
 
-![Reward matrix for YLD Outcome](images/H-YLD.png){#fig-V-yld
-fig-align="center" width="70%"}
-
-![Reward matrix \mathbf{V} for QALY
-Outcome](images/H-QALY.png){#fig-V-qaly fig-align="center" width="60%"}
-
-We simliarly define an occupancy indicator vector $\mathbf{v}$ just as
-we did $\mathbf{h}$:
+We similarly define an occupancy indicator vector $\mathbf{v}$ just as
+we did for $\mathbf{h}$:
 
 $$
 \mathbf{v}_{m}=\operatorname{vec} \mathbf{V}_{m}
 $$
 
-### Rewards for Partial Occupancy
+#### Partial Occupancy 
 
-Like many health economic applications, the Healthy Longevity approach
-makes assumptions on partial occupancy in a health state.[^partial]
-Specifically, the approach assumes that partial occupancy in a health
-state receives half the reward---essentially, we draw on an assumption
-that mid-cycle transitions occur at the half-way point.[^cycle]
-
-[^partial]: For example, half-cycle corrections are often used---though there
-    are other methdos (e.g., Simpson's rule) that are also drawn upon.
-
-[^cycle]: This is similar to the standard "half-cycle" correction, however
-    under this approach, a half-cycle correction occurs in each cycle,
-    not in the first and last cycles. As we will see below, for rewards
-    that are uniform across transient health states (e.g., calculating
-    life expectancy involves a "payoff" of 1.0 for every living health
-    state) this will yield identical answers as a Markov trace-based
-    approach that adopts a half-cycle correction.
-
-We combine this partial ocupancy assumption, along with the vectorized
-reward matrices $\mathbf{h}$ and $\mathbf{v}$ to obtain the following:
+Because we are modeling a continuous-time disease progression progress in discrete time, it is useful to make corrections for partial occupancy in a cycle. Similar to a half-cycle correction often used in health economic applications, the Markov chain with rewards approach does so by assuming transitions occur half-way through a cycle. We operationalize this assumption by defining,
 
 $$
 \begin{aligned}
@@ -1481,7 +1434,7 @@ $$ and
 
 $$
 \widetilde{\mathbf{C}}_{1}=\frac{1}{2} \mathbf{1}_{\alpha} \mathbf{v_1}^{\top}
-$$
+$$ where $\mathbf{1}_{\alpha}$ is a vector of ones with length $\alpha$.
 
 We combine $\widetilde{\mathbf{B}}_{1}$ and $\widetilde{\mathbf{C}}_{1}$ to
 obtain:
@@ -1491,14 +1444,14 @@ $$
 \widetilde{\mathbf{B}}_{1} & \mathbf{0} \\
 \hline \widetilde{\mathbf{C}}_{1} & \mathbf{0}
 \end{array}\right) 
-$$ which has same block structure as the transition probability matrix
-$\widetilde{\mathbf{P}}$.
+$$ which has same block structure and dimensions as the transition probability matrix
+$\widetilde{\mathbf{P}}$ (@eq-Ptilde).
 
-Expected outcomes are based on
+Expected YLDs are estimated by,
 
 $$
 \begin{aligned}
-& \widetilde{\boldsymbol{\rho}}_{1}=\widetilde{\mathbf{N}}^{\top} \mathbf{Z}\left(\widetilde{\mathbf{P}} \circ \widetilde{\mathbf{R}}_{1}\right)^{\top} \mathbf{1}_{s} 
+& \widetilde{\boldsymbol{\rho}}_{1}=\widetilde{\mathbf{N}}^{\top} \mathbf{Z}\left(\widetilde{\mathbf{P}} \odot \widetilde{\mathbf{R}}_{1}\right)^{\top} \mathbf{1}_{s} 
 \end{aligned}
 $$ where $\widetilde{\mathbf{N}}$ is the fundamental matrix
 
@@ -1531,14 +1484,7 @@ $$
 where $\eta_{i x}$ is remaining life expectancy for an individual in
 health state $i$ at a given age $x$. In this structure, remaining life expectancy for each health state is grouped within age classes. 
 
-Our choice for remaining life expectancy values $\eta_{i x}$ for YLL outcomes will depend on
-the context and research question at hand [@anand2019]. Historically, the GBD
-has utilized an *exogenous*, external life table 
-based on the maximum potential life span among humans [@globalburdenofdiseasecollaborativenetwork2021]. @anand2019 discuss alternative contexts in which remaining life expectancy based on an *endogenous* life table or life expectancy model might be preferred. 
 
-The distinction between *exogenous* and *endogenous* rewards for YLLs boils down to whether the remaining life expectancy value used originates from *outside* the population under study (i.e., mortality risks used to calculate remaining life expectancy at a given age are independent of the mortality risks of the population being assessed), or not. 
-
-For YLLs based on exogenous life tables, such as the reference life table published by the GBD, we define $\widetilde{\boldsymbol{\eta}}^{\top}$ based on the reference life table value at each age. For YLLs based on an endogenous life table, we could simply swap in external life table values from our country or region of interest, *or* use the model itself to estimate remaining life expectancy for a given age and initial health state. 
 
 We next construct the reward matrices:
 
@@ -1671,7 +1617,9 @@ with(params3,{
 
 LY3_ <- params3 %>% healthy_longevity_occupancy(H = H, V = V_LY)
 QALY3_ <- params3 %>% healthy_longevity_occupancy(H = H, V = V_QALY)
-YLD3_ <- params3 %>% healthy_longevity_occupancy(H = H, V = V_YLD)
+HYLD = H
+HYLD[1,] = rep(0,ncol(H))
+YLD3_ <- params3 %>% healthy_longevity_occupancy(H = HYLD, V = V_YLD)
 COST3_ <- params3 %>% healthy_longevity_occupancy(H = H, V = V_COST)
 
 remaining_life_expectancy <- with(params3,(1/r_v_disc_h) * (1 - exp(-r_v_disc_h * f_ExR(ages))))
