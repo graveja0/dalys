@@ -272,13 +272,18 @@ v_disc_c =
 r = 0.03
 Delta_t = 1
 t = 10
-x = (1/r)*(1-exp(-r))
 
 r_ = r * Delta_t
 (1/r_)*(1-exp(-r_*t/Delta_t))*Delta_t
 adj = (1/r_)*(1-exp(-r_))
 disc = exp(-r_*(0:(t/Delta_t-1)))
 sum(rep(1,t/Delta_t)*adj*disc)*Delta_t
+
+# YLL
+Ex = 20
+(1/r)*(1-exp(-r*Ex))*exp(-r*(t-1))
+Ex_ <- (1/r)*(1-exp(-r*Ex))
+sum(c(rep(0,(t-1)/Delta_t),Ex_)*disc)
 
 # basic intuition is that discrete time formula (1/(1+r)^t) and continuous time formula exp(-rt) are designed to discount a series of discrete "payoffs." but health doesn't accrue with a single lump-sum value in each cycle; it is continuous flow throughout the cycle. by comparison, the GBD (1/r)(1-exp(-rt)) assumes a continuous flow. we can adjust the cycle "payoff" to reflect a continuous flow by applyign the adjustment factor (1/r)*(1-exp(-r)), and thus once adjusted, any sum total that uses exp(-rt) will be identical as a value that uses (1/r)*(1-exp(-rt)).
 
