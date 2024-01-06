@@ -1,0 +1,381 @@
+---
+title: "Replicating FRH"
+output: html_notebook
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup}
+#| echo: true
+#| message: false
+#| warning: false
+library(tidyverse)
+library(MASS)
+library(expm)
+library(knitr)
+library(kableExtra)
+options(scipen = 5) 
+transpose <- purrr::transpose
+select <- dplyr::select
+options(knitr.kable.NA = '')
+
+gen_wcc <- function (n_cycles, method = c("Simpson1/3", "half-cycle", "none")) 
+{
+    if (n_cycles <= 0) {
+        stop("Number of cycles should be positive")
+    }
+    method <- match.arg(method)
+    n_cycles <- as.integer(n_cycles)
+    if (method == "Simpson1/3") {
+        v_cycles <- seq(1, n_cycles + 1)
+        v_wcc <- ((v_cycles%%2) == 0) * (2/3) + ((v_cycles%%2) != 
+                                                     0) * (4/3)
+        v_wcc[1] <- v_wcc[n_cycles + 1] <- 1/3
+    }
+    if (method == "half-cycle") {
+        v_wcc <- rep(1, n_cycles + 1)
+        v_wcc[1] <- v_wcc[n_cycles + 1] <- 0.5
+    }
+    if (method == "none") {
+        v_wcc <- rep(1, n_cycles + 1)
+    }
+    return(v_wcc)
+}
+```
+
+FRH consider a woman who develops bipolar depression at age 35, lives for 10 years with the disorder, and then dies prematurely at age 45.
+
+```{r parameterize}
+params_ <- list(
+    # Treatment Strategies
+    v_tx_names = c("FRH"),      # treatment names
+    n_tx = 1, # number of treatment strategies
+    
+    cycle_correction = "half-cycle",
+    
+    v_tr_names = c("H","S1"), # transient health states
+    v_ab_names = c("DOC","DS"), # absorbing health states
+    n_states = 4, # total number of health states
+    
+    horizon = 50,  # TK 400 # model time horizon (in years)  
+    r_v_disc_h  = 0.03,     # annual discount rate for health outcomes
+    r_v_disc_c = 0.03,     # annual discount rate for cost outcomes
+    Delta_t = 1,      # time step (1 = yearly, 1/12 = monthly, etc.)
+    age0 = 35,         # age at baseline
+    v_s0T = c(1,0,0,0), # initial state occupancy  
+                      # c(1,0,0,0,0) means the modeled cohort starts off healthy
+    
+    r_HS1 = 0,   # disease onset rate
+    r_S1H = 0,    # recovery rate
+    r_HD = 0,  # TK .002 # background mortality rate
+    
+    u_H = 1,           # Healthy utility weight
+    u_S1 = 0.4,       # Sick utility weight
+    u_D = 0,           # Death utility weight
+
+    dw_S1 = 0.6,      # Sick disability weight
+    
+    df_ExR =  # Reference life table from GBD
+          tibble::tribble(
+              ~Age, ~Life.Expectancy,
+              0L,      0,
+              1L,      0,
+              5L,      0,
+              10L,     0,
+              15L,     0,
+              20L,     0,
+              25L,     0,
+              30L,     0,
+              35L,     0,
+              40L,     0,
+              45L,    34.73 , #FRH 
+              50L,      0,
+              55L,      0,
+              60L,      0,
+              65L,      0,
+              70L,      0,
+              75L,      0,
+              80L,      0,
+              85L,      0,
+              90L,      0,
+              95L,      0
+          )
+)
+
+params <- 
+    with(params_,{
+        modifyList(params_,list(
+            v_names_states = c(v_tr_names, v_ab_names), # health state names
+            omega = horizon/Delta_t,  # Total number of cycles
+            r_v_disc_h_Delta_t = r_v_disc_h * Delta_t,  # Cycle discount rate: health outcomes
+            r_v_disc_c_Delta_t = r_v_disc_c * Delta_t,  # Cycle discount rate: cost outcomes
+            ages = (0:(horizon/Delta_t))*Delta_t + age0,  # Age in each cycle
+             # Approximation function for reference life table life expectancies:
+            f_ExR = function(x) x %>% map_dbl(~(if(.x==45)  34.73 else 0))
+        ))
+    })
+
+params$ages_trace <- params$ages
+params$ages <- params$ages[-length(params$ages)]
+
+v_disc_h =  # Continuous time discounting
+  exp(-params$r_v_disc_h_Delta_t  * 0:(params$omega))
+# v_disc_h =  # Discrete time discounting
+#   with(params,1 / (( 1 + (r_v_disc_h * Delta_t)) ^ (0 : omega)))
+v_disc_c = 
+  exp(-params$r_v_disc_c_Delta_t  * 0:(params$omega))
+```
+
+
+```{r transition-matrices}
+params1 <- with(params,modifyList(params,list(
+    # Natural History Transition Rate Matrix
+    m_R = 
+      ages %>% map(~({
+        mR_FRH = 
+          matrix(c(
+          0,0,0,0, 
+          0,0,0,0, 
+          0,0,0,0,          
+          0,0,0,0),
+          nrow = n_states, 
+          ncol = n_states,
+          byrow=TRUE, 
+          dimnames = list(c(v_tr_names,v_ab_names),
+                          c(v_tr_names,v_ab_names)
+          ))
+        
+        array(c(as.vector(mR_FRH)), 
+              dim = c(length(v_tr_names)+ length(v_ab_names),length(v_tr_names)+ length(v_ab_names),length(v_tx_names)),
+          dimnames = list(c(v_tr_names,v_ab_names),c(v_tr_names,v_ab_names),v_tx_names)) %>% 
+            apply(.,3,function(x) x, simplify=FALSE) 
+        
+      }))
+    )))
+
+params1 <- with(params1,modifyList(params1,list(
+    m_P = m_R %>% transpose() %>% map(~({
+      mR_ = .x
+      mR_ %>% map(~({
+              expm(.x * Delta_t)
+         }))
+      }))
+)))
+
+params1 <- with(params1,modifyList(params1,list(
+  m_P_ = m_P %>% map(~({
+    tmp <- .x
+    init <- diag(nrow=nrow(tmp[[1]]),ncol=ncol(tmp[[1]]))
+    dimnames(init) = dimnames(tmp[[1]])
+    append(.x,list(init),after=0)
+  }))
+)))
+params1$m_P = params1$m_P_
+params1[["m_P_"]] <- NULL
+
+params1 <- with(params1,modifyList(params1,list(
+  m_P_ = v_tx_names %>% map(~({
+    p_ <- m_P[[.x]]
+    a <- ages_trace
+    map2(a,p_,~({
+      if (.x==35) {
+        .y[1,2]  = 1
+        .y[1,1] = 0
+      }
+      if (.x==45) {
+        .y[2,4] = 1
+        .y[2,2] = 0
+      }
+      if (.x>45) {
+        .y[1,3] = 1
+        .y[1,1] = 0
+        .y[2,3] = 1
+        .y[2,2] = 0
+      }
+      .y
+    }))
+  }))
+)))
+params1$m_P = params1$m_P_
+params1[["m_P_"]] <- NULL
+names(params1$m_P) = params1$v_tx_names
+```
+
+```{r}
+params2 <- with(params,modifyList(params,list(
+    v_tr_names = c("H","S1"), # transient health states
+    v_ab_names = c("D","trDS"), # absorbing health states
+    n_states = 4, # total number of health states
+    v_names_states = c(c("H","S1"), c("D","trDS"))
+)))
+
+params2 <- with(params2,modifyList(params2,list(
+    # Natural History Transition Rate Matrix
+      m_R = 
+        ages %>% map(~({
+         mR_FRH = 
+          matrix(c(
+          0,0,0,0, 
+          0,0,0,0, 
+          0,0,0,0,          
+          0,0,0,0),
+          nrow = n_states, 
+          ncol = n_states,
+          byrow=TRUE, 
+          dimnames = list(c(v_tr_names,v_ab_names),
+                          c(v_tr_names,v_ab_names)
+          ))
+        
+ array(c(as.vector(mR_FRH)), 
+              dim = c(length(v_tr_names)+ length(v_ab_names),length(v_tr_names)+ length(v_ab_names),length(v_tx_names)),
+          dimnames = list(c(v_tr_names,v_ab_names),c(v_tr_names,v_ab_names),v_tx_names)) %>% 
+            apply(.,3,function(x) x, simplify=FALSE) 
+        
+      }))
+    )))
+
+params2 <- with(params2,modifyList(params2,list(
+    m_P = m_R %>% transpose() %>% map(~({
+      mR_ = .x
+      mR_ %>% map(~({
+              tmp_ <- expm(.x * Delta_t)
+              tmp_[4,4] = 0
+              tmp_
+         }))
+      }))
+)))
+
+params2 <- with(params2,modifyList(params2,list(
+  m_P_ = m_P %>% map(~({
+    tmp <- .x
+    init <- diag(nrow=nrow(tmp[[1]]),ncol=ncol(tmp[[1]]))
+    dimnames(init) = dimnames(tmp[[1]])
+    append(.x,list(init),after=0)
+  }))
+)))
+params2$m_P = params2$m_P_
+params2[["m_P_"]] <- NULL
+
+params2 <- with(params2,modifyList(params2,list(
+  m_P_ = v_tx_names %>% map(~({
+    p_ <- m_P[[.x]]
+    a <- ages_trace
+    map2(a,p_,~({
+      .y[4,4] = 0
+      if (.x==35) {
+        .y[1,2]  = 1
+        .y[1,1] = 0
+      }
+      if (.x==45) {
+        .y[2,4] = 1
+        .y[2,3] = 1
+        .y[2,2] = 0
+      }
+      if (.x>45) {
+        .y[1,3] = 1
+        .y[1,1] = 0
+        .y[2,3] = 1
+        .y[2,2] = 0
+      }
+      .y
+    }))
+  }))
+)))
+params2$m_P = params2$m_P_
+params2[["m_P_"]] <- NULL
+names(params1$m_P) = params1$v_tx_names
+```
+
+```{r trace}
+trace1 <- 
+    with(params1, {
+        m_P %>% map( ~ ({
+            P = .x
+            occ <- v_s0T
+            P %>% map(~({
+              occ <<- occ %*% .x
+            })) %>% 
+            map(~(data.frame(.x))) %>% 
+            bind_rows()
+        }))
+    })  
+
+trace2 <- 
+    with(params2, {
+        m_P %>% map( ~ ({
+            P = .x
+            occ <- v_s0T
+            P %>% map(~({
+              occ <<- occ %*% .x
+            })) %>% 
+            map(~(data.frame(.x))) %>% 
+            bind_rows()
+        }))
+    })  %>% 
+    map(~({
+        tmp = .x[1,]
+        tmp[1,] = params2$v_s0T
+        tmp = rbind(tmp,.x)
+    }))
+```
+
+```{r}
+# YLD
+yld_ = with(params1,(matrix(c(0,
+              dw_S1 * Delta_t * (1/r_v_disc_h_Delta_t) * (1 - exp(-r_v_disc_h_Delta_t)) ,
+              0,
+              0),
+            dimnames = list(c(
+                c(v_tr_names,v_ab_names)
+            ), c("DW")))
+))
+yld_ <- 
+  with(params1,{
+    v_tx_names %>% map(~({
+         yld_
+    }))
+  }) %>% 
+  set_names(params1$v_tx_names)
+
+YLDt <- 
+   with(params1, {
+    v_tx_names %>% map( ~ ({
+      P = m_P[[.x]]
+      occ <- v_s0T
+      d <- yld_[[.x]]
+      out <- 0
+      P %>% map(~({
+        occ <<- occ %*% .x 
+        out <<-  occ %*% d
+      })) %>% 
+        map(~(data.frame(.x))) %>% 
+        bind_rows()
+    }))
+  })  %>% 
+  set_names(params1$v_tx_names)
+YLD = YLDt %>% map(~sum(.x*  v_disc_h * gen_wcc(params1$omega, method = "none")))
+
+# YLL
+new_deaths_from_disease <- 
+    map(trace1,~({
+        c(0,diff(.x[,"DS"]))
+    })) 
+
+remaining_life_expectancy <- 
+    with(params1,(1/r_v_disc_h) * (1 - exp(-r_v_disc_h * f_ExR(ages_trace))))
+    
+YLLt <- 
+    new_deaths_from_disease %>% map(~(.x * remaining_life_expectancy ))
+
+YLL <- 
+    YLLt %>% map(~(sum(.x * v_disc_h * gen_wcc(params1$omega,method = params1$cycle_correction))))
+
+DALY <- 
+    map2(YLL,YLD,~(.x + .y))
+DALY
+```
+
+```{r}
+
+```
+
