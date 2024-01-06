@@ -267,6 +267,23 @@ v_disc_c =
   exp(-params$r_v_disc_c_Delta_t  * 0:(params$omega))
 ```
 
+```{r, eval = FALSE}
+#https://resource-allocation.biomedcentral.com/articles/10.1186/1478-7547-11-18/tables/3
+r = 0.03
+Delta_t = 1
+t = 10
+x = (1/r)*(1-exp(-r))
+
+r_ = r * Delta_t
+(1/r_)*(1-exp(-r_*t/Delta_t))*Delta_t
+adj = (1/r_)*(1-exp(-r_))
+disc = exp(-r_*(0:(t/Delta_t-1)))
+sum(rep(1,t/Delta_t)*adj*disc)*Delta_t
+
+# basic intuition is that discrete time formula (1/(1+r)^t) and continuous time formula exp(-rt) are designed to discount a series of discrete "payoffs." but health doesn't accrue with a single lump-sum value in each cycle; it is continuous flow throughout the cycle. by comparison, the GBD (1/r)(1-exp(-rt)) assumes a continuous flow. we can adjust the cycle "payoff" to reflect a continuous flow by applyign the adjustment factor (1/r)*(1-exp(-r)), and thus once adjusted, any sum total that uses exp(-rt) will be identical as a value that uses (1/r)*(1-exp(-rt)).
+
+```
+
 
 ```{r}
 #| tbl-cap: Model Parameters
@@ -989,7 +1006,7 @@ $$
 r_{\Delta_t} = r \Delta_t
 $$ {#eq-cycledisc} where $r$ is the annual discount rate and $\Delta_t$ is the cycle length. 
 
-In the YLD payoff vector, the term $\frac{1}{r_{\Delta_t}}(1-e^{-r_{\Delta_t}})$ is included as a continuous-time discounting factor for the defined time step $\Delta_t$. This term is included to discount time *within* each cycle in order to maintain the continuous-time discounting approach used in the original GBD equations.[^conttime] 
+In the YLD payoff vector, the term $\frac{1}{r_{\Delta_t}}(1-e^{-r_{\Delta_t}})$ is included as a continuous-time discounting factor for the defined time step $\Delta_t$. This term is included to discount time *within* each cycle in order to maintain the continuous-time discounting approach used in the original GBD equations [@larson2013calculating].[^conttime] 
 
 [^conttime]: For example, if $r=0.03$ and $\Delta_t=1$ (i.e., annual cycle length), this adjustment factor will be $0.985 = \frac{1}{r_{\Delta_t}}(1-e^{-r_{\Delta_t}})$. If $\Delta_t=1/12$ (monthly cycle) the cycle discounting adjustment factor is 0.99875.
 
