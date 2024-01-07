@@ -1013,13 +1013,13 @@ $$ {#eq-cycledisc} where $r$ is the annual discount rate and $\Delta_t$ is the c
 
 In the YLD payoff vector, the term $\frac{1}{r_{\Delta_t}}(1-e^{-r_{\Delta_t}})$ is included as a continuous-time discounting factor for the defined time step $\Delta_t$. This term is included to discount time *within* each cycle in order to maintain the continuous-time discounting approach used in the original GBD equations [@larson2013calculating].[^conttime] 
 
-[^conttime]: For example, if $r=0.03$ and $\Delta_t=1$ (i.e., annual cycle length), this adjustment factor will be $0.985 = \frac{1}{r_{\Delta_t}}(1-e^{-r_{\Delta_t}})$. If $\Delta_t=1/12$ (monthly cycle) the cycle discounting adjustment factor is 0.99875.
+[^conttime]: Common discounting formulas, such as the discrete time discount factor $\frac{1}{(1+r)^t}$, as well as the continuous time discount factor $e^{-rt}$, are designed for a series of discrete "payoffs" at specific time points. By comparison, the continuous time discounting used in the GBD DALY equations (@eq-yld and @eq-yll) is based on an assumption that payffs accrue in a continuous stream. The discount adjustment factor shown here ($\frac{1}{r}(1-e^{-rt})$)---and introduced in @larson2013calculating)---essentially "smooths out" the discrete YLD weight applied in each cycle to reflect this continuous flow. We have verified that application of this factor in our approach exactly replicate the example results using the GBD equations in @rushby2001; see the Supplementary Appendix for these examples and code. 
 
 To fully discount outcomes, we still must discount all future outcome values back to baseline ($t=0$).  Discounted years of life lost to disability (YLD) at cycle $t$ is given by
 
 $$
 YLD_t=\mathbf{s}'_0 \mathbf{P}_1\mathbf{P}_2\dots\mathbf{P}_t \mathbf{d}_{YLD}  \times{e^{-r_{\Delta_t} t}}
-$$ {#eq-yldt}
+$$ {#eq-yldt} 
 
 Total discounted YLDs are obtained by summing cycle-specific discounted YLD outcomes,
 
@@ -1462,31 +1462,14 @@ We combine $\widetilde{\mathbf{B}}_{1}$ and $\widetilde{\mathbf{C}}_{1}$ to
 obtain:
 
 $$
-\widetilde{\mathbf{R}}_{1}=\left(\begin{array}{c|c}
+\widetilde{\mathbf{R}}^{YLD}_{1}=\left(\begin{array}{c|c}
 \widetilde{\mathbf{B}}_{1} & \mathbf{0} \\
 \hline \widetilde{\mathbf{C}}_{1} & \mathbf{0}
 \end{array}\right) 
 $$ which has same block structure and dimensions as the transition probability matrix
 $\widetilde{\mathbf{P}}$ (@eq-Ptilde).
 
-Expected YLDs are estimated by,
-
-$$
-\begin{aligned}
-& \widetilde{\boldsymbol{\rho}}_{1}=\widetilde{\mathbf{N}}^{\top} \mathbf{Z}\left(\widetilde{\mathbf{P}} \odot \widetilde{\mathbf{R}}_{1}\right)^{\top} \mathbf{1}_{s} 
-\end{aligned}
-$$ where $\widetilde{\mathbf{N}}$ is the fundamental matrix
-
-$$
-\widetilde{\mathbf{N}}=(\mathbf{I}-\widetilde{\mathbf{U}})^{-1}
-$$ and $\mathbf{Z}$ is
-
-$$
-\mathbf{Z}=\left(\mathbf{I}_{\tau \omega} \mid \mathbf{0}_{\tau \omega \times \alpha}\right)
-$$
-
-
-### Transition-Based Outcomes
+### Years of Life Lost to Disease (YLL)
 
 For transition-based outcomes such as YLLs, we define the first moment of remaining life expectancy as the
 vector $\widetilde{\boldsymbol{\eta}}^{\top}$. This vector has dimensions
@@ -1504,9 +1487,7 @@ $$
 \end{array}\right)
 $$ 
 where $\eta_{i x}$ is remaining life expectancy for an individual in
-health state $i$ at a given age $x$. In this structure, remaining life expectancy for each health state is grouped within age classes. 
-
-
+health state $i$ at a given age $x$. In this structure, remaining life expectancy for each health state is grouped within age classes. Remaining life expectancy should also enter $\eta_{i x}$ as fully discounted back to $t=0$. 
 
 We next construct the reward matrices:
 
@@ -1523,7 +1504,7 @@ $$
 and
 
 $$
-\widetilde{\mathbf{R}}_{1}=\left(\begin{array}{c|c}
+\widetilde{\mathbf{R}}^{YLL}_{1}=\left(\begin{array}{c|c}
 \mathbf{0}_{\tau \omega \times \tau \omega} & \mathbf{0}_{\tau \omega \times 2} \\
 \hline \widetilde{\boldsymbol{\eta}}_{1}^{\top} & \mathbf{0}_{1 \times 2} \\
 \mathbf{0}_{1 \times \tau \omega} & \mathbf{0}_{1 \times 2}
@@ -1531,13 +1512,15 @@ $$
 $$
 
 
-Echoing the approach to occupancy-based rewards above, expected outcomes are based on
+### Expected YLD and YLL Outcomes
+
+The expected value of outcome $Y$ (where $Y \in \{YLD, YLL\}$) is estimated by,
 
 $$
 \begin{aligned}
-& \widetilde{\boldsymbol{\rho}}_{1}=\widetilde{\mathbf{N}}^{\top} \mathbf{Z}\left(\widetilde{\mathbf{P}} \circ \widetilde{\mathbf{R}}_{1}\right)^{\top} \mathbf{1}_{s} 
+& \widetilde{\boldsymbol{\rho}}^{Y}_{1}=\widetilde{\mathbf{N}}^{\top} \mathbf{Z}\left(\widetilde{\mathbf{P}} \odot \widetilde{\mathbf{R}}^Y_{1}\right)^{\top} \mathbf{1}_{s} 
 \end{aligned}
-$$ where $\circ$ denotes element-wise multiplication, $\widetilde{\mathbf{N}}$ is the fundamental matrix
+$$ {#eq-app3out} where $\widetilde{\mathbf{N}}$ is the fundamental matrix,
 
 $$
 \widetilde{\mathbf{N}}=(\mathbf{I}-\widetilde{\mathbf{U}})^{-1}
@@ -1547,24 +1530,12 @@ $$
 \mathbf{Z}=\left(\mathbf{I}_{\tau \omega} \mid \mathbf{0}_{\tau \omega \times \alpha}\right)
 $$
 
-### Expected Outcomes
-
-<!-- $$ -->
-<!-- \begin{aligned} -->
-<!-- E(\widetilde{\boldsymbol{\rho}}) & =\widetilde{\boldsymbol{\rho}}_1 \\ -->
-<!-- V(\widetilde{\boldsymbol{\rho}}) & =\widetilde{\boldsymbol{\rho}}_2-\left(\widetilde{\boldsymbol{\rho}}_1 \circ \widetilde{\boldsymbol{\rho}}_1\right) \\ -->
-<!-- S D(\widetilde{\boldsymbol{\rho}}) & =\sqrt{V(\widetilde{\boldsymbol{\rho}})} \\ -->
-<!-- C V(\widetilde{\boldsymbol{\rho}}) & =\mathcal{D}\left(\widetilde{\boldsymbol{\rho}}_1\right)^{-1} S D(\widetilde{\boldsymbol{\rho}}) \\ -->
-<!-- S k(\widetilde{\boldsymbol{\rho}}) & =\mathcal{D}[V(\widetilde{\boldsymbol{\rho}})]^{-3 / 2}\left(\widetilde{\boldsymbol{\rho}}_3-3 \widetilde{\boldsymbol{\rho}}_1 \circ \widetilde{\boldsymbol{\rho}}_2+2 \widetilde{\boldsymbol{\rho}}_1 \circ \widetilde{\boldsymbol{\rho}}_1 \circ \widetilde{\boldsymbol{\rho}}_1\right) -->
-<!-- \end{aligned} -->
-<!-- $$ -->
-
-For both occupancy- and transition-based outcomes, total (across all ages) outcomes for each starting health state are
+Total (across all ages) outcomes for each starting health state are
 calculated as
 
 $$
-\boldsymbol{\rho}_{m}^{\text {stage }}(\operatorname{age} x)=\left(\mathbf{e}_{x}^{\top} \otimes \mathbf{I}_{\tau}\right) \widetilde{\boldsymbol{\rho}}_{m} \quad \tau \times 1
-$$ where $\otimes$ is the Kronecker operator.
+\boldsymbol{\rho}_{1}^{Y,\text {stage }}(\operatorname{cycle} t)=\left(\mathbf{e}_{t}^{\top} \otimes \mathbf{I}_{\tau}\right) \widetilde{\boldsymbol{\rho}}^Y_{1} \quad \tau \times 1
+$$ {#eq-app3outstate} where $\otimes$ is the Kronecker operator and $\mathbf{e}_{t}$ is a vector of length $\omega$ with a value of one in the first position and zero elsewhere; this facilitates calculating expected outcomes from the baseline period (i.e., $t=0$). 
 
 
 Alternatively, we may wish to calculate outcomes separately under
@@ -1572,8 +1543,8 @@ different starting ages, and for a specified starting health state
 (e.g., healthy). This is given by
 
 $$
-\boldsymbol{\rho}_{m}^{\text {age }}(\text { stage } i)=\left(\mathbf{I}_{\omega} \otimes \mathbf{e}_{i}^{\top}\right) \widetilde{\boldsymbol{\rho}}_{m} \quad \omega \times 1,
-$$
+\boldsymbol{\rho}_{1}^{Y,\text {age }}(\text { stage } i)=\left(\mathbf{I}_{\omega} \otimes \mathbf{e}_{i}^{\top}\right) \widetilde{\boldsymbol{\rho}}^Y_{1} \quad \omega \times 1,
+$$ {#eq-app3outage} where $\mathbf{e}_{i}$ is a vector of length $\tau$ with a value of one in the initial health state position of interest (e.g., ```Healthy```) and zero elsewhere. 
 
 
 ```{r markov-chain-rewards}
@@ -1645,6 +1616,7 @@ YLD3_ <- params3 %>% healthy_longevity_occupancy(H = HYLD, V = V_YLD)
 COST3_ <- params3 %>% healthy_longevity_occupancy(H = H, V = V_COST)
 
 remaining_life_expectancy <- with(params3,(1/r_v_disc_h) * (1 - exp(-r_v_disc_h * f_ExR(ages))))
+
 YLL3_ <- params3 %>% healthy_longevity_yll(life_expectancy = remaining_life_expectancy, disc = v_disc_h[-length(v_disc_h)])
 DALY3_ <- map2(YLL3_,YLD3_,~(.x+.y))
 

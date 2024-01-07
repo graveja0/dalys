@@ -3,9 +3,14 @@ title: "Replicating FRH"
 output: html_notebook
 editor_options: 
   chunk_output_type: console
+bibliography: ../references.bib  
 ---
 
-```{r setup}
+# Introduction
+
+The objective of this notebook is to employ our approach to modeling disability-adjusted life years (DALYs) in discrete time Markov cohort models to replicate the examples in @rushby2001 (FRH) and @larson2013calculating. 
+
+```{r setup, echo=TRUE, message=FALSE, warning=FALSE}
 #| echo: true
 #| message: false
 #| warning: false
@@ -43,15 +48,24 @@ gen_wcc <- function (n_cycles, method = c("Simpson1/3", "half-cycle", "none"))
 }
 ```
 
-FRH consider a woman who develops bipolar depression at age 35, lives for 10 years with the disorder, and then dies prematurely at age 45.
+FRH consider a woman who develops bipolar depression at age 35, lives for 10 years with the disorder (disability weight = 0.60), and then dies prematurely at age 45. Remaining life expectancy at age 45 is 34.73 years. 
 
+Based on this information, we parameterize a discrete time Markov model in which 35-year old individuals start of sick. The probability of death is then held to zero for 10 years, at which time the probability of death from disease is set to 1.0. We structure our model based on Approach 1, which defines a separate disease-related death transition. 
+
+```{r}
+data.frame(state = c("Healthy","Sick","Dead-Other Cause","Dead-Disease"), name = c("H","S1","DOC","DS")) %>% 
+  kable(col.names=c("Health State","Health State Label")) %>% 
+  kable_styling()
+```
+
+# Parameterize 
 ```{r parameterize}
 params_ <- list(
     # Treatment Strategies
-    v_tx_names = c("FRH","tmp"),      # treatment names
-    n_tx = 2, # number of treatment strategies
+    v_tx_names = c("FRH"),      # treatment names
+    n_tx = 1, # number of treatment strategies
     
-    cycle_correction = "none",
+    cycle_correction = "half-cycle",
     
     v_tr_names = c("H","S1"), # transient health states
     v_ab_names = c("DOC","DS"), # absorbing health states
@@ -62,7 +76,7 @@ params_ <- list(
     r_v_disc_c = 0.03,     # annual discount rate for cost outcomes
     Delta_t = 1,      # time step (1 = yearly, 1/12 = monthly, etc.)
     age0 = 35,         # age at baseline
-    v_s0T = c(1,0,0,0), # initial state occupancy  
+    v_s0T = c(0,1,0,0), # initial state occupancy  
                       # c(1,0,0,0,0) means the modeled cohort starts off healthy
     
     r_HS1 = 0,   # disease onset rate
@@ -117,16 +131,7 @@ params <-
 
 params$ages_trace <- params$ages
 params$ages <- params$ages[-length(params$ages)]
-
-v_disc_h =  # Continuous time discounting
-  exp(-params$r_v_disc_h_Delta_t  * 0:(params$omega))
-# v_disc_h =  # Discrete time discounting
-#   with(params,1 / (( 1 + (r_v_disc_h * Delta_t)) ^ (0 : omega)))
-v_disc_c = 
-  exp(-params$r_v_disc_c_Delta_t  * 0:(params$omega))
 ```
-
-## Approaches 1 and 2
 
 ```{r transition-matrices}
 params1 <- with(params,modifyList(params,list(
@@ -146,20 +151,7 @@ params1 <- with(params,modifyList(params,list(
                           c(v_tr_names,v_ab_names)
           ))
         
-        mR_tmp = 
-          matrix(c(
-          0,0,0,0, 
-          0,0,0,0, 
-          0,0,0,0,          
-          0,0,0,0),
-          nrow = n_states, 
-          ncol = n_states,
-          byrow=TRUE, 
-          dimnames = list(c(v_tr_names,v_ab_names),
-                          c(v_tr_names,v_ab_names)
-          ))
-        
-        array(c(as.vector(mR_FRH),as.vector(mR_tmp)), 
+        array(c(as.vector(mR_FRH)), 
               dim = c(length(v_tr_names)+ length(v_ab_names),length(v_tr_names)+ length(v_ab_names),length(v_tx_names)),
           dimnames = list(c(v_tr_names,v_ab_names),c(v_tr_names,v_ab_names),v_tx_names)) %>% 
             apply(.,3,function(x) x, simplify=FALSE) 
@@ -180,8 +172,8 @@ params1 <- with(params1,modifyList(params1,list(
     a <- ages
     map2(a,p_,~({
       if (.x==35) {
-        #.y[1,2]  = 100
-        #.y[1,1] = -100
+        .y[1,2]  = 100
+        .y[1,1] = -100
       }
       if (.x==44) {
         .y[2,4] = 100
@@ -215,8 +207,8 @@ params1 <- with(params1,modifyList(params1,list(
     tmp <- .x
     init <- diag(nrow=nrow(tmp[[1]]),ncol=ncol(tmp[[1]]))
     # FRH replication move
-    init[1,1] = 0
-    init[1,2] = 1
+    #init[1,1] = 0
+    #init[1,2] = 1
     dimnames(init) = dimnames(tmp[[1]])
     append(.x,list(init),after=0)
   }))
@@ -227,6 +219,11 @@ names(params1$m_P) = params1$v_tx_names
 ```
 
 # Outcomes
+
+We then use the resulting Markov trace to calculate outcomes. We estimate years of life with disability (YLD), years of life lost to disease (YLL) and DALY outcomes using a 3% discount rate. This mirrors the FRH DALY(3, 0) approach in @rushby2001 and @larson2013calculating.
+
+First, let's construct and view the Markov trace:
+
 ```{r trace}
 trace1 <- 
     with(params1, {
@@ -240,11 +237,29 @@ trace1 <-
             bind_rows()
         }))
     })  
-
+trace1 %>% as.data.frame() %>% 
+  mutate(age = params1$ages_trace) %>% 
+  select(age,everything()) %>% 
+  kable() %>% kable_styling()
 
 ```
 
+## Continuous Time Discounting Formula
+
+Our first option for discounting is to use the continuous time discounting factor, $e^{-r \Delta_t t}$ where $r$ is the annual discount rate, $\Delta_t$ is the cycle length (a value of 1 indicates an annual cycle) and $t$ is the cycle in question. This option maintains the continuous time discounting appraoch adopted by the Global Burden of Disease study for DALY outcomes---however the formula itself is designed to accomodate a series of discrete payoffs in continuous time (e.g., a payoff of 0.6 at the beggining/end/middle of each year living with disease). 
+
+By comparison, the GBD adopts a continuous time discounting appaoch whereby disability weights accrue as a "flow" of payoffs over time. We can convert a cycle payoff to this "flow" scale by applying a continuous time adjustment factor,
+
+$$
+\frac{1}{r}(1-e^{-rt})
+$$ 
+
+This factor is multiplied by the disability weight to define the YLD payoff vector for each cycle. 
+
 ```{r}
+v_disc_h =  # Continuous time discounting
+  exp(-params$r_v_disc_h_Delta_t  * 0:(params$omega))
+
 # YLD
 yld_ = with(params1,(matrix(c(0,
               dw_S1 * Delta_t * (1/r_v_disc_h_Delta_t) * (1 - exp(-r_v_disc_h_Delta_t)) ,
@@ -299,6 +314,74 @@ DALY <-
     map2(YLL,YLD,~(.x + .y))
 DALY
 ```
+
+This results in a DALY value that exactly matches the example using the GBD equations in @rushby2001. 
+
+## Adapting the Discrete Time Discounting Formula
+
+A more common approach is to use the discrete time discounting formula $\frac{1}{(1+r)^t}$. This formula also assumes a series of discrete payoffs, though in discrete time. 
+
+We can replicate the GBD continuous time discounting approach using the discrete time formula by converting the discount rate $r$ using $r' = exp(r)-1$ @larson2013calculating. We then plug $r'$ into the discrete time discounting formula and simplify to obtain a discounting factor of $(\frac{1}{1+e^{r})^t-1=\frac{1}{1+e^{rt}-1}=\frac{1}{e^{rt}}=e^{-rt}$, which is exactly the discounting factor used above. It follows trivially, then, that we obtain the same answer as above:
+
+```{r}
+v_disc_h = 
+  1/exp(params1$r_v_disc_c*(0:(params$omega)))
+
+# YLD
+yld_ = with(params1,(matrix(c(0,
+              dw_S1 * Delta_t * (1/r_v_disc_h_Delta_t) * (1 - exp(-r_v_disc_h_Delta_t)) ,
+              0,
+              0),
+            dimnames = list(c(
+                c(v_tr_names,v_ab_names)
+            ), c("DW")))
+))
+yld_ <- 
+  with(params1,{
+    v_tx_names %>% map(~({
+         yld_
+    }))
+  }) %>% 
+  set_names(params1$v_tx_names)
+
+YLDt <- 
+   with(params1, {
+    v_tx_names %>% map( ~ ({
+      P = m_P[[.x]]
+      occ <- v_s0T
+      d <- yld_[[.x]]
+      out <- 0
+      P %>% map(~({
+        occ <<- occ %*% .x 
+        out <<-  occ %*% d
+      })) %>% 
+        map(~(data.frame(.x))) %>% 
+        bind_rows()
+    }))
+  })  %>% 
+  set_names(params1$v_tx_names)
+YLD = YLDt %>% map(~sum(.x*  v_disc_h * gen_wcc(params1$omega, method = "none")))
+
+# YLL
+new_deaths_from_disease <- 
+    map(trace1,~({
+        c(0,diff(.x[,"DS"]))
+    })) 
+
+remaining_life_expectancy <- 
+    with(params1,(1/r_v_disc_h) * (1 - exp(-r_v_disc_h * f_ExR(ages_trace))))
+    
+YLLt <- 
+    new_deaths_from_disease %>% map(~(.x * remaining_life_expectancy ))
+
+YLL <- 
+    YLLt %>% map(~(sum(.x * v_disc_h * gen_wcc(params1$omega,method = params1$cycle_correction))))
+
+DALY <- 
+    map2(YLL,YLD,~(.x + .y))
+DALY
+```
+
 
 ```{r}
 
