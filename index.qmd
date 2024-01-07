@@ -179,7 +179,7 @@ params_ <- list(
     v_ab_names = c("DOC","DS"), # absorbing health states
     n_states = 5, # total number of health states
     
-    horizon = 100,  # TK 400 # model time horizon (in years)  
+    horizon = 400,  # TK 400 # model time horizon (in years)  
     r_v_disc_h  = 0.03,     # annual discount rate for health outcomes
     r_v_disc_c = 0.03,     # annual discount rate for cost outcomes
     Delta_t = 1,      # time step (1 = yearly, 1/12 = monthly, etc.)
@@ -190,7 +190,7 @@ params_ <- list(
     r_HS1 = 0.15,   # disease onset rate
     r_S1H = 0.5,    # recovery rate
     r_S1S2 = 0.105,   # disease progression rate
-    r_HD = .022,  # TK .002 # background mortality rate
+    r_HD = .002,  # TK .002 # background mortality rate
     
     hr_S1 = 3.0,     # hazard rate of disease-related death from S1 state
     hr_S2 = 10.0,    # hazard rate of disease-related death from S1 state
@@ -1510,7 +1510,6 @@ $$
 \mathbf{0}_{1 \times \tau \omega} & \mathbf{0}_{1 \times 2}
 \end{array}\right)
 $$
-
 
 ### Expected YLD and YLL Outcomes
 
