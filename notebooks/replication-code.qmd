@@ -1,0 +1,511 @@
+---
+title: "Replication Code"
+author: John A. Graves
+editor: source
+editor_options: 
+  chunk_output_type: console
+---
+
+Notes:
+
+- The original paper uses pairwise conversion formulas. We have verified that we can replicate their results if we do this. However, we use the matrix exponentiation method here.
+
+- For QALY-like DALYs, the levels are very different (and are a function of number of cycles), but the incremental results are similar and actually yield the same ICER for strategy AB relative to B. Why ? the problem with QALY-like DALYs comes through the deaths. Any strategy that affects death will yield different results relative to our approach. Strategy AB, relative to strategy B, however, just affects the disability weight. So the incremental effect of adding A to B yields the same answer as under our DALY approach---but this will in general not hold if deaths are affected.
+
+
+```{r}
+library(tidyverse)
+library(MASS)
+library(expm)
+library(knitr)
+library(kableExtra)
+options(scipen = 5) 
+transpose <- purrr::transpose
+select <- dplyr::select
+options(knitr.kable.NA = '')
+
+gen_wcc <- function (n_cycles, method = c("Simpson1/3", "half-cycle", "none")) 
+{
+    if (n_cycles <= 0) {
+        stop("Number of cycles should be positive")
+    }
+    method <- match.arg(method)
+    n_cycles <- as.integer(n_cycles)
+    if (method == "Simpson1/3") {
+        v_cycles <- seq(1, n_cycles + 1)
+        v_wcc <- ((v_cycles%%2) == 0) * (2/3) + ((v_cycles%%2) != 
+                                                     0) * (4/3)
+        v_wcc[1] <- v_wcc[n_cycles + 1] <- 1/3
+    }
+    if (method == "half-cycle") {
+        v_wcc <- rep(1, n_cycles + 1)
+        v_wcc[1] <- v_wcc[n_cycles + 1] <- 0.5
+    }
+    if (method == "none") {
+        v_wcc <- rep(1, n_cycles + 1)
+    }
+    return(v_wcc)
+}
+
+params_ <- list(
+    # Treatment Strategies
+    tx_names = c("SoC","A","B","AB"),      # treatment names
+    n_tx = 4, # number of treatment strategies
+    
+    tr_names = c("H","S1","S2"), # transient health states
+    ab_names = c("DOC","DS"), # absorbing health states
+    n_states = 5, # total number of health states
+    
+    horizon = 150,    # model time horizon (in years)  
+    r_disc_h  = 0.03,     # annual discount rate for health outcomes
+    r_disc_c = 0.03,     # annual discount rate for cost outcomes
+    Delta_t = 1,      # time step (1 = yearly, 1/12 = monthly, etc.)
+    age0 = 25,         # age at baseline
+    s0T = c(1,0,0,0,0), # initial state occupancy  
+                      # c(1,0,0,0,0) means the modeled cohort starts off healthy
+    
+    r_HS1 = 0.15,   # disease onset rate
+    r_S1H = 0.5,    # recovery rate
+    r_S1S2 = 0.105,   # disease progression rate
+    r_HD = 0.002,    # background mortality rate
+    
+    hr_S1 = 3.0,     # hazard rate of disease-related death from S1 state
+    hr_S2 = 10.0,    # hazard rate of disease-related death from S1 state
+    
+    u_S1 = 0.75,       # Sick utility weight
+    u_S2 = 0.5,        # Sicker utility weight
+    u_D = 0,           # Death utility weight
+    u_H = 1,           # Healthy utility weight
+    
+    dw_S1 = 0.2,      # Sick disability weight
+    dw_S2 = 0.4,       # Sicker disability weight
+    
+    c_H = 2000,   # annual cost of healthy
+    c_S1 = 4000,  # annual cost of S1
+    c_S2 = 15000, # annual cost of S2
+    c_D = 0, # annual cost of death
+
+    c_trtA = 12000, # cost of treatment A
+    u_trtA = 0.95, # utility weight for treatment A (S1 state)
+    dw_trtA = 0.08,    # Disability weight for sick under treatment A
+    
+    c_trtB = 12000, # cost of treatment B
+    hr_S1S2_trtB = 0.6, # reduction in rate of disease progression 
+    
+    hr_treat = 0.85,  # Hazard Ratio for Treatment Strategy
+    hr_prevent = 0.9, # Hazard Ratio for Prevention Strategy
+
+    ExR =  # Reference life table from GBD
+          tibble::tribble(
+              ~Age, ~Life.Expectancy,
+              0L,       88.8718951,
+              1L,      88.00051053,
+              5L,      84.03008056,
+              10L,      79.04633476,
+              15L,       74.0665492,
+              20L,      69.10756792,
+              25L,      64.14930031,
+              30L,       59.1962771,
+              35L,      54.25261364,
+              40L,      49.31739311,
+              45L,      44.43332057,
+              50L,      39.63473787,
+              55L,      34.91488095,
+              60L,      30.25343822,
+              65L,      25.68089534,
+              70L,      21.28820012,
+              75L,      17.10351469,
+              80L,      13.23872477,
+              85L,      9.990181244,
+              90L,      7.617724915,
+              95L,      5.922359078
+          ),
+    
+    cycle_correction = "Simpson1/3"
+)
+
+params <- 
+    with(params_,{
+        modifyList(params_,list(
+            v_names_states = c(tr_names, ab_names),
+            omega = horizon/Delta_t,  # Total number of cycles
+            r_disc_h_Delta_t = r_disc_h * Delta_t,  # Cycle discount rate: health outcomes
+            r_disc_c_Delta_t = r_disc_c * Delta_t,  # Cycle discount rate: cost outcomes
+            ages = (0:(horizon/Delta_t))*Delta_t + age0,  # Age in each cycle
+             # Approximation function for reference life table life expectancies:
+            fExR = function(x) pmax(0,unname(Hmisc::approxExtrap(ExR$Age, ExR$Life.Expectancy,xout = x)$y))
+        ))
+    })
+
+params$ages_trace <- params$ages
+params$ages <- params$ages[-length(params$ages)]
+
+disc_h =  # Continuous time
+  exp(-params$r_disc_h_Delta_t  * 0:(params$omega))
+disc_h =  # Discrete time
+  with(params,1 / (( 1 + (r_disc_h * Delta_t)) ^ (0 : omega)))
+disc_c = 
+  exp(-params$r_disc_c_Delta_t  * 0:(params$omega))
+```
+
+```{r}
+fn_r_HD <- function(age) {
+  # Access r_HD from the parent frame where this function is called
+  r_HD <- get("r_HD", envir = parent.frame())
+  r_HD
+}
+
+fn_r_HS1 <- function(age) {
+  # Access r_HD from the parent frame where this function is called
+  r_HS1 <- get("r_HS1", envir = parent.frame())
+  r_HS1
+}
+
+fn_r_S1H <- function(age) {
+  # Access from the parent frame where this function is called
+  r_S1H <- get("r_S1H", envir = parent.frame())
+  r_S1H
+}
+
+fn_r_S1S2 <- function(age) {
+  # Access  from the parent frame where this function is called
+  r_S1S2 <- get("r_S1S2", envir = parent.frame())
+  r_S1S2
+}
+
+params1 <- with(params,modifyList(params,list(
+    # Natural History Transition Rate Matrix
+    m_R = 
+      ages %>% map(~({
+        mR_SoC = 
+          matrix(c(
+          -(fn_r_HD(.x)+fn_r_HS1(.x)), fn_r_HS1(.x), 0, fn_r_HD(.x), 0,
+          fn_r_S1H(.x),-(fn_r_S1H(.x) + fn_r_S1S2(.x) + fn_r_HD(.x) + hr_S1 * fn_r_HD(.x) - fn_r_HD(.x)),fn_r_S1S2(.x),fn_r_HD(.x),hr_S1 * fn_r_HD(.x) - fn_r_HD(.x),
+          0,0,-(fn_r_HD(.x) + hr_S2 * fn_r_HD(.x) - fn_r_HD(.x)),fn_r_HD(.x),hr_S2 * fn_r_HD(.x) - fn_r_HD(.x),
+          0,0,0,0,0,          
+          0,0,0,0,0),
+          nrow = n_states, 
+          ncol = n_states,
+          byrow=TRUE, 
+          dimnames = list(c(tr_names,ab_names),
+                          c(tr_names,ab_names)
+          ))
+        
+        mR_A = 
+          matrix(c(
+          -(fn_r_HD(.x)+fn_r_HS1(.x)), fn_r_HS1(.x), 0, fn_r_HD(.x), 0,
+          fn_r_S1H(.x),-(fn_r_S1H(.x) + fn_r_S1S2(.x) + fn_r_HD(.x) + hr_S1 * fn_r_HD(.x) - fn_r_HD(.x)),fn_r_S1S2(.x),fn_r_HD(.x),hr_S1 * fn_r_HD(.x) - fn_r_HD(.x),
+          0,0,-(fn_r_HD(.x) + hr_S2 * fn_r_HD(.x) - fn_r_HD(.x)),fn_r_HD(.x),hr_S2 * fn_r_HD(.x) - fn_r_HD(.x),
+          0,0,0,0,0,          
+          0,0,0,0,0),
+          nrow = n_states, 
+          ncol = n_states,
+          byrow=TRUE, 
+          dimnames = list(c(tr_names,ab_names),
+                          c(tr_names,ab_names)
+          ))
+        
+        mR_B = 
+          matrix(c(
+          -(fn_r_HD(.x)+fn_r_HS1(.x)), fn_r_HS1(.x), 0, fn_r_HD(.x), 0,
+          fn_r_S1H(.x),-(fn_r_S1H(.x) + hr_S1S2_trtB * fn_r_S1S2(.x) + fn_r_HD(.x) + hr_S1 * fn_r_HD(.x) - fn_r_HD(.x)),hr_S1S2_trtB *  fn_r_S1S2(.x),fn_r_HD(.x),hr_S1 * fn_r_HD(.x) - fn_r_HD(.x),
+          0,0,-(fn_r_HD(.x) + hr_S2 * fn_r_HD(.x) - fn_r_HD(.x)),fn_r_HD(.x),hr_S2 * fn_r_HD(.x) - fn_r_HD(.x),
+          0,0,0,0,0,          
+          0,0,0,0,0),
+          nrow = n_states, 
+          ncol = n_states,
+          byrow=TRUE, 
+          dimnames = list(c(tr_names,ab_names),
+                          c(tr_names,ab_names)
+          ))
+        
+        mR_AB = 
+          matrix(c(
+          -(fn_r_HD(.x)+fn_r_HS1(.x)), fn_r_HS1(.x), 0, fn_r_HD(.x), 0,
+          fn_r_S1H(.x),-(fn_r_S1H(.x) + hr_S1S2_trtB *  fn_r_S1S2(.x) + fn_r_HD(.x) + hr_S1 * fn_r_HD(.x) - fn_r_HD(.x)),hr_S1S2_trtB * fn_r_S1S2(.x),fn_r_HD(.x),hr_S1 * fn_r_HD(.x) - fn_r_HD(.x),
+          0,0,-(fn_r_HD(.x) + hr_S2 * fn_r_HD(.x) - fn_r_HD(.x)),fn_r_HD(.x),hr_S2 * fn_r_HD(.x) - fn_r_HD(.x),
+          0,0,0,0,0,          
+          0,0,0,0,0),
+          nrow = n_states, 
+          ncol = n_states,
+          byrow=TRUE, 
+          dimnames = list(c(tr_names,ab_names),
+                          c(tr_names,ab_names)
+          ))
+        
+        array(c(as.vector(mR_SoC),
+                as.vector(mR_A), 
+                as.vector(mR_B),
+                as.vector(mR_AB)), 
+              dim = c(length(tr_names)+ length(ab_names),length(tr_names)+ length(ab_names),length(tx_names)),
+          dimnames = list(c(tr_names,ab_names),c(tr_names,ab_names),tx_names)) %>% 
+            apply(.,3,function(x) x, simplify=FALSE) 
+        
+      }))
+    )))
+
+params1 <- with(params1,modifyList(params1,list(
+    m_P = m_R %>% transpose() %>% map(~({
+      mR_ = .x
+      mR_ %>% map(~({
+              expm(.x * Delta_t)
+         }))
+      }))
+)))
+
+```
+
+```{r}
+trace1 <- 
+    with(params1, {
+        m_P %>% map( ~ ({
+            P = .x
+            occ <- s0T
+            P %>% map(~({
+              occ <<- occ %*% .x
+            })) %>% 
+            map(~(data.frame(.x))) %>% 
+            bind_rows()
+        }))
+    })  %>% 
+    map(~({
+        tmp = .x[1,]
+        tmp[1,] = params$s0T
+        tmp = rbind(tmp,.x)
+    }))
+tr <- trace1$SoC
+```
+
+```{r}
+# Life Expectancy (Non-Discounted)
+le_ = with(params1,(matrix(c(1,
+              1 ,
+              1,
+              0,
+              0)*Delta_t,
+            dimnames = list(c(
+                c(tr_names,ab_names)
+            ), c("DW")))
+))
+
+LEt <- trace1 %>% map( ~ ({
+    tmp = as.matrix(.x) %*% le_
+    tmp 
+}))
+
+LE = LEt %>% map(~sum(.x * gen_wcc(params1$omega, method = params1$cycle_correction))) 
+
+# QALYs
+qaly_ = with(params1,(matrix(c(u_H,
+              u_S1 ,
+              u_S2,
+              u_D,
+              u_D) * Delta_t,
+            dimnames = list(c(
+                c(tr_names,ab_names)
+            ), c("UW")))
+))
+qaly_ <- 
+  with(params1,{
+    tx_names %>% map(~({
+        if (.x=="A" | .x=="AB") {
+          tmp_ <- qaly_
+          tmp_[2,1] = u_trtA
+          tmp_
+      } else qaly_
+    }))
+  })
+
+QALYt <- trace1 %>% map2(.,qaly_, ~ ({
+    tmp = as.matrix(.x) %*% .y
+    tmp 
+}))
+
+QALY = QALYt %>% map(~sum(.x * disc_h * gen_wcc(params1$omega, method = params1$cycle_correction))) 
+
+# YLD
+yld_ = with(params1,(matrix(c(0,
+              dw_S1 * Delta_t * (1/r_disc_h_Delta_t) * (1 - exp(-r_disc_h_Delta_t)) ,
+              dw_S2 * Delta_t * (1/r_disc_h_Delta_t) * (1 - exp(-r_disc_h_Delta_t)),
+              0,
+              0),
+            dimnames = list(c(
+                c(tr_names,ab_names)
+            ), c("DW")))
+))
+yld_ <- 
+  with(params1,{
+    tx_names %>% map(~({
+        if (.x=="A" | .x=="AB") {
+          tmp_ <- yld_
+          tmp_[2,1] = dw_trtA * Delta_t * (1/r_disc_h_Delta_t) * (1 - exp(-r_disc_h_Delta_t))
+          tmp_
+      } else yld_
+    }))
+  })
+
+YLDt <- trace1 %>% map2(.,yld_, ~ ({
+    tmp = as.matrix(.x) %*% .y
+    tmp 
+}))
+
+YLD = YLDt %>% map(~sum(.x*  disc_h * gen_wcc(params1$omega, method = params1$cycle_correction)))
+
+# YLL
+
+new_deaths_from_disease <- 
+    map(trace1,~({
+        c(0,diff(.x[,"DS"]))
+    })) 
+   
+remaining_life_expectancy <- 
+    with(params1,(1/r_disc_h) * (1 - exp(-r_disc_h * fExR(ages_trace))))
+    
+YLLt <- 
+    new_deaths_from_disease %>% map(~(.x * remaining_life_expectancy ))
+
+YLL <- 
+    YLLt %>% map(~(sum(.x * disc_h * gen_wcc(params1$omega,method = params1$cycle_correction))))
+
+DALY <- 
+    map2(YLL,YLD,~(.x + .y))
+
+# QALY-Like DALY
+qaly_daly_ = with(params1,(matrix(c(0,
+              dw_S1 * Delta_t * (1/r_disc_h_Delta_t) * (1 - exp(-r_disc_h_Delta_t)) ,
+              dw_S2 * Delta_t * (1/r_disc_h_Delta_t) * (1 - exp(-r_disc_h_Delta_t)),
+              0,
+              1) * Delta_t,
+            dimnames = list(c(
+                c(tr_names,ab_names)
+            ), c("UW")))
+))
+qaly_daly_ <- 
+  with(params1,{
+    tx_names %>% map(~({
+        if (.x=="A" | .x=="AB") {
+          tmp_ <- qaly_daly_
+          tmp_[2,1] = dw_trtA * Delta_t * (1/r_disc_h_Delta_t) * (1 - exp(-r_disc_h_Delta_t))
+          tmp_
+      } else qaly_daly_
+    }))
+  })
+
+QALY_DALYt <- trace1 %>% map2(.,qaly_daly_, ~ ({
+    tmp = as.matrix(.x) %*% .y
+    tmp 
+}))
+
+QALY_DALY = QALY_DALYt %>% map(~sum(.x * disc_h * gen_wcc(params1$omega, method = params1$cycle_correction))) 
+
+# Costs
+cost_ = with(params1,(matrix(c(c_H,
+              c_S1 ,
+              c_S2,
+              c_D,
+              c_D)*Delta_t,
+            dimnames = list(c(
+                c(tr_names,ab_names)
+            ), c("COST")))
+))
+cost_ <-
+  with(params1, {
+    tx_names %>% map( ~ ({
+      if (.x == "A") {
+        tmp_ <- cost_
+        tmp_["S1", 1] = c_S1 + c_trtA
+        tmp_["S2", 1] = c_S2 + c_trtA
+        tmp_
+      } else if (.x == "B") {
+        tmp_ <- cost_
+        tmp_["S1", 1] = c_S1 + c_trtB
+        tmp_["S2", 1] = c_S2 + c_trtB
+        tmp_
+      } else if (.x == "AB") {
+        tmp_ <- cost_
+        tmp_["S1", 1] = c_S1 + c_trtA + c_trtB
+        tmp_["S2", 1] = c_S2 + c_trtA + c_trtB
+        tmp_
+      } else cost_
+    }))
+  }) %>% 
+  set_names(params1$tx_names)
+
+COSTt <- trace1 %>% map2(.,cost_, ~ ({
+    tmp = as.matrix(.x) %*% .y
+    tmp 
+}))
+
+COST = COSTt %>% map(~sum(.x * disc_c * gen_wcc(params1$omega, method = params1$cycle_correction))) 
+
+result1 <- cbind(LE, QALY, YLD, YLL, DALY, QALY_DALY, COST) %>%
+  as.data.frame() %>%
+  mutate_all( ~ as.numeric(.))  %>%
+  rownames_to_column(var = "strategy") %>%
+  mutate(approach = "Markov Trace") %>% 
+  dplyr::select(approach, strategy, LE, QALY,YLD, YLL, DALY, QALY_DALY, COST) 
+
+result1 %>% 
+    kable(digits = 3, col.names = c("Approach","Scenario","Life Expectancy (Model)","QALYs","YLDs","YLLs","DALYs","QALY-like DALY","Costs")) %>% 
+    kable_styling()
+```
+
+```{r}
+result1 %>% 
+  select(strategy,QALY,COST) %>% 
+  arrange(COST) %>% 
+  mutate(iQALY = c(0,diff(QALY)),
+         iCOST = c(0,diff(COST))) %>% 
+  mutate(icer = iCOST / iQALY) %>% 
+  filter(is.na(icer) | icer>0) %>% 
+  arrange(COST) %>% 
+  mutate(iQALY = c(NA,diff(QALY)),
+         iCOST = c(NA,diff(COST))) %>% 
+  mutate(icer = iCOST / iQALY) %>% 
+  bind_rows(result1 %>% 
+  select(strategy,QALY,COST) %>% filter(strategy=="A")) %>% 
+  kable() %>% 
+  kable_styling()
+  
+```
+
+```{r}
+result1 %>% 
+  select(strategy,DALY,COST) %>% 
+  arrange(COST) %>% 
+  mutate(iDALY = c(0,pmax(0,-diff(DALY))),
+         iCOST = c(0,diff(COST))) %>% 
+  mutate(icer = iCOST / iDALY) %>% 
+  filter(is.na(icer) | icer>0) %>% 
+  filter(!is.infinite(icer)) %>% 
+  arrange(COST) %>% 
+  mutate(iDALY = c(NA,pmax(0,-diff(DALY))),
+         iCOST = c(NA,diff(COST))) %>% 
+  mutate(icer = iCOST / iDALY) %>% 
+  bind_rows(result1 %>% 
+  select(strategy,DALY,COST) %>% filter(strategy=="A")) %>% 
+  kable() %>% 
+  kable_styling()
+```
+
+```{r}
+result1 %>% 
+  select(strategy,QALY_DALY,COST) %>% 
+  arrange(COST) %>% 
+  mutate(iDALY = c(0,pmax(0,-diff(QALY_DALY))),
+         iCOST = c(0,diff(COST))) %>% 
+  mutate(icer = iCOST / iDALY) %>% 
+  filter(is.na(icer) | icer>0) %>% 
+  filter(!is.infinite(icer)) %>% 
+  arrange(COST) %>% 
+  mutate(iDALY = c(NA,pmax(0,-diff(QALY_DALY))),
+         iCOST = c(NA,diff(COST))) %>% 
+  mutate(icer = iCOST / iDALY) %>% 
+  bind_rows(result1 %>% 
+  select(strategy,QALY_DALY,COST) %>% filter(strategy=="A")) %>% 
+  kable() %>% 
+  kable_styling()
+```
+
+## Approach 2
+
