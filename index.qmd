@@ -7,7 +7,7 @@ keywords:
   - Discrete Event Simulation
   - Markov Cohort Models
 abstract: |
-  This study outlines a methodological framework for joint modeling of Disability- and Quality-Adjusted Life Year outcomes. 
+  This study outlines a methodological framework for joint modeling of Disability- and Quality-Adjusted Life Year outcomes.
 plain-language-summary: |
   Modeling Disability-Adjusted Life Years for Policy and Decision Analysis
 key-points:
@@ -20,7 +20,7 @@ citation:
 number-sections: true
 editor_options: 
   chunk_output_type: console
-prefer-html: true  
+prefer-html: true 
 ---
 
 
@@ -41,6 +41,7 @@ library(here)
 library(Hmisc)
 library(hrbrthemes)
 library(ggsci)
+library(janitor)
 options(scipen = 5) 
 transpose <- purrr::transpose
 select <- dplyr::select
@@ -51,21 +52,21 @@ Disability-adjusted life years (DALYs) measure disease burden in a population. C
 
 In addition to their role in describing levels and trends in disease burdens worldwide, DALYs are a primary health outcome in evaluations of health interventions in low- and middle-income countries (LMICs). In these settings, resource allocation decisions are guided by modeled assessments of the incremental costs per DALY averted under alternative (often competing) strategies to improve population health.[^1]
 
-[^1]: The adoption of DALYs over other common health outcomes in health economics (e.g., quality-adjusted life years, or QALYs) stems from several practical and theoretical considerations. See @Feng2020 and @Wilkinson2016 for futher discussion.
+[^1]: The adoption of DALYs over other common health outcomes in health economics (e.g., quality-adjusted life years, or QALYs) stems from several practical and theoretical considerations. See @Feng2020 and @Wilkinson2016 for further discussion.
 
 Despite the prominent role of DALYs in global health policy, scant methodological guidance is available for adapting and/or structuring decision analytic models for DALY outcomes. This methodological gap has its roots in health economics education, where textbooks and training exercises focus almost exclusively on Quality-Adjusted Life Year (QALY) outcomes---the primary health outcome used for health technology assessments (HTAs) and policy decisionmaking in high-income countries (HICs). DALYs differ from QALYs in important and model-relevant respects, including the use of reference life tables to calculate YLLs and standardized disability weights to calculate YLDs.[^2] To the extent DALY-specific modeling considerations are taught, they are often considered in isolation and without a firm methodological grounding in *how* one might structure a model to measure DALY outcomes.
 
-[^2]: In contrast, QALYs are calculated based on utility weights derived from general and patient surveys. See @Feng2020 and @Wilkinson2016 for futher discussion.
+[^2]: In contrast, QALYs are calculated based on utility weights derived from general and patient surveys. See @Feng2020 and @Wilkinson2016 for further discussion.
 
 As a consequence, and in practice, health economic applications often resort to shortcuts and other "hacks" for calculating DALYs. For example, practitioners may simply estimate a "QALY-like" DALY that is based on a diseased state occupancy payoff of one minus the disability weight. Other approaches define a diseased-state payoff using the disability weight as an estimate of YLDs, and accumulate person-years in an absorbing death state (due to disease) as an estimate of YLLs. As this study will show, these shortcuts do not provide an accurate representation of DALY levels in a population.
 
-This tutorial outlines a framework for direct incorporation of DALY outcomes in common decision modeling environments. Our primary focus is on discrete-time Markov cohort models---however, our framework extends directly to microsimulation and is also easily adapted for continuous time discrete event simulation (DES) models. As such, our study provides a comprehensive roadmap for incorporating DALY outcomes into common decision modeling frameworks.
+This study outlines methods for direct incorporation of DALY outcomes in common decision modeling environments. Our primary focus is on discrete-time Markov cohort models---however, our framework extends directly to microsimulation and is also easily adapted for continuous time discrete event simulation (DES) models. As such, our study provides a comprehensive roadmap for incorporating DALY outcomes into common decision modeling frameworks.
 
-To maintain consistency within the literature, we build on an existing didactic disease progression model [@alarid2023introductory]. The underlying discrete time Markov cohort model is time homogeneous---that is, transition probabilities do not vary as a function of age/time in model. However, our methods and code are developed to accomodate time-inhomogenous models. Finally, recognizing the wide spectrum of experience and programming comfort level among practitioners, we offer three approaches for modeling DALYs (beginner, intermediate and advanced) and provide replication materials for implementing our approaches in R and Microsoft Excel. 
+To maintain consistency within the literature, we build on an existing didactic disease progression model [@alarid2023introductory]. The underlying discrete time Markov cohort model is time homogeneous---that is, transition probabilities do not vary as a function of age/time in model. However, our methods and code are developed to accommodate time-homogeneous models. Finally, recognizing the wide spectrum of experience and programming comfort level among practitioners, we offer three approaches for modeling DALYs (beginner, intermediate and advanced) and provide replication materials for implementing our approaches in R and Microsoft Excel. 
 
 ## Background {#sec-background}
 
-This section provides background information sufficient for conceptual understaning of DALYs and how to estimate them in a decision-analytic model; it is not intended as a comprehensive treatment of the subject. For extensive discussion of the history, assumptions and controversies around DALYs, see TK.  
+This section provides background information sufficient for conceptual understanding of DALYs and how to estimate them in a decision-analytic model; it is not intended as a comprehensive treatment of the subject. For extensive discussion of the history, assumptions and controversies around DALYs, see TK.  
 
 DALYs are the sum of two components: a morbidity component called years lost to disability (YLD), and a premature mortality component called years of life lost to disease (YLL) [@who2020methods]. To quantify YLDs, conditions are assigned disability weights ($D$) ranging from zero to one, with zero representing the absence of the condition and one representing the highest burden a condition can inflict. Disability weights are elicited from expert panels, are standardized across geographies, and are routinely updated and published as part of the GBD [@who2020methods].
 
@@ -75,7 +76,7 @@ $$
 YLD(c) = D_c \cdot L_c
 $$ {#eq-yld1} 
 
-YLLs are determined by a loss function, which is typically defined as the number of years lost to premature mortality at age $a$. This value is often taken directly from a life table that provides information on remaining life expectancy ($Ex(a)$) at a given age. 
+YLLs are determined by a loss function, which is typically defined as the number of years lost to premature mortality. This value is often taken from a life table that provides information on remaining life expectancy at age $a$,
 
 $$
 YLL(a)= Ex(a)
@@ -111,7 +112,7 @@ $$
 YLL(a)= \frac{1}{r}\left(1-e^{-r Ex(a)}\right).
 $$ {#eq-yll} 
 
-It is important to note that the discounting shown in @eq-yld and @eq-yll yield the present value of YLD and YLL outcomes at a single point in time, when the duration of disease ($L_c$) and time of death from disease ($a$) are known. For a decision model where not all cohort members start off ill, that point in time very likely occurs at some point after the baseline period---and different illness durations and death times will, of course, occur across individuals in a modeled cohort. As such, to be consistent with standard practice with WHO-CHOICE, we must discount YLL and YLD outcomes further---all the way back to the baseline (time $t=0$) period. This additional discounting step will become apparent in  @sec-outcomes below. 
+It is important to note that the discounting shown in @eq-yld and @eq-yll yields the present value of YLD and YLL outcomes at a single point in time, when the duration of disease ($L_c$) and time of death from disease ($a$) are known. For a decision model where not all cohort members start off ill, that point in time very likely occurs at some point after the baseline period---and different illness durations and death times will, of course, occur across individuals in a modeled cohort. As such, we must discount YLL and YLD outcomes further, to time $t=0$ period. This additional discounting step will become apparent in @sec-outcomes below. 
 
 ## Model Overview {#sec-overview}
 
@@ -124,11 +125,11 @@ We consider outcomes under four strategies:
 - **Strategy B**, which reduces the rate of progression from Sick to Sicker by 40%.
 - **Composite Strategy AB**, which jointly implements strategies A and B. 
  
-A state transition diagram is shown in @fig-model1. In the figure, nodes are health states and edges depict possible transitions among them. Edge labels are defined in terms of transition intensities (rates).  Other key model parameters are summarized in @tbl-params. 
+A state transition diagram is shown in @fig-model1. In the figure, nodes are health states and edges depict  transitions among them. Edge labels are defined in terms of transition intensities (rates).  Other key model parameters are summarized in @tbl-params. 
 
-As depicted in @fig-model1, and as parameterized in our replication code, the underlying Markov model is time homogeneous---that is, transition rates do not vary as a function of time (e.g., the background mortality rate is fixed and does not increase with age). This is merely a simplification that builds on an existing time-homogeneous model constructed for didactic purposes [@alarid2023introductory]. We do, however, index all formulas and other model-relevant objects with the subscript $t$ to allow for time-inhomogenous models. Our replication code is also written to easily accomodate time-inhomogeneous models. 
+As depicted in @fig-model1, and as parameterized in our replication code, the underlying Markov model is time homogeneous---that is, transition rates do not vary as a function of age/time. This is merely a simplification that builds on an existing time-homogeneous model constructed for didactic purposes [@alarid2023introductory]. We do, however, index all formulas and other model-relevant objects with the subscript $t$ to allow for time-inhomogenous models. Our replication code is also written to accommodate time-inhomogeneous models. 
 
-An additional observation is worth highlighting. In our implementation of the Sick-Sicker model, disability weights are defined as one minus the utility weight. This is not generally the case, as DALY disability weights are derived from expert valuations and are standardized across countries and regions [@who2020methods; @sassi2006calculating]. Utility weights, by contrast, are often derived from general population and/or patient samples and therefore differ across geographies [@sassi2006calculating]. We have elected to parameterize our model in this way to hold this methodological difference fixed---that is, we aim to show how differences in methodological choices shape estimates of DALYs while holding fixed *additional* differences that might occur due to differences in the derivation of disability and utility weights. 
+An additional assumption is worth highlighting. In our model, disability weights are defined as one minus the utility weight. This is not generally the case, as DALY disability weights are derived from expert valuations and are standardized across countries and regions [@who2020methods; @sassi2006calculating]. Utility weights, by contrast, are often derived from general population and/or patient samples and therefore differ across geographies [@sassi2006calculating]. We have elected to parameterize our model in this way to hold this methodological difference fixed---that is, we aim to show how differences in methodological choices shape estimates of DALYs while holding fixed *additional* differences that might occur due to differences in the derivation of disability and utility weights. 
 
 ![State transition diagram for progressive disease model](images/state-transition-diagram-1.svg){#fig-model1}
 
@@ -240,7 +241,7 @@ params_ <- list(
               85L,      9.990181244,
               90L,      7.617724915,
               95L,      5.922359078
-          )
+          ) 
 )
 
 params <- 
@@ -356,23 +357,23 @@ tibble(parameter = c(sc_params,vec_params),value = unname(c(params_[sc_params],v
 
 ## Transition Matrices
 
-With the model parameterized, our next step is to define the matrices that govern transitions in the model. The state transition diagram represented in @fig-model1 is not well-suited to calculate DALY outcomes, however. A primary reason is that transitions to the absorbing death state capture transitions due to all causes of death.  To calculate YLLs, we need to separately track the timing and number of deaths *due to disease*. 
+With the model parameterized, we next define the matrices that govern transitions. The state transition diagram represented in @fig-model1 is not yet well-suited to calculate DALY outcomes, however. A primary reason is that transitions to the absorbing death state capture transitions due to all causes of death.  To calculate YLLs, we must separately track the timing and number of deaths *due to disease*. 
 
 To accommodate this need, several approaches are available. We categorize each based on the level of experience and skill required (beginner, intermediate, advanced):
 
-1. **Approach 1 (Beginner): Separate Death State**: Re-define the health states to include a separate cause-specific death state as depicted in @fig-modelDS.[^othcause] We then draw on the resulting Markov trace and use changes in the number of cause-specific deaths in each cycle to calculate YLLs. 
+1. **Approach 1 (Beginner): Separate Death State**: Re-define the health states to include a separate cause-specific death state as depicted in @fig-modelDS.[^othcause] We then construct a Markov trace tracking state occupancy in each cycle, and use changes in the number of cause-specific deaths across cycles to calculate YLLs. 
 
-2. **Approach 2 (Intermediate): Non-Markovian Trackers**: Include a non-Markovian transition state for cause-specific deaths in the transition probability matrix. This approach allows for direct calculation of YLD, YLL and DALY outcomes because it sidesteps the need to derive a separate cause-related death transition vector from the Markov trace (as in Approach 1). 
+2. **Approach 2 (Intermediate): Non-Markovian Trackers**: Augment the transition matrices to include a non-Markovian transition state for cause-specific deaths. This approach allows for efficient calculation of YLD, YLL and DALY outcomes (often useful for microsimulation or probabilistic sensitivity analyses) because it sidesteps the need to derive a Markov trace.
 
-3. **Approach 3 (Advanced): Markov Chain with Rewards** Define a block matrix Markov chain with rewards for occupancy (YLDs) and disease-related death transitions (YLLs) by adapting the methods in @caswell2021a. This approach draws on matrix calculus and solves for expected outcomes as well as higher order moments such as variance and skewness. 
+3. **Approach 3 (Advanced): Markov Chain with Rewards** Define a block matrix Markov chain with rewards for occupancy (YLDs) and disease-related death transitions (YLLs) by adapting the methods in @caswell2021a. This approach is the most efficient since it solves directly for expected outcomes; it also facilitates estimation of higher order moments such as variance and skewness of DALYs in a population. 
 
-[^othcause]: In this example, disease-specific death rates are goverened by a hazard ratio applied to the background mortality rate. Because we are operating on the rate scale, we can separate out disease-related deaths from other-cause mortality by simply taking a difference in the rates. Other applications for prevalent conditions with high death rates, however, may require us to construct a cause-deleted life table to obtain background mortality rates that net out deaths from the modeled disease.
+[^othcause]: In this example, disease-specific death rates are governed by a hazard ratio applied to the background mortality rate. Because we are operating on the rate scale, we can separate out disease-related deaths from other-cause mortality by simply taking a difference in the rates. Other applications for prevalent conditions with high death rates, however, may require us to construct a cause-deleted life table to obtain background mortality rates that net out deaths from the modeled disease.
 
-Each approach facilitates the design and execution of a decision-analytic model that correctly calculates YLD, YLL, and DALY outcomes---as well as other common outcomes such as life-years (LYs), QALYs and costs. In practice, Approaches (1) and (2)  will produce identical results.  Approach (3) draws on slightly different assumptions on partial payoffs for partial occupancy in a cycle, but will yield results very similar to (1) and (2). We show in @sec-results that other shortcut-based approaches previously used in the literature---such as modeling a QALY-like DALY and/or accumulating time in the absorbing death state---will not in general yield similar results.  
+Each approach facilitates the design and execution of a decision-analytic model that correctly calculates YLD, YLL, and DALY outcomes---as well as other common outcomes such as life-years (LYs), QALYs and costs. In practice, Approaches (1) and (2)  will produce identical results.  Approach (3) draws on slightly different assumptions on partial health state occupancy in a cycle, but yields results quite similar to (1) and (2). We show in @sec-results that other shortcut-based approaches previously used in the literature---such as modeling a QALY-like DALY and/or accumulating time in the absorbing death state---will not in general yield similar results.  
 
 ### Approach 1 (Beginner): Cause-Specific Death State
 
-Under this approach, we separate out deaths from disease vs. other causes by defining a separate health state for cause-specific mortality; an updated state transition diagram is shown in @fig-modelDS. 
+Under this approach, we separate out deaths from disease vs. other causes by defining a separate health state for cause-specific mortality; @fig-modelDS shows an updated state transition diagram. 
 
 ![State transition diagram for progressive disease model with separate cause-specific death state](images/state-transition-diagram-2.svg){#fig-modelDS}
 
@@ -380,9 +381,9 @@ Transitions among health states are defined in terms of continuous rates ("inten
 
 ![Transition Intensity Matrix for Approach 1](images/Q_model2.png)
 
-Cell values in row $i$, column $j$ of $\mathbf{Q}_t$ capture the (continuous time) transition rate from health state $i$ to health state $j$. $\mathbf{Q}_t$ has diagonal elements defined as the negative sum of the off-diagonal row values (i.e., the row sums of $\mathbf{Q}_t$ are zero). This ensures that the Markov model is "closed"---that is, the total cohort size neither grows nor shrinks over time.
+Cell values in row $i$, column $j$ of $\mathbf{Q}_t$ capture the (continuous time) transition rate from health state $i$ to health state $j$. $\mathbf{Q}_t$ has diagonal elements defined as the negative sum of the off-diagonal row values (i.e., the row sums of $\mathbf{Q}_t$ are zero). This ensures that the Markov model is "closed"---that is, the total cohort size neither grows or shrinks over time.
 
-We next embed the  transition intensity matrix into a discrete time transition probability matrix by taking the matrix exponential of $\mathbf{Q}_t$ for a defined time step (i.e., "cycle length") $\Delta t$:[^embed]
+We next embed the  transition intensity matrix into a discrete time transition probability matrix by taking the matrix exponential of $\mathbf{Q}_t$ for a defined cycle length ("time step") $\Delta t$:[^embed]
 
 $$
 \mathbf{P}_t = e^{\mathbf{Q}_t\Delta t}
@@ -395,21 +396,21 @@ Embedding the Sick-Sicker model results in a transition probability matrix $\mat
 
 [^embed]: In Markov theory, $\mathbf{P}$ is called the "discrete skeleton" of the continuous model [@iosifescu1980]. The conversion formula used to calculate $mathbf{P}$ is the matrix analogue to the standard rate-to-probability formula commonly taught in health economics textbooks, i.e., $p = 1 - e^{r\Delta t}$, where $r$ is the rate and $\Delta t$ is the time step (i.e., "cycle length").
 
-Embedding the transition probability matrix using the matrix exponential ensures that the resulting transition probabilities capture the underlying continuous time disease process. In particular, $\mathbf{P}$ will capture the probability of compound ("jumpover") transitions within a single cycle.[^jumpover] 
+Embedding the transition probability matrix using @eq-embed ensures that the resulting transition probabilities capture the underlying continuous time disease process. In particular, $\mathbf{P}$ captures the probability of compound ("jumpover") transitions within a single cycle.[^jumpover] 
 
 [^jumpover]: For example, in the continuous time rate matrix $\mathbf{Q}_t$ above, there is a zero-valued rate defined for progressions from Healthy (H) to Disease-related death (DS), since individuals must first become ill before they can die from disease-related causes. However, after embedding, the matrix $\mathbf{P}$ has a non-zero cycle transition probability from Healthy (H) to Disease-related death (DS) (i.e., $\texttt{p\_HDS}$). This value captures the probability of a compound or "jumpover" transition from Healthy and through the Sick and/or Sicker state to death from disease-related causes within the same discrete time cycle; see @graves2021 for further discussion, and @iosifescu1980 for additional theory.[^comparison]
 
-[^comparison]: Because we embed the transition probability matrix using matrix exponentiation, rather than through pairwise application of rate-to-probability formulas to each transition type, our results will differ from those in @alarid2023introductory---even though we use identical input parameters. Application of standard rate-to-probability formulas in health states with competing risks (i.e., the possibility of transitioning to more than one other health state in a given cycle) will ignore the possibility of compound transitions within a single cycle. Though not (yet) widely used in health economics, embedding the transition probability matrix using the matrix exponential is the technically correct way to construct a transition probability matrix from underlying transition rates.
+[^comparison]: Because we embed the transition probability matrix using matrix exponentiation, rather than through pairwise application of rate-to-probability formulas to each transition type, our results will differ from those in @alarid2023introductory---even though we use identical input parameters. Application of standard rate-to-probability formulas in health states with competing risks (i.e., the possibility of transitioning to more than one other health state in a given cycle) will ignore the possibility of compound transitions within a single cycle. Though not (yet) widely used in health economics, embedding the transition probability matrix using the matrix exponential is the technically correct way to construct a transition probability matrix from underlying transition rates. 
 
 ### Approach 2 (Intermediate): Non-Markovian Tracking States
 
-Under this approach, we maintain the overall structure as depicted in the original @fig-model1, but augment the transition probability matrix with non-Markovian components to facilitate accounting of disease-related deaths.[^tracking]  Approach 2 offers a more generalized method that allows practitioners to accurately account for costs and/or health payoffs (such as YLLs) that are defined by *transitions* among health states, rather than occupancy in a health state. DALY outcomes can also be calculated directly, without the need to derive a vector of disease-related death transitions from the Markov trace (as required for Approach 1). 
+This method maintains the overall structure as depicted in the original @fig-model1, but augments the transition probability matrix with non-Markovian components to facilitate accounting of disease-related deaths.[^tracking]  Approach 2 offers a more generalized method that allows practitioners to accurately account for costs and/or health payoffs (such as YLLs) that are defined by *transitions* among health states, rather than occupancy in a health state. DALY outcomes can also be calculated directly, without the need to derive a vector of disease-related death transitions from the Markov trace (as required for Approach 1). 
 
 @fig-transition shows a state transition diagram with the tracking state added. The tracking state (shown as red nodes)  simply records transitions as cohort members move from either diseased state to the absorbing death state due to causes related to the disease. 
 
 ![State Transition Diagram with Transition State (Red)](images/state-transition-diagram-3.svg){#fig-transition}
 
-[^tracking]: Tracking states also allow for accurate bookeeping for other outcomes such as costs. For example, if developing the disease incurs a one-time diagnosis or treatment cost, the compound transitions implied by the embedded transition probability matrix indicate that some individuals will transiently enter (and then exit) the Sick state in a single cycle. When calculating costs, practitioners may want to include a tracking state for the Sick state to be sure to capture these one-time costs, which would be masked if cost payoffs are simply multiplied by state occupancy at the end of each cycle (e.g., costs for individuals with a sojourn through the Sick state in a single cycle would not be accounted for).
+[^tracking]: Tracking states also allow for accurate bookkeeping for other outcomes such as costs. For example, if developing the disease incurs a one-time diagnosis or treatment cost, the compound transitions implied by the embedded transition probability matrix indicate that some individuals will transiently enter (and then exit) the Sick state in a single cycle. When calculating costs, practitioners may want to include a tracking state for the Sick state to be sure to capture these one-time costs, which would be masked if cost payoffs are simply multiplied by state occupancy at the end of each cycle (e.g., costs for individuals with a sojourn through the Sick state in a single cycle would not be accounted for).
 
 In general, tracking states can either count the total number of transitions that have occurred up to a given cycle (i.e., an "accumulator" state), or can track the total number of new transitions that occur within a single cycle (i.e., a "transition" state).[^augmented] To calculate YLL outcomes we will add a transition state that records the total number of new disease-related deaths in each cycle. 
 
@@ -428,7 +429,7 @@ Second, two transition intensities---from the S1 (Sick) and S2 (Sicker) states t
 
 As above, we obtain the transition probability matrix by embedding $\mathbf{Q}_t$ into the discrete time step (@eq-embed). However, the resulting transition probability matrix treats $\texttt{trDS}$ as an absorbing state (i.e., individuals are retained in the $\texttt{trDS}$ with probability one). Using the terminology introduced above, this absorbing state could serve as an **accumulator** state that (in the constructed Markov trace) records the total number of people who have died from the disease up to any given cycle. This may be a decision-relevant health outcome to consider on its own; indeed, so long as the Markovian submatrix remains closed, there is no limit to the number of accumulator and/or transition states one might add along the "edges" of a model.[^transex]
 
-[^transex]: To build on the example of compound "jumpover" transitions above, suppose an individual starts off healthy in a cycle, then rapidly transitions through the Sick and Sicker state and dies due to disease-related causes within the same cycle. If there is some treatment cost associated with being in the Sicker state, a traditional approach that applies cost payoffs to state occupancy at the (beginning) end of the cycle would miss treatment costs for this individual because they *transition* through the Sicker state, but never occupy it at the beginning or end of a cycle. Adding a non-Markovian transition state to the model facilitates more accurate bookkeeping because the transition state would pick up on this transition through the Sicker state. 
+[^transex]: To build on the example of compound "jump-over" transitions above, suppose an individual starts off healthy in a cycle, then rapidly transitions through the Sick and Sicker state and dies due to disease-related causes within the same cycle. If there is some treatment cost associated with being in the Sicker state, a traditional approach that applies cost payoffs to state occupancy at the (beginning) end of the cycle would miss treatment costs for this individual because they *transition* through the Sicker state, but never occupy it at the beginning or end of a cycle. Adding a non-Markovian transition state to the model facilitates more accurate bookkeeping because the transition state would pick up on this transition through the Sicker state. 
 
 To change $\texttt{trDS}$ to a **transition** state, we simply replace the absorbing probability of one in the cell $[\texttt{trDS},\texttt{trDS}]$ with a zero.  This cell-level change is highlighted in grey in the bottom right cell of $\mathbf{P}$ below:
 
@@ -657,7 +658,7 @@ params2[["m_P_"]] <- NULL
 
 Our final approach adapts methods from mathematical demography to estimate YLD, YLL and DALY outcomes [@caswell2021a].[^otherout] This approach requires a separate disease-related absorbing state as shown in  @fig-modelDS. While our focus here is on expected outcomes, this method can also be used to estimate higher order moments (e.g., variance, skewness). It is also quite flexible and can estimate separate outcomes for any combination of health states and age classes (e.g., disease-free survival among those aged 40-45, etc.); see @caswell2018 and @caswell2021a for details. 
 
-[^otherout]: The method also easily accomodates other common outcomes such as QALYs and costs. 
+[^otherout]: The method also easily accommodates other common outcomes such as QALYs and costs. 
 
 To implement Approach 3 we define some additional parameters:
 
@@ -681,10 +682,10 @@ absorbing (death) states.
 To construct $\mathbf{U}_t$ and $\mathbf{M}_t$ we define transition rate
 ("intensity") matrices as in Approaches 1 and 2 above. One important (minor) difference is that the rows
 in $\mathbf{Q}_t$, $\mathbf{V}_t$, and $\mathbf{S}_t$ now correspond to the final state, while the
-columns correspond to the starting state; this is essentially the transpose of the rate matrices defined for Approaches 1 and 2, where rows corresponded to the initial health state and columns to the final health state. 
+columns correspond to the starting state; this is essentially the transpose of the rate matrices defined for Approaches 1 and 2. 
 
 [^vecperm]: See @henderson1981 and Appendix B in @caswell2021a for
-further information. A function to construct a vec-permultation matrix is provided
+further information. A function to construct a vec-permutation matrix is provided
 within our replication code.
 
 
@@ -712,8 +713,8 @@ $\mathbf{Q}_t$ zero (i.e., the model is "closed" and does not gain or lose cohor
 
 For the defined time step $\Delta_t$, the discrete time
 transition probability matrix $\mathbf{P}_t$ is again obtained by taking the
-matrix exponential of the intensity matrix ($\mathbf{Q}_t$) multipled by
-the time step ($\Delta_t$), i.e., @eq-embed:
+matrix exponential of the intensity matrix ($\mathbf{Q}_t$) multiplied by
+the time step, i.e., @eq-embed:
 
 $$
 \mathbf{P}_t =e^{\mathbf{Q}_t  \Delta t}
@@ -728,8 +729,7 @@ $$
 \end{array}\right)
 $$ {#eq-P3}
 
-In addition, the matrix $\mathbf{D}_j$ defines age advancement in the
-Markov chain. Borrowing from an example in @caswell2021a, if $\omega=3$ then
+In addition, the matrix $\mathbf{D}_j$ defines age advancement in the model. Borrowing from an example in @caswell2021a, if $\omega=3$ then
 
 $$
 \mathbf{D}_j=\left(\begin{array}{ccc}
@@ -786,9 +786,9 @@ $$
 \end{array}\right) \quad(\tau \omega+\alpha) \times(\tau \omega+\alpha)
 $$ {#eq-Ptilde} where $\mathbf{I}$ is the identity matrix and $\mathbf{0}$ is a matrix of zeros. 
 
-$\widetilde{\mathbf{P}}$ is the analogue to the transition matrix $\mathbf{P}$ (@eq-embed) under Approaches 1 and 2 above.
+$\widetilde{\mathbf{P}}$ is the analogue to the transition matrix $\mathbf{P}_t$ (@eq-embed) under Approaches 1 and 2 above.
 
-```{r approach-3}
+```{r approach-3, cache=TRUE}
 params3_ <- with(params1,modifyList(params1,list(
     alpha = length(v_ab_names),
     tau = length(v_tr_names), 
@@ -1013,7 +1013,7 @@ $$ {#eq-cycledisc} where $r$ is the annual discount rate and $\Delta_t$ is the c
 
 In the YLD payoff vector, the term $\frac{1}{r_{\Delta_t}}(1-e^{-r_{\Delta_t}})$ is included as a continuous-time discounting factor for the defined time step $\Delta_t$. This term is included to discount time *within* each cycle in order to maintain the continuous-time discounting approach used in the original GBD equations [@larson2013calculating].[^conttime] 
 
-[^conttime]: Common discounting formulas, such as the discrete time discount factor $\frac{1}{(1+r)^t}$, as well as the continuous time discount factor $e^{-rt}$, are designed for a series of discrete "payoffs" at specific time points. By comparison, the continuous time discounting used in the GBD DALY equations (@eq-yld and @eq-yll) is based on an assumption that payffs accrue in a continuous stream. The discount adjustment factor shown here ($\frac{1}{r}(1-e^{-rt})$)---and introduced in @larson2013calculating)---essentially "smooths out" the discrete YLD weight applied in each cycle to reflect this continuous flow. We have verified that application of this factor in our approach exactly replicate the example results using the GBD equations in @rushby2001; see the Supplementary Appendix for these examples and code. 
+[^conttime]: Common discounting formulas, such as the discrete time discount factor $\frac{1}{(1+r)^t}$, as well as the continuous time discount factor $e^{-rt}$, are designed for a series of discrete "payoffs" at specific time points. By comparison, the continuous time discounting used in the GBD DALY equations (@eq-yld and @eq-yll) is based on an assumption that payoffs accrue in a continuous stream. The discount adjustment factor shown here ($\frac{1}{r}(1-e^{-rt})$)---and introduced in @larson2013calculating)---essentially "smooths out" the discrete YLD weight applied in each cycle to reflect this continuous flow. We have verified that application of this factor in our approach exactly replicate the example results using the GBD equations in @rushby2001; see the Supplementary Appendix for these examples and code. 
 
 To fully discount outcomes, we still must discount all future outcome values back to baseline ($t=0$).  Discounted years of life lost to disability (YLD) at cycle $t$ is given by
 
@@ -1037,7 +1037,7 @@ Finally, an equivalent way to calculate YLD outcomes is through matrix multiplic
 
 $$
 YLD = \sum_{t=0}^{\omega-1} \mathbf{S}\mathbf{d}_{YLD} \odot \mathbf{c}
-$$ {#eq-yldtrace}   where $\mathbf{c}$ is an $\omega \times 1$ vector of cycle discoutning/correction factors $c_t$ and $\odot$ is the element-wise multiplication (Hadamard product) operator. 
+$$ {#eq-yldtrace}   where $\mathbf{c}$ is an $\omega \times 1$ vector of cycle discounting/correction factors $c_t$ and $\odot$ is the element-wise multiplication (Hadamard product) operator. 
 
 ### Years of Life Lost to Disease (YLLs): Approach 1
 
@@ -1074,7 +1074,7 @@ $$ {#eq-yllcum1}
 
 ### Years of Life Lost to Disease (YLLs): Approach 2
 
-YLLs under Approach 2 can be calculated in a similar way as YLDs, since we have augmented the model with a transition tracking state that directly etimates new deaths in each cycle. Define the YLL payoff vector $\mathbf{d}_{YLL,t}$, which has value $Ex_{t}$ for the transition tracker health state (```trDS```) and zeros elsewhere,
+YLLs under Approach 2 can be calculated in a similar way as YLDs, since we have augmented the model with a transition tracking state that directly estimates new deaths in each cycle. Define the YLL payoff vector $\mathbf{d}_{YLL,t}$, which has value $Ex_{t}$ for the transition tracker health state (```trDS```) and zeros elsewhere,
 
 ![](images/d_yll.png){width="40%" fig-align="center"}
 
@@ -1116,12 +1116,7 @@ trace2 <-
             map(~(data.frame(.x))) %>% 
             bind_rows()
         }))
-    })  %>% 
-    map(~({
-        tmp = .x[1,]
-        tmp[1,] = params2$v_s0T
-        tmp = rbind(tmp,.x)
-    }))
+    })  
 ```
 
 ```{r}
@@ -1261,7 +1256,7 @@ YLL <-
 DALY <- 
     map2(YLL,YLD,~(.x + .y))
 
-# Accumualted Time in Absorbing Death State
+# Accumulated Time in Absorbing Death State
 accdaly_ = with(params1,(matrix(c(0,
               dw_S1 * Delta_t * (1/r_v_disc_h_Delta_t) * (1 - exp(-r_v_disc_h_Delta_t)) ,
               dw_S2 * Delta_t * (1/r_v_disc_h_Delta_t) * (1 - exp(-r_v_disc_h_Delta_t)),
@@ -1406,11 +1401,11 @@ result1 <- cbind(LY, YLD, YLL, DALY, ACCDALY, QALY_DALY, QALY,COST) %>%
 
 
 Our advanced approach draws on Markov chain with rewards methods that define reward matrices for occupancy-based (YLD) and transition-based (YLL) outcomes. These reward matrices allow us to estimate outcomes for any combination of health states and/or ages. Reward matrices have notation $\mathbf{R}_m$, where $m$ indexes the moment of interest (e.g., expected
-value, variance, etc.). We focus here on expected outcomes (i.e., outcomes based on $\mathbf{R}_1$)---though equations are available to estimate higher-order moments and objects such as variance, skewness, the coefficient of variation, etc. 
+value, variance, etc.). We focus here on expected outcomes (i.e., outcomes based on $\mathbf{R}_1$)---though equations for higher-order moments are available in @caswell2021a. 
 
 ### Years of Life Lived With Disease (YLD)
 
-To calculate occupancy-based outcomes such as YLDs, we first define a $\tau \times \omega$ reward matrix
+To estimate YLDs, we first define a $\tau \times \omega$ reward matrix
 $\mathbf{H}$, which has dimensions $\tau \times \omega$ and is
 structured as shown in @fig-H-le:
 
@@ -1420,10 +1415,7 @@ Cell values within this matrix can be set to one if we want to potentially "rewa
 that health state-age combination in our outcome measure, and zero
 otherwise.
 
-We use this matrix to define the reward vector $\mathbf{h}$:[^stackreward]
-
-[^stackreward]: The $\text{vec}$ operator stacks the columns of an $m \times n$
-    matrix into a $mn \times 1$ vector.
+We use this matrix to define the reward vector $\mathbf{h}$, where $\text{vec}$ is an operator that stacks the columns of an $m \times n$ matrix into a $mn \times 1$ vector.
 
 $$
 \mathbf{h} = \text{vec } \mathbf{H}
@@ -1431,22 +1423,22 @@ $$ We also define $\neg \mathbf{h}$ as the complement of $\mathbf{h}$,
 (i.e., values of 1.0 become 0, and vice versa).
 
 We next define additional matrix $\mathbf{V}$, which has the same structure
-as $\mathbf{H}$ but includes the (fully discounted) disability weight:
+as $\mathbf{H}$ but includes the (fully discounted) disability weights:
 
 ![YLD reward matrix $\mathbf{V}$](images/H-YLD.png){#fig-H-yld fig-align="center" width="60%"} 
 
-where $\texttt{dwS1}* = \texttt{dwS1} \times \Delta_t  \times  \frac{1}{r_{\Delta_t}}(1-e^{-r_{\Delta_t}}) \times e^{-r_{\Delta_t} t}$, etc.
+where $\texttt{dwS1}* = \texttt{dwS1} \times \Delta_t  \times  \frac{1}{r_{\Delta_t}}(1-e^{-r_{\Delta_t}}) \times e^{-r_{\Delta_t} t}$, etc. This equation first converts the weights into the appropriate value for the time step, applies the cycle-specific discounting adjustment factor, and then discounts the resulting value to the baseline period. 
 
 We similarly define an occupancy indicator vector $\mathbf{v}$ just as
 we did for $\mathbf{h}$:
 
 $$
-\mathbf{v}_{m}=\operatorname{vec} \mathbf{V}_{m}
+\mathbf{v}=\operatorname{vec} \mathbf{V}
 $$
 
 #### Partial Occupancy 
 
-Because we are modeling a continuous-time disease progression progress in discrete time, it is useful to make corrections for partial occupancy in a cycle. Similar to a half-cycle correction often used in health economic applications, the Markov chain with rewards approach does so by assuming transitions occur half-way through a cycle. We operationalize this assumption by defining,
+Because we are modeling a continuous-time disease progression progress in discrete time, it is useful to make corrections for partial occupancy in a cycle. Similar to a half-cycle correction often used in health economic applications, the Markov chain with rewards approach does so by assuming transitions occur half-way through a cycle; the application of this assumption is slightly different, however, because the correction applies in every cycle, not just the first and last. We operationalize this assumption by defining,
 
 $$
 \begin{aligned}
@@ -1459,7 +1451,7 @@ $$
 $$ where $\mathbf{1}_{\alpha}$ is a vector of ones with length $\alpha$.
 
 We combine $\widetilde{\mathbf{B}}_{1}$ and $\widetilde{\mathbf{C}}_{1}$ to
-obtain:
+obtain the final reward matrix for expected YLD outcomes,
 
 $$
 \widetilde{\mathbf{R}}^{YLD}_{1}=\left(\begin{array}{c|c}
@@ -1467,7 +1459,7 @@ $$
 \hline \widetilde{\mathbf{C}}_{1} & \mathbf{0}
 \end{array}\right) 
 $$ which has same block structure and dimensions as the transition probability matrix
-$\widetilde{\mathbf{P}}$ (@eq-Ptilde).
+$\widetilde{\mathbf{P}}$ (@eq-Ptilde). We explain how to use this matrix to estimate expected YLDs in @sec-expected below. 
 
 ### Years of Life Lost to Disease (YLL)
 
@@ -1488,6 +1480,21 @@ $$
 $$ 
 where $\eta_{i x}$ is remaining life expectancy for an individual in
 health state $i$ at a given age $x$. In this structure, remaining life expectancy for each health state is grouped within age classes. Remaining life expectancy should also enter $\eta_{i x}$ as fully discounted back to $t=0$. 
+
+Our model, for example, follows a cohort of 25 year old adults until death. The GBD reference life expectancy value for a 25 year old is 64.15, and the life expectancy for the last age class (95+) is 5.92. There are also $\tau=3$ non-absorbing health states. If we followed the cohort until age 95, $\eta_{i x}$ would take the following form:
+
+$$
+\widetilde{\mathbf{\eta}}=\left(\begin{array}{c}
+\eta_{H,25} =  64.15 \\
+\eta_{S1,25} =  64.15 \\
+\eta_{S2,25} =  64.15 \\
+\hline \vdots \\
+\hline \eta_{H,95} =  5.92 \\
+\eta_{S1,95} = 5.92 \\
+\eta_{S2,95} =  5.92 \\
+\end{array}\right)
+$$ 
+
 
 We next construct the reward matrices:
 
@@ -1511,7 +1518,7 @@ $$
 \end{array}\right)
 $$
 
-### Expected YLD and YLL Outcomes
+### Expected YLD and YLL Outcomes {#sec-expected}
 
 The expected value of outcome $Y$ (where $Y \in \{YLD, YLL\}$) is estimated by,
 
@@ -1537,16 +1544,16 @@ $$
 $$ {#eq-app3outstate} where $\otimes$ is the Kronecker operator and $\mathbf{e}_{t}$ is a vector of length $\omega$ with a value of one in the first position and zero elsewhere; this facilitates calculating expected outcomes from the baseline period (i.e., $t=0$). 
 
 
-Alternatively, we may wish to calculate outcomes separately under
-different starting ages, and for a specified starting health state
-(e.g., healthy). This is given by
+@eq-app3outstate will yield expected outcomes as typically reported in health economic evaluations. Alternatively, we may wish to calculate outcomes separately under
+different baseline age-health state combinations
+(e.g., DALYs for healthy 55 year-old adults). We obtain these expected outcomes by,
 
 $$
 \boldsymbol{\rho}_{1}^{Y,\text {age }}(\text { stage } i)=\left(\mathbf{I}_{\omega} \otimes \mathbf{e}_{i}^{\top}\right) \widetilde{\boldsymbol{\rho}}^Y_{1} \quad \omega \times 1,
 $$ {#eq-app3outage} where $\mathbf{e}_{i}$ is a vector of length $\tau$ with a value of one in the initial health state position of interest (e.g., ```Healthy```) and zero elsewhere. 
 
 
-```{r markov-chain-rewards}
+```{r markov-chain-rewards, cache=TRUE}
 H = with(params3,matrix(1,nrow=tau, ncol=omega))
 
 with(params3,{
@@ -1661,116 +1668,106 @@ result3 <- cbind(LY3, YLD3, YLL3, DALY3, QALY3,COST3) %>%
 
 ## Results {#sec-results}
 
-@tbl-trace1 shows the Markov trace for the first five cycles under Approach 1, while @tbl-trace2 shows the trace under Approach 2.  @tbl-trace1 also includes a new column (```deaths_disease```) that is calculated as the difference in state occupancy in the ```DS``` column between cycles. This extra step will be necessary later for calculating YLL outcomes. The trace shown under Approach 2 (@tbl-trace2), by comparison, automatically calculates new deaths through the inclusion of the transition state ```trDS```; the values under ```deaths_disease``` and ```trDS``` are identical, again highlighting that either approach can be used to calculate the number of disease-related deaths in each cycle.  
+### Comparison of DALY Outcomes Under All Three Approaches
 
-
-
-```{r}
-#| tbl-cap: Markov Trace Under Approach 1
-#| label: tbl-trace1
-
-trace1$SoC %>% head() %>% 
-  data.frame() %>% 
-  mutate(deaths_disease = c(0,diff(DS))) %>% 
-  mutate(cycle = row_number()-1) %>% 
-  select(cycle,everything()) %>% 
-  kable(digits = c(0,rep(4,6))) 
-```
+@tbl-compare1 draws on the Sick-Sicker model parameters and shows YLD, YLL and DALY outcomes estimates across the three approaches. Due to their similar structure, Approaches 1 and 2 yield identical estimates and are reported together in the table. Approach 3 draws on a slightly different partial occupancy assumption, though yields DALY estimates that are consistently within 2% of those under Approaches 1 & 2. YLLs have the largest difference (up to 5%), while YLDs have the lowest (around 1%). 
 
 ```{r}
-#| tbl-cap: Markov Trace Under Approach 2
-#| label: tbl-trace2
-#|
-trace2$SoC %>% head() %>% data.frame() %>% 
-  mutate(cycle = row_number()-1) %>% 
-  select(cycle,everything()) %>% 
-  kable(digits = c(0,rep(4,5))) 
-```
-
-
-
-```{r}
+#| label: tbl-compare1
+#| tbl-cap: "Comparison of Outcomes Under Three DALY Approaches"
+#| 
 result1 %>% 
   bind_rows(result3) %>% 
-  select(-approach) %>% 
-  kable(digits = 3, col.names = c("Scenario","Life-Years","YLDs","YLLs","DALYs","DALY-Hack","QALY-like DALY","QALY","Costs"))  %>% 
+  select(approach,strategy,YLD,YLL,DALY) %>% 
+  gather(outcome,value,-strategy,-approach) %>% 
+  mutate(approach = case_when(
+    approach == "Markov Trace" ~ "1-2",
+    .default = "3"
+  )) %>% 
+  unite(outcome,outcome,approach) %>% 
+  pivot_wider(names_from = outcome, values_from = value) %>% 
+  mutate(strategy = case_when(
+    strategy ==  "SoC" ~ "Standard of Care", 
+    strategy == "A" ~ "Strategy A: Quality of Life Improvement",
+    strategy == "B" ~ "Strategy B: Reduce Disease Progression",
+    strategy == "AB" ~ "Composite: Strategy A + Strategy B"
+  )) %>% 
+  kable(col.names = c("",rep(c("Markov Trace (1&2)","Markov Chain With Rewards (3)"),3)), digits = 3) %>% 
   kable_styling() %>% 
-  pack_rows("Approaches 1 and 2 (Markov Trace)", 1,4) %>% 
-  pack_rows("Approach 3 (Markov Chain With Rewards)",5,8)
+  add_header_above(c("", "YLD" = 2, "YLL"=2, "DALY"=2)) 
 ```
 
+### Comparison with "Shortcut-based" DALY Approaches
+
+@tbl-cea reports cost, effect and incremental cost-effectiveness ratio (ICER) results for our three DALY approaches. The table also includes results under two "shortcut" DALY strategies. As above, there is a roughly 3% difference in outcome estimates, including ICERs, across our three DALY approaches. 
+
+@tbl-cea also includes outcomes under alternative "shortcut"-based DALY estimation approaches. First, the method labeled **death state occupancy** defines cycle payoffs based on the disease weight for the diseased health states, and a payoff value of 1.0 for the disease-related death state. Inclusion of disease weights facilitates accumulation of YLDs; YLLs are calculated by accumulating time in the disease-related death state. This approach to YLLs is endogenous to the model, i.e., it does not incorporate exogenous life expectancy information from the GBD reference life table. 
+
+The death state occupancy method yields DALY estimates that are 32-38% higher than our three approaches, and results in an ICER that is 25% lower for Strategy A vs. the standard of care. The ICER for strategy AB is calculated relative to strategy B, so the only difference is additional improvement in quality life from strategy A. This improvement works exclusively through the YLD channel, as there is no differential effect on mortality. With this key information in mind, we note that the ICER for AB vs. B is identical for the death state occupancy method vs. Approaches 1 & 2. 
+
+Next, the approach labeled **QALY-like DALY** defines the cycle occupancy payoff for the sick and sicker states as one minus the disability weight; as in many QALY applications, the healthy state receives a payoff value of 1.0. Because we have defined the disability weight in this example as one minus the utility weight, the **QALY-like DALY** approach yields estimates that are equivalent to estimating standard QALY outcomes. 
+
+QALY-like DALY estimates are, not surprisingly, higher than the other DALY estimates, owing to their conceptual difference with DALYs (i.e., QALYs accumulate and reward the quality and extension of life, while DALYs accumulate years lost to disease). Again, ICERs for strategy A vs. the standard of care are about 25% lower, while they are very similar to our DALY approaches for the AB strategy that deferentially improves quality of life. 
 
 ```{r}
-dampack::calculate_icers(cost = result1$COST, effect = result1$QALY, strategies = result1$strategy) %>% 
-  bind_rows(
-    dampack::calculate_icers(cost = result3$COST, effect = result3$QALY, strategies = result3$strategy)
-  )  %>% 
+#| tbl-cap: Comparison of Cost-Effectiveness Analysis Results
+#| label: tbl-cea
+#| 
+cea <- 
   bind_rows(
     dampack::calculate_icers(cost = result1$COST, effect = -result1$DALY, strategies = result1$strategy) %>% 
-      mutate(Effect = -Effect)
+      mutate(Effect = -Effect) %>% mutate(approach = "1 & 2")
   ) %>% 
   bind_rows(
     dampack::calculate_icers(cost = result3$COST, effect = -result3$DALY, strategies = result3$strategy) %>% 
-      mutate(Effect = -Effect)
+      mutate(Effect = -Effect) %>%  mutate(approach = "3")
   )   %>% 
   bind_rows(
     dampack::calculate_icers(cost = result1$COST, effect = -result1$ACCDALY, strategies = result1$strategy) %>% 
-            mutate(Effect = -Effect)
+            mutate(Effect = -Effect) %>% mutate(approach = "AccDALY")
     
   ) %>%   
   bind_rows(
-    dampack::calculate_icers(cost = result1$COST, effect = result1$QALY_DALY, strategies = result1$strategy)
-  ) %>%  
-  kable(digits = c(1,0,3,0,3,0,1)) %>% 
-  kable_styling(bootstrap_options = c("striped", "condensed"),full_width = FALSE)  %>% 
-  pack_rows("QALY - Approaches 1 & 2",1,4) %>% 
-  pack_rows("QALY - Approach 3",5,8) %>% 
-  pack_rows("DALY - Approaches 1 & 2",9,12) %>% 
-  pack_rows("DALY - Approach 3",13,16) %>% 
-  pack_rows("DALY-Hack",17,20) %>% 
-  pack_rows("QALY-like DALY",21,24)
-```
-
-
-```{r, eval = FALSE}
-dampack::calculate_icers(cost = result1$COST, effect = result1$QALY, strategies = result1$strategy) %>% 
-  mutate(outcome = "QALY", approach = "Approach 1 & 2") %>% 
-  bind_rows(
-    dampack::calculate_icers(cost = result3$COST, effect = result3$QALY, strategies = result3$strategy) %>% 
-       mutate(outcome = "QALY", approach = "Approach 3")
-  )  %>% 
-  bind_rows(
-    dampack::calculate_icers(cost = result1$COST, effect = -result1$DALY, strategies = result1$strategy) %>% 
-      mutate(Effect = -Effect) %>% 
-      mutate(outcome = "DALY", approach = "Approach 1 & 2")
-  ) %>% 
-  bind_rows(
-    dampack::calculate_icers(cost = result3$COST, effect = -result3$DALY, strategies = result3$strategy) %>% 
-      mutate(Effect = -Effect) %>% 
-      mutate(outcome = "DALY", approach = "Approach 3")
-  )   %>% 
-  bind_rows(
-    dampack::calculate_icers(cost = result1$COST, effect = -result1$ACCDALY, strategies = result1$strategy) %>% 
-    mutate(Effect = -Effect) %>% 
-    mutate(outcome = "ACCDALY", approach = "Approach 1 & 2")  
-  ) %>%   
-  bind_rows(
     dampack::calculate_icers(cost = result1$COST, effect = result1$QALY_DALY, strategies = result1$strategy) %>% 
-    mutate(outcome = "QALY-like DALY", approach = "Approach 1 & 2")      
-  ) %>% 
-  filter(!grepl("QALY",outcome)) %>% 
-  ggplot(aes(x = Effect, y = Cost)) + geom_point(aes(colour = approach, shape = outcome),size=2) + 
-  hrbrthemes::theme_ipsum() + ggsci::scale_color_aaas(name="Approach") + facet_wrap(~Strategy) + 
-  scale_x_continuous(limits = c(0,10)) + scale_shape(name="Outcome") + theme(legend.position = "bottom")
+      mutate(approach = "QALY-like-DALY")
+  )  %>% 
+  mutate_at(vars(ICER,Inc_Cost,Cost), ~case_when(Status=="ND" & is.na(.)~"ref.", 
+                                                  Status=="D" & is.na(.) ~ "D", 
+                                                  .default=as.character(prettyNum(round(.,0), big.mark=",")))) %>% 
+  mutate_at(vars(Inc_Effect,Effect), ~case_when(Status=="ND" & is.na(.)~"ref.", 
+                                                  Status=="D"& is.na(.) ~ "D" , 
+                                                  .default=as.character(prettyNum(round(.,2), big.mark=","))))  %>% 
+  select(approach,Strategy,Cost,Inc_Cost,Effect,Inc_Effect,ICER)
+
+
+
+
+
+cea %>% 
+  gather(outcome,value,-approach,-Strategy) %>% 
+  unite(outcome,outcome,approach) %>% 
+  pivot_wider(names_from = outcome, values_from = value) %>% 
+  janitor::clean_names() %>% 
+  select(strategy,contains("1_2"), contains("_3"),contains("acc_daly"), contains("qaly_like")) %>% 
+  mutate(res_1_2 = glue::glue("{effect_1_2}"),
+         res_3 = glue::glue("{effect_3}"),
+         res_acc_daly = glue::glue("{effect_acc_daly}"),
+         res_qaly_like_daly = glue::glue("{effect_qaly_like_daly}")) %>% 
+  select(strategy,cost_1_2,cost_3,res_1_2,res_3,res_acc_daly,res_qaly_like_daly,icer_1_2,icer_3,icer_acc_daly,icer_qaly_like_daly) %>% 
+  mutate_at(vars(cost_1_2,cost_3,res_acc_daly,res_qaly_like_daly,res_1_2,res_3),function(x) ifelse(x=="D","",x)) %>% 
+  kable(col.names = c("","Markov Trace (1&2)","Markov Chain With Rewards (3)", "Markov Trace (1&2)","Markov Chain With Rewards (3)","Death State Occupancy","QALY-like DALY",
+                     "Markov Trace (1&2)","Markov Chain With Rewards (3)", "Death State Occupancy","QALY-like DALY")) %>% 
+  kable_styling() %>% 
+  add_header_above(c("", "Cost Estimate" = 2, "DALY Estimate"=4, "ICER"=4)) 
+
 ```
 
+```{r}
 
-## Conclusion
+```
 
-## To Incorporate
+## Discussion 
 
-- [Link](https://academic.oup.com/heapol/article/21/5/402/578296?login=false)
-- [Link](https://link.springer.com/article/10.1007/s40258-022-00722-3)
 ## References {.unnumbered}
 
 :::{#refs}

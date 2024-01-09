@@ -2,11 +2,11 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.533">
+<meta name="generator" content="quarto-1.4.534">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="dcterms.date" content="2024-01-07">
+<meta name="dcterms.date" content="2024-01-09">
 <meta name="keywords" content="Cost-Effectiveness Analysis, Microsimulation, Discrete Event Simulation, Markov Cohort Models">
 
 <title>Modeling Disability-Adjusted Life Years for Policy and Decision Analysis</title>
@@ -101,10 +101,10 @@ window.Quarto = {
 <meta name="citation_abstract" content="This study outlines a methodological framework for joint modeling of Disability- and Quality-Adjusted Life Year outcomes.
 ">
 <meta name="citation_keywords" content="Cost-Effectiveness Analysis,Microsimulation,Discrete Event Simulation,Markov Cohort Models">
-<meta name="citation_publication_date" content="2024-01-07">
-<meta name="citation_cover_date" content="2024-01-07">
+<meta name="citation_publication_date" content="2024-01-09">
+<meta name="citation_cover_date" content="2024-01-09">
 <meta name="citation_year" content="2024">
-<meta name="citation_online_date" content="2024-01-07">
+<meta name="citation_online_date" content="2024-01-09">
 <meta name="citation_language" content="en">
 <meta name="citation_journal_title" content="Citation title">
 <meta name="citation_reference" content="citation_title=Calculating disability-adjusted-life-years lost (DALYs) in discrete-time;,citation_author=Bruce A Larson;,citation_publication_date=2013;,citation_cover_date=2013;,citation_year=2013;,citation_issue=1;,citation_volume=11;,citation_journal_title=Cost effectiveness and resource allocation;,citation_publisher=BioMed Central;">
@@ -157,7 +157,7 @@ window.Quarto = {
                 <div>
             <div class="quarto-title-meta-heading">Published</div>
             <div class="quarto-title-meta-contents">
-              <p class="date">January 7, 2024</p>
+              <p class="date">January 9, 2024</p>
             </div>
           </div>
           
@@ -213,13 +213,17 @@ window.Quarto = {
   <ul class="collapse">
   <li><a href="#years-of-life-lived-with-disease-yld" id="toc-years-of-life-lived-with-disease-yld" class="nav-link" data-scroll-target="#years-of-life-lived-with-disease-yld"><span class="header-section-number">6.1</span> Years of Life Lived With Disease (YLD)</a></li>
   <li><a href="#years-of-life-lost-to-disease-yll" id="toc-years-of-life-lost-to-disease-yll" class="nav-link" data-scroll-target="#years-of-life-lost-to-disease-yll"><span class="header-section-number">6.2</span> Years of Life Lost to Disease (YLL)</a></li>
-  <li><a href="#expected-yld-and-yll-outcomes" id="toc-expected-yld-and-yll-outcomes" class="nav-link" data-scroll-target="#expected-yld-and-yll-outcomes"><span class="header-section-number">6.3</span> Expected YLD and YLL Outcomes</a></li>
+  <li><a href="#sec-expected" id="toc-sec-expected" class="nav-link" data-scroll-target="#sec-expected"><span class="header-section-number">6.3</span> Expected YLD and YLL Outcomes</a></li>
   </ul></li>
-  <li><a href="#sec-results" id="toc-sec-results" class="nav-link" data-scroll-target="#sec-results"><span class="header-section-number">7</span> Results</a></li>
-  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">8</span> Conclusion</a></li>
-  <li><a href="#to-incorporate" id="toc-to-incorporate" class="nav-link" data-scroll-target="#to-incorporate"><span class="header-section-number">9</span> To Incorporate</a></li>
+  <li><a href="#sec-results" id="toc-sec-results" class="nav-link" data-scroll-target="#sec-results"><span class="header-section-number">7</span> Results</a>
+  <ul class="collapse">
+  <li><a href="#comparison-of-daly-outcomes-under-all-three-approaches" id="toc-comparison-of-daly-outcomes-under-all-three-approaches" class="nav-link" data-scroll-target="#comparison-of-daly-outcomes-under-all-three-approaches"><span class="header-section-number">7.1</span> Comparison of DALY Outcomes Under All Three Approaches</a></li>
+  <li><a href="#comparison-with-shortcut-based-daly-approaches" id="toc-comparison-with-shortcut-based-daly-approaches" class="nav-link" data-scroll-target="#comparison-with-shortcut-based-daly-approaches"><span class="header-section-number">7.2</span> Comparison with “Shortcut-based” DALY Approaches</a></li>
+  </ul></li>
+  <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion"><span class="header-section-number">8</span> Discussion</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
-<div class="quarto-alternate-notebooks"><h2>Notebooks</h2><ul><li><a href="index-preview.html"><i class="bi bi-journal-code"></i>Article Notebook</a></li><li><a href="notebooks/FRH-replication-preview.html"><i class="bi bi-journal-code"></i>Replicating FRH</a></li><li><a href="notebooks/replication-code-preview.html"><i class="bi bi-journal-code"></i>Replication Code</a></li></ul></div></nav>
+<div class="quarto-alternate-notebooks"><h2>Notebooks</h2><ul><li><a href="index-preview.html"><i class="bi bi-journal-code"></i>Article Notebook</a></li><li><a href="notebooks/FRH-replication-preview.html"><i class="bi bi-journal-code"></i>Replicating FRH</a></li></ul></div></nav>
 </div>
 <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
 </div>
@@ -236,18 +240,18 @@ window.Quarto = {
 <p>In addition to their role in describing levels and trends in disease burdens worldwide, DALYs are a primary health outcome in evaluations of health interventions in low- and middle-income countries (LMICs). In these settings, resource allocation decisions are guided by modeled assessments of the incremental costs per DALY averted under alternative (often competing) strategies to improve population health.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
 <p>Despite the prominent role of DALYs in global health policy, scant methodological guidance is available for adapting and/or structuring decision analytic models for DALY outcomes. This methodological gap has its roots in health economics education, where textbooks and training exercises focus almost exclusively on Quality-Adjusted Life Year (QALY) outcomes—the primary health outcome used for health technology assessments (HTAs) and policy decisionmaking in high-income countries (HICs). DALYs differ from QALYs in important and model-relevant respects, including the use of reference life tables to calculate YLLs and standardized disability weights to calculate YLDs.<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> To the extent DALY-specific modeling considerations are taught, they are often considered in isolation and without a firm methodological grounding in <em>how</em> one might structure a model to measure DALY outcomes.</p>
 <p>As a consequence, and in practice, health economic applications often resort to shortcuts and other “hacks” for calculating DALYs. For example, practitioners may simply estimate a “QALY-like” DALY that is based on a diseased state occupancy payoff of one minus the disability weight. Other approaches define a diseased-state payoff using the disability weight as an estimate of YLDs, and accumulate person-years in an absorbing death state (due to disease) as an estimate of YLLs. As this study will show, these shortcuts do not provide an accurate representation of DALY levels in a population.</p>
-<p>This tutorial outlines a framework for direct incorporation of DALY outcomes in common decision modeling environments. Our primary focus is on discrete-time Markov cohort models—however, our framework extends directly to microsimulation and is also easily adapted for continuous time discrete event simulation (DES) models. As such, our study provides a comprehensive roadmap for incorporating DALY outcomes into common decision modeling frameworks.</p>
-<p>To maintain consistency within the literature, we build on an existing didactic disease progression model <span class="citation" data-cites="alarid2023introductory">(<a href="#ref-alarid2023introductory" role="doc-biblioref">Alarid-Escudero et al. 2023</a>)</span>. The underlying discrete time Markov cohort model is time homogeneous—that is, transition probabilities do not vary as a function of age/time in model. However, our methods and code are developed to accomodate time-inhomogenous models. Finally, recognizing the wide spectrum of experience and programming comfort level among practitioners, we offer three approaches for modeling DALYs (beginner, intermediate and advanced) and provide replication materials for implementing our approaches in R and Microsoft Excel.</p>
+<p>This study outlines methods for direct incorporation of DALY outcomes in common decision modeling environments. Our primary focus is on discrete-time Markov cohort models—however, our framework extends directly to microsimulation and is also easily adapted for continuous time discrete event simulation (DES) models. As such, our study provides a comprehensive roadmap for incorporating DALY outcomes into common decision modeling frameworks.</p>
+<p>To maintain consistency within the literature, we build on an existing didactic disease progression model <span class="citation" data-cites="alarid2023introductory">(<a href="#ref-alarid2023introductory" role="doc-biblioref">Alarid-Escudero et al. 2023</a>)</span>. The underlying discrete time Markov cohort model is time homogeneous—that is, transition probabilities do not vary as a function of age/time in model. However, our methods and code are developed to accommodate time-homogeneous models. Finally, recognizing the wide spectrum of experience and programming comfort level among practitioners, we offer three approaches for modeling DALYs (beginner, intermediate and advanced) and provide replication materials for implementing our approaches in R and Microsoft Excel.</p>
 </section>
 <section id="sec-background" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="sec-background"><span class="header-section-number">2</span> Background</h2>
-<p>This section provides background information sufficient for conceptual understaning of DALYs and how to estimate them in a decision-analytic model; it is not intended as a comprehensive treatment of the subject. For extensive discussion of the history, assumptions and controversies around DALYs, see TK.</p>
+<p>This section provides background information sufficient for conceptual understanding of DALYs and how to estimate them in a decision-analytic model; it is not intended as a comprehensive treatment of the subject. For extensive discussion of the history, assumptions and controversies around DALYs, see TK.</p>
 <p>DALYs are the sum of two components: a morbidity component called years lost to disability (YLD), and a premature mortality component called years of life lost to disease (YLL) <span class="citation" data-cites="who2020methods">(<a href="#ref-who2020methods" role="doc-biblioref">WHO 2013</a>)</span>. To quantify YLDs, conditions are assigned disability weights (<span class="math inline">\(D\)</span>) ranging from zero to one, with zero representing the absence of the condition and one representing the highest burden a condition can inflict. Disability weights are elicited from expert panels, are standardized across geographies, and are routinely updated and published as part of the GBD <span class="citation" data-cites="who2020methods">(<a href="#ref-who2020methods" role="doc-biblioref">WHO 2013</a>)</span>.</p>
 <p>For a given condition <span class="math inline">\(c\)</span>, YLDs are defined as the condition’s disability weight multiplied by the average number of years a person lives with the disease (<span class="math inline">\(L_c\)</span>):</p>
 <p><span id="eq-yld1"><span class="math display">\[
 YLD(c) = D_c \cdot L_c
 \tag{1}\]</span></span></p>
-<p>YLLs are determined by a loss function, which is typically defined as the number of years lost to premature mortality at age <span class="math inline">\(a\)</span>. This value is often taken directly from a life table that provides information on remaining life expectancy (<span class="math inline">\(Ex(a)\)</span>) at a given age.</p>
+<p>YLLs are determined by a loss function, which is typically defined as the number of years lost to premature mortality. This value is often taken from a life table that provides information on remaining life expectancy at age <span class="math inline">\(a\)</span>,</p>
 <p><span id="eq-yll1"><span class="math display">\[
 YLL(a)= Ex(a)
 \tag{2}\]</span></span> .</p>
@@ -268,7 +272,7 @@ YLD(c) = D_c  \left ( \frac{1}{r}\left(1-e^{-r(L_c) }\right) \right ).
 <p><span id="eq-yll"><span class="math display">\[
 YLL(a)= \frac{1}{r}\left(1-e^{-r Ex(a)}\right).
 \tag{5}\]</span></span></p>
-<p>It is important to note that the discounting shown in <a href="#eq-yld" class="quarto-xref">Equation&nbsp;4</a> and <a href="#eq-yll" class="quarto-xref">Equation&nbsp;5</a> yield the present value of YLD and YLL outcomes at a single point in time, when the duration of disease (<span class="math inline">\(L_c\)</span>) and time of death from disease (<span class="math inline">\(a\)</span>) are known. For a decision model where not all cohort members start off ill, that point in time very likely occurs at some point after the baseline period—and different illness durations and death times will, of course, occur across individuals in a modeled cohort. As such, to be consistent with standard practice with WHO-CHOICE, we must discount YLL and YLD outcomes further—all the way back to the baseline (time <span class="math inline">\(t=0\)</span>) period. This additional discounting step will become apparent in <a href="#sec-outcomes" class="quarto-xref">Section&nbsp;5</a> below.</p>
+<p>It is important to note that the discounting shown in <a href="#eq-yld" class="quarto-xref">Equation&nbsp;4</a> and <a href="#eq-yll" class="quarto-xref">Equation&nbsp;5</a> yields the present value of YLD and YLL outcomes at a single point in time, when the duration of disease (<span class="math inline">\(L_c\)</span>) and time of death from disease (<span class="math inline">\(a\)</span>) are known. For a decision model where not all cohort members start off ill, that point in time very likely occurs at some point after the baseline period—and different illness durations and death times will, of course, occur across individuals in a modeled cohort. As such, we must discount YLL and YLD outcomes further, to time <span class="math inline">\(t=0\)</span> period. This additional discounting step will become apparent in <a href="#sec-outcomes" class="quarto-xref">Section&nbsp;5</a> below.</p>
 </section>
 </section>
 <section id="sec-overview" class="level2" data-number="3">
@@ -281,9 +285,9 @@ YLL(a)= \frac{1}{r}\left(1-e^{-r Ex(a)}\right).
 <li><strong>Strategy B</strong>, which reduces the rate of progression from Sick to Sicker by 40%.</li>
 <li><strong>Composite Strategy AB</strong>, which jointly implements strategies A and B.</li>
 </ul>
-<p>A state transition diagram is shown in <a href="#fig-model1" class="quarto-xref">Figure&nbsp;1</a>. In the figure, nodes are health states and edges depict possible transitions among them. Edge labels are defined in terms of transition intensities (rates). Other key model parameters are summarized in <a href="#tbl-params" class="quarto-xref">Table&nbsp;1</a>.</p>
-<p>As depicted in <a href="#fig-model1" class="quarto-xref">Figure&nbsp;1</a>, and as parameterized in our replication code, the underlying Markov model is time homogeneous—that is, transition rates do not vary as a function of time (e.g., the background mortality rate is fixed and does not increase with age). This is merely a simplification that builds on an existing time-homogeneous model constructed for didactic purposes <span class="citation" data-cites="alarid2023introductory">(<a href="#ref-alarid2023introductory" role="doc-biblioref">Alarid-Escudero et al. 2023</a>)</span>. We do, however, index all formulas and other model-relevant objects with the subscript <span class="math inline">\(t\)</span> to allow for time-inhomogenous models. Our replication code is also written to easily accomodate time-inhomogeneous models.</p>
-<p>An additional observation is worth highlighting. In our implementation of the Sick-Sicker model, disability weights are defined as one minus the utility weight. This is not generally the case, as DALY disability weights are derived from expert valuations and are standardized across countries and regions <span class="citation" data-cites="who2020methods sassi2006calculating">(<a href="#ref-who2020methods" role="doc-biblioref">WHO 2013</a>; <a href="#ref-sassi2006calculating" role="doc-biblioref">Sassi 2006</a>)</span>. Utility weights, by contrast, are often derived from general population and/or patient samples and therefore differ across geographies <span class="citation" data-cites="sassi2006calculating">(<a href="#ref-sassi2006calculating" role="doc-biblioref">Sassi 2006</a>)</span>. We have elected to parameterize our model in this way to hold this methodological difference fixed—that is, we aim to show how differences in methodological choices shape estimates of DALYs while holding fixed <em>additional</em> differences that might occur due to differences in the derivation of disability and utility weights.</p>
+<p>A state transition diagram is shown in <a href="#fig-model1" class="quarto-xref">Figure&nbsp;1</a>. In the figure, nodes are health states and edges depict transitions among them. Edge labels are defined in terms of transition intensities (rates). Other key model parameters are summarized in <a href="#tbl-params" class="quarto-xref">Table&nbsp;1</a>.</p>
+<p>As depicted in <a href="#fig-model1" class="quarto-xref">Figure&nbsp;1</a>, and as parameterized in our replication code, the underlying Markov model is time homogeneous—that is, transition rates do not vary as a function of age/time. This is merely a simplification that builds on an existing time-homogeneous model constructed for didactic purposes <span class="citation" data-cites="alarid2023introductory">(<a href="#ref-alarid2023introductory" role="doc-biblioref">Alarid-Escudero et al. 2023</a>)</span>. We do, however, index all formulas and other model-relevant objects with the subscript <span class="math inline">\(t\)</span> to allow for time-inhomogenous models. Our replication code is also written to accommodate time-inhomogeneous models.</p>
+<p>An additional assumption is worth highlighting. In our model, disability weights are defined as one minus the utility weight. This is not generally the case, as DALY disability weights are derived from expert valuations and are standardized across countries and regions <span class="citation" data-cites="who2020methods sassi2006calculating">(<a href="#ref-who2020methods" role="doc-biblioref">WHO 2013</a>; <a href="#ref-sassi2006calculating" role="doc-biblioref">Sassi 2006</a>)</span>. Utility weights, by contrast, are often derived from general population and/or patient samples and therefore differ across geographies <span class="citation" data-cites="sassi2006calculating">(<a href="#ref-sassi2006calculating" role="doc-biblioref">Sassi 2006</a>)</span>. We have elected to parameterize our model in this way to hold this methodological difference fixed—that is, we aim to show how differences in methodological choices shape estimates of DALYs while holding fixed <em>additional</em> differences that might occur due to differences in the derivation of disability and utility weights.</p>
 <div id="fig-model1" class="quarto-figure quarto-figure-center quarto-float anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-model1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -483,17 +487,17 @@ Table&nbsp;1: Model Parameters
 </section>
 <section id="transition-matrices" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="transition-matrices"><span class="header-section-number">4</span> Transition Matrices</h2>
-<p>With the model parameterized, our next step is to define the matrices that govern transitions in the model. The state transition diagram represented in <a href="#fig-model1" class="quarto-xref">Figure&nbsp;1</a> is not well-suited to calculate DALY outcomes, however. A primary reason is that transitions to the absorbing death state capture transitions due to all causes of death. To calculate YLLs, we need to separately track the timing and number of deaths <em>due to disease</em>.</p>
+<p>With the model parameterized, we next define the matrices that govern transitions. The state transition diagram represented in <a href="#fig-model1" class="quarto-xref">Figure&nbsp;1</a> is not yet well-suited to calculate DALY outcomes, however. A primary reason is that transitions to the absorbing death state capture transitions due to all causes of death. To calculate YLLs, we must separately track the timing and number of deaths <em>due to disease</em>.</p>
 <p>To accommodate this need, several approaches are available. We categorize each based on the level of experience and skill required (beginner, intermediate, advanced):</p>
 <ol type="1">
-<li><p><strong>Approach 1 (Beginner): Separate Death State</strong>: Re-define the health states to include a separate cause-specific death state as depicted in <a href="#fig-modelDS" class="quarto-xref">Figure&nbsp;2</a>.<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> We then draw on the resulting Markov trace and use changes in the number of cause-specific deaths in each cycle to calculate YLLs.</p></li>
-<li><p><strong>Approach 2 (Intermediate): Non-Markovian Trackers</strong>: Include a non-Markovian transition state for cause-specific deaths in the transition probability matrix. This approach allows for direct calculation of YLD, YLL and DALY outcomes because it sidesteps the need to derive a separate cause-related death transition vector from the Markov trace (as in Approach 1).</p></li>
-<li><p><strong>Approach 3 (Advanced): Markov Chain with Rewards</strong> Define a block matrix Markov chain with rewards for occupancy (YLDs) and disease-related death transitions (YLLs) by adapting the methods in <span class="citation" data-cites="caswell2021a">Caswell and van Daalen (<a href="#ref-caswell2021a" role="doc-biblioref">2021</a>)</span>. This approach draws on matrix calculus and solves for expected outcomes as well as higher order moments such as variance and skewness.</p></li>
+<li><p><strong>Approach 1 (Beginner): Separate Death State</strong>: Re-define the health states to include a separate cause-specific death state as depicted in <a href="#fig-modelDS" class="quarto-xref">Figure&nbsp;2</a>.<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> We then construct a Markov trace tracking state occupancy in each cycle, and use changes in the number of cause-specific deaths across cycles to calculate YLLs.</p></li>
+<li><p><strong>Approach 2 (Intermediate): Non-Markovian Trackers</strong>: Augment the transition matrices to include a non-Markovian transition state for cause-specific deaths. This approach allows for efficient calculation of YLD, YLL and DALY outcomes (often useful for microsimulation or probabilistic sensitivity analyses) because it sidesteps the need to derive a Markov trace.</p></li>
+<li><p><strong>Approach 3 (Advanced): Markov Chain with Rewards</strong> Define a block matrix Markov chain with rewards for occupancy (YLDs) and disease-related death transitions (YLLs) by adapting the methods in <span class="citation" data-cites="caswell2021a">Caswell and van Daalen (<a href="#ref-caswell2021a" role="doc-biblioref">2021</a>)</span>. This approach is the most efficient since it solves directly for expected outcomes; it also facilitates estimation of higher order moments such as variance and skewness of DALYs in a population.</p></li>
 </ol>
-<p>Each approach facilitates the design and execution of a decision-analytic model that correctly calculates YLD, YLL, and DALY outcomes—as well as other common outcomes such as life-years (LYs), QALYs and costs. In practice, Approaches (1) and (2) will produce identical results. Approach (3) draws on slightly different assumptions on partial payoffs for partial occupancy in a cycle, but will yield results very similar to (1) and (2). We show in <a href="#sec-results" class="quarto-xref">Section&nbsp;7</a> that other shortcut-based approaches previously used in the literature—such as modeling a QALY-like DALY and/or accumulating time in the absorbing death state—will not in general yield similar results.</p>
+<p>Each approach facilitates the design and execution of a decision-analytic model that correctly calculates YLD, YLL, and DALY outcomes—as well as other common outcomes such as life-years (LYs), QALYs and costs. In practice, Approaches (1) and (2) will produce identical results. Approach (3) draws on slightly different assumptions on partial health state occupancy in a cycle, but yields results quite similar to (1) and (2). We show in <a href="#sec-results" class="quarto-xref">Section&nbsp;7</a> that other shortcut-based approaches previously used in the literature—such as modeling a QALY-like DALY and/or accumulating time in the absorbing death state—will not in general yield similar results.</p>
 <section id="approach-1-beginner-cause-specific-death-state" class="level3" data-number="4.1">
 <h3 data-number="4.1" class="anchored" data-anchor-id="approach-1-beginner-cause-specific-death-state"><span class="header-section-number">4.1</span> Approach 1 (Beginner): Cause-Specific Death State</h3>
-<p>Under this approach, we separate out deaths from disease vs.&nbsp;other causes by defining a separate health state for cause-specific mortality; an updated state transition diagram is shown in <a href="#fig-modelDS" class="quarto-xref">Figure&nbsp;2</a>.</p>
+<p>Under this approach, we separate out deaths from disease vs.&nbsp;other causes by defining a separate health state for cause-specific mortality; <a href="#fig-modelDS" class="quarto-xref">Figure&nbsp;2</a> shows an updated state transition diagram.</p>
 <div id="fig-modelDS" class="quarto-figure quarto-figure-center quarto-float anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-modelDS-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -511,8 +515,8 @@ Figure&nbsp;2: State transition diagram for progressive disease model with separ
 <figcaption>Transition Intensity Matrix for Approach 1</figcaption>
 </figure>
 </div>
-<p>Cell values in row <span class="math inline">\(i\)</span>, column <span class="math inline">\(j\)</span> of <span class="math inline">\(\mathbf{Q}_t\)</span> capture the (continuous time) transition rate from health state <span class="math inline">\(i\)</span> to health state <span class="math inline">\(j\)</span>. <span class="math inline">\(\mathbf{Q}_t\)</span> has diagonal elements defined as the negative sum of the off-diagonal row values (i.e., the row sums of <span class="math inline">\(\mathbf{Q}_t\)</span> are zero). This ensures that the Markov model is “closed”—that is, the total cohort size neither grows nor shrinks over time.</p>
-<p>We next embed the transition intensity matrix into a discrete time transition probability matrix by taking the matrix exponential of <span class="math inline">\(\mathbf{Q}_t\)</span> for a defined time step (i.e., “cycle length”) <span class="math inline">\(\Delta t\)</span>:<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a></p>
+<p>Cell values in row <span class="math inline">\(i\)</span>, column <span class="math inline">\(j\)</span> of <span class="math inline">\(\mathbf{Q}_t\)</span> capture the (continuous time) transition rate from health state <span class="math inline">\(i\)</span> to health state <span class="math inline">\(j\)</span>. <span class="math inline">\(\mathbf{Q}_t\)</span> has diagonal elements defined as the negative sum of the off-diagonal row values (i.e., the row sums of <span class="math inline">\(\mathbf{Q}_t\)</span> are zero). This ensures that the Markov model is “closed”—that is, the total cohort size neither grows or shrinks over time.</p>
+<p>We next embed the transition intensity matrix into a discrete time transition probability matrix by taking the matrix exponential of <span class="math inline">\(\mathbf{Q}_t\)</span> for a defined cycle length (“time step”) <span class="math inline">\(\Delta t\)</span>:<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a></p>
 <p><span id="eq-embed"><span class="math display">\[
 \mathbf{P}_t = e^{\mathbf{Q}_t\Delta t}
 \tag{6}\]</span></span></p>
@@ -523,11 +527,11 @@ Figure&nbsp;2: State transition diagram for progressive disease model with separ
 <figcaption>Transition Probability Matrix for Approach 1</figcaption>
 </figure>
 </div>
-<p>Embedding the transition probability matrix using the matrix exponential ensures that the resulting transition probabilities capture the underlying continuous time disease process. In particular, <span class="math inline">\(\mathbf{P}\)</span> will capture the probability of compound (“jumpover”) transitions within a single cycle.<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a></p>
+<p>Embedding the transition probability matrix using <a href="#eq-embed" class="quarto-xref">Equation&nbsp;6</a> ensures that the resulting transition probabilities capture the underlying continuous time disease process. In particular, <span class="math inline">\(\mathbf{P}\)</span> captures the probability of compound (“jumpover”) transitions within a single cycle.<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a></p>
 </section>
 <section id="approach-2-intermediate-non-markovian-tracking-states" class="level3" data-number="4.2">
 <h3 data-number="4.2" class="anchored" data-anchor-id="approach-2-intermediate-non-markovian-tracking-states"><span class="header-section-number">4.2</span> Approach 2 (Intermediate): Non-Markovian Tracking States</h3>
-<p>Under this approach, we maintain the overall structure as depicted in the original <a href="#fig-model1" class="quarto-xref">Figure&nbsp;1</a>, but augment the transition probability matrix with non-Markovian components to facilitate accounting of disease-related deaths.<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a> Approach 2 offers a more generalized method that allows practitioners to accurately account for costs and/or health payoffs (such as YLLs) that are defined by <em>transitions</em> among health states, rather than occupancy in a health state. DALY outcomes can also be calculated directly, without the need to derive a vector of disease-related death transitions from the Markov trace (as required for Approach 1).</p>
+<p>This method maintains the overall structure as depicted in the original <a href="#fig-model1" class="quarto-xref">Figure&nbsp;1</a>, but augments the transition probability matrix with non-Markovian components to facilitate accounting of disease-related deaths.<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a> Approach 2 offers a more generalized method that allows practitioners to accurately account for costs and/or health payoffs (such as YLLs) that are defined by <em>transitions</em> among health states, rather than occupancy in a health state. DALY outcomes can also be calculated directly, without the need to derive a vector of disease-related death transitions from the Markov trace (as required for Approach 1).</p>
 <p><a href="#fig-transition" class="quarto-xref">Figure&nbsp;3</a> shows a state transition diagram with the tracking state added. The tracking state (shown as red nodes) simply records transitions as cohort members move from either diseased state to the absorbing death state due to causes related to the disease.</p>
 <div id="fig-transition" class="quarto-figure quarto-figure-center quarto-float anchored">
 <figure class="quarto-float quarto-float-fig figure">
@@ -575,7 +579,7 @@ s &amp;= \text{Total number of states; }s=\tau\omega+\alpha \\
 \mathbf{D}_{j} &amp;=\text{Age advancement matrix for stage }j, \text{for }j=1,\dots,\tau
 \end{aligned}
 \]</span> In the above notation, <span class="math inline">\(\mathbf{K}\)</span> is a permutation matrix known as the vec-permutation matrix.<a href="#fn12" class="footnote-ref" id="fnref12" role="doc-noteref"><sup>12</sup></a> The matrix <span class="math inline">\(\mathbf{U}_t\)</span> captures transition probabilities among transient (i.e., non-absorbing) health states, while <span class="math inline">\(\mathbf{M}_t\)</span> contains transition probabilities from transient health states to the absorbing (death) states.</p>
-<p>To construct <span class="math inline">\(\mathbf{U}_t\)</span> and <span class="math inline">\(\mathbf{M}_t\)</span> we define transition rate (“intensity”) matrices as in Approaches 1 and 2 above. One important (minor) difference is that the rows in <span class="math inline">\(\mathbf{Q}_t\)</span>, <span class="math inline">\(\mathbf{V}_t\)</span>, and <span class="math inline">\(\mathbf{S}_t\)</span> now correspond to the final state, while the columns correspond to the starting state; this is essentially the transpose of the rate matrices defined for Approaches 1 and 2, where rows corresponded to the initial health state and columns to the final health state.</p>
+<p>To construct <span class="math inline">\(\mathbf{U}_t\)</span> and <span class="math inline">\(\mathbf{M}_t\)</span> we define transition rate (“intensity”) matrices as in Approaches 1 and 2 above. One important (minor) difference is that the rows in <span class="math inline">\(\mathbf{Q}_t\)</span>, <span class="math inline">\(\mathbf{V}_t\)</span>, and <span class="math inline">\(\mathbf{S}_t\)</span> now correspond to the final state, while the columns correspond to the starting state; this is essentially the transpose of the rate matrices defined for Approaches 1 and 2.</p>
 <!-- $$ -->
 <!-- \mathbf{P}_t=\left(\begin{array}{c|c} -->
 <!-- \mathbf{U} & \mathbf{0} \\ -->
@@ -589,7 +593,7 @@ s &amp;= \text{Total number of states; }s=\tau\omega+\alpha \\
 \hline \mathbf{S}_t  &amp; \mathbf{0}
 \end{array}\right)
 \tag{7}\]</span></span> where <span class="math inline">\(\mathbf{V}_t\)</span> is the rate matrix for the transitory (i.e., non-absorbing) states and <span class="math inline">\(\mathbf{S}_t\)</span> is the rate matrix for the absorbing states. The diagonal elements of <span class="math inline">\(\mathbf{Q}_t\)</span> are the negative sum of the non-diagonal column elements, thus making the column sums of <span class="math inline">\(\mathbf{Q}_t\)</span> zero (i.e., the model is “closed” and does not gain or lose cohort members over time).</p>
-<p>For the defined time step <span class="math inline">\(\Delta_t\)</span>, the discrete time transition probability matrix <span class="math inline">\(\mathbf{P}_t\)</span> is again obtained by taking the matrix exponential of the intensity matrix (<span class="math inline">\(\mathbf{Q}_t\)</span>) multipled by the time step (<span class="math inline">\(\Delta_t\)</span>), i.e., <a href="#eq-embed" class="quarto-xref">Equation&nbsp;6</a>:</p>
+<p>For the defined time step <span class="math inline">\(\Delta_t\)</span>, the discrete time transition probability matrix <span class="math inline">\(\mathbf{P}_t\)</span> is again obtained by taking the matrix exponential of the intensity matrix (<span class="math inline">\(\mathbf{Q}_t\)</span>) multiplied by the time step, i.e., <a href="#eq-embed" class="quarto-xref">Equation&nbsp;6</a>:</p>
 <p><span class="math display">\[
 \mathbf{P}_t =e^{\mathbf{Q}_t  \Delta t}
 \]</span></p>
@@ -600,7 +604,7 @@ s &amp;= \text{Total number of states; }s=\tau\omega+\alpha \\
 \hline \mathbf{M}_t  &amp; \mathbf{0}
 \end{array}\right)
 \tag{8}\]</span></span></p>
-<p>In addition, the matrix <span class="math inline">\(\mathbf{D}_j\)</span> defines age advancement in the Markov chain. Borrowing from an example in <span class="citation" data-cites="caswell2021a">Caswell and van Daalen (<a href="#ref-caswell2021a" role="doc-biblioref">2021</a>)</span>, if <span class="math inline">\(\omega=3\)</span> then</p>
+<p>In addition, the matrix <span class="math inline">\(\mathbf{D}_j\)</span> defines age advancement in the model. Borrowing from an example in <span class="citation" data-cites="caswell2021a">Caswell and van Daalen (<a href="#ref-caswell2021a" role="doc-biblioref">2021</a>)</span>, if <span class="math inline">\(\omega=3\)</span> then</p>
 <p><span id="eq-D"><span class="math display">\[
 \mathbf{D}_j=\left(\begin{array}{ccc}
 0 &amp; 0 &amp; 0 \\
@@ -640,7 +644,7 @@ s &amp;= \text{Total number of states; }s=\tau\omega+\alpha \\
 \hline \widetilde{\mathbf{M}} &amp; \mathbf{I}_{\alpha \times \alpha}
 \end{array}\right) \quad(\tau \omega+\alpha) \times(\tau \omega+\alpha)
 \tag{14}\]</span></span> where <span class="math inline">\(\mathbf{I}\)</span> is the identity matrix and <span class="math inline">\(\mathbf{0}\)</span> is a matrix of zeros.</p>
-<p><span class="math inline">\(\widetilde{\mathbf{P}}\)</span> is the analogue to the transition matrix <span class="math inline">\(\mathbf{P}\)</span> (<a href="#eq-embed" class="quarto-xref">Equation&nbsp;6</a>) under Approaches 1 and 2 above.</p>
+<p><span class="math inline">\(\widetilde{\mathbf{P}}\)</span> is the analogue to the transition matrix <span class="math inline">\(\mathbf{P}_t\)</span> (<a href="#eq-embed" class="quarto-xref">Equation&nbsp;6</a>) under Approaches 1 and 2 above.</p>
 </section>
 </section>
 <section id="sec-outcomes" class="level2" data-number="5">
@@ -691,7 +695,7 @@ YLD=\sum_{t=0}^{\omega-1} YLD(t)=\sum_{t=0}^{\omega-1}\left(\mathbf{s}'_0 \mathb
 <p>Finally, an equivalent way to calculate YLD outcomes is through matrix multiplication of the Markov trace matrix and the YLD payoff vector,</p>
 <p><span id="eq-yldtrace"><span class="math display">\[
 YLD = \sum_{t=0}^{\omega-1} \mathbf{S}\mathbf{d}_{YLD} \odot \mathbf{c}
-\tag{21}\]</span></span> where <span class="math inline">\(\mathbf{c}\)</span> is an <span class="math inline">\(\omega \times 1\)</span> vector of cycle discoutning/correction factors <span class="math inline">\(c_t\)</span> and <span class="math inline">\(\odot\)</span> is the element-wise multiplication (Hadamard product) operator.</p>
+\tag{21}\]</span></span> where <span class="math inline">\(\mathbf{c}\)</span> is an <span class="math inline">\(\omega \times 1\)</span> vector of cycle discounting/correction factors <span class="math inline">\(c_t\)</span> and <span class="math inline">\(\odot\)</span> is the element-wise multiplication (Hadamard product) operator.</p>
 </section>
 <section id="years-of-life-lost-to-disease-ylls-approach-1" class="level3" data-number="5.3">
 <h3 data-number="5.3" class="anchored" data-anchor-id="years-of-life-lost-to-disease-ylls-approach-1"><span class="header-section-number">5.3</span> Years of Life Lost to Disease (YLLs): Approach 1</h3>
@@ -717,7 +721,7 @@ YLL=\sum_{t=1}^{\omega-1} YLL_t = \sum_{t=1}^{\omega-1}m_t Ex_{t}  \times{c_t}
 </section>
 <section id="years-of-life-lost-to-disease-ylls-approach-2" class="level3" data-number="5.4">
 <h3 data-number="5.4" class="anchored" data-anchor-id="years-of-life-lost-to-disease-ylls-approach-2"><span class="header-section-number">5.4</span> Years of Life Lost to Disease (YLLs): Approach 2</h3>
-<p>YLLs under Approach 2 can be calculated in a similar way as YLDs, since we have augmented the model with a transition tracking state that directly etimates new deaths in each cycle. Define the YLL payoff vector <span class="math inline">\(\mathbf{d}_{YLL,t}\)</span>, which has value <span class="math inline">\(Ex_{t}\)</span> for the transition tracker health state (<code>trDS</code>) and zeros elsewhere,</p>
+<p>YLLs under Approach 2 can be calculated in a similar way as YLDs, since we have augmented the model with a transition tracking state that directly estimates new deaths in each cycle. Define the YLL payoff vector <span class="math inline">\(\mathbf{d}_{YLL,t}\)</span>, which has value <span class="math inline">\(Ex_{t}\)</span> for the transition tracker health state (<code>trDS</code>) and zeros elsewhere,</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><a href="images/d_yll.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9"><img src="images/d_yll.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:40.0%"></a></p>
@@ -735,11 +739,11 @@ YLL = \sum_{t=0}^{\omega-1} \text{sum}(\mathbf{S} \odot \mathbf{D}) \odot \mathb
 </section>
 <section id="sec-outcomes3" class="level2" data-number="6">
 <h2 data-number="6" class="anchored" data-anchor-id="sec-outcomes3"><span class="header-section-number">6</span> DALY Outcomes Under Approach 3</h2>
-<p>Our advanced approach draws on Markov chain with rewards methods that define reward matrices for occupancy-based (YLD) and transition-based (YLL) outcomes. These reward matrices allow us to estimate outcomes for any combination of health states and/or ages. Reward matrices have notation <span class="math inline">\(\mathbf{R}_m\)</span>, where <span class="math inline">\(m\)</span> indexes the moment of interest (e.g., expected value, variance, etc.). We focus here on expected outcomes (i.e., outcomes based on <span class="math inline">\(\mathbf{R}_1\)</span>)—though equations are available to estimate higher-order moments and objects such as variance, skewness, the coefficient of variation, etc.</p>
+<p>Our advanced approach draws on Markov chain with rewards methods that define reward matrices for occupancy-based (YLD) and transition-based (YLL) outcomes. These reward matrices allow us to estimate outcomes for any combination of health states and/or ages. Reward matrices have notation <span class="math inline">\(\mathbf{R}_m\)</span>, where <span class="math inline">\(m\)</span> indexes the moment of interest (e.g., expected value, variance, etc.). We focus here on expected outcomes (i.e., outcomes based on <span class="math inline">\(\mathbf{R}_1\)</span>)—though equations for higher-order moments are available in <span class="citation" data-cites="caswell2021a">Caswell and van Daalen (<a href="#ref-caswell2021a" role="doc-biblioref">2021</a>)</span>.</p>
 <section id="years-of-life-lived-with-disease-yld" class="level3" data-number="6.1">
 <h3 data-number="6.1" class="anchored" data-anchor-id="years-of-life-lived-with-disease-yld"><span class="header-section-number">6.1</span> Years of Life Lived With Disease (YLD)</h3>
-<p>To calculate occupancy-based outcomes such as YLDs, we first define a <span class="math inline">\(\tau \times \omega\)</span> reward matrix <span class="math inline">\(\mathbf{H}\)</span>, which has dimensions <span class="math inline">\(\tau \times \omega\)</span> and is structured as shown in <a href="#fig-H-le" class="quarto-xref">Figure&nbsp;4</a>:</p>
-<div id="fig-H-le" class="quarto-figure quarto-figure-center quarto-float anchored" width="40%" data-fig-align="center">
+<p>To estimate YLDs, we first define a <span class="math inline">\(\tau \times \omega\)</span> reward matrix <span class="math inline">\(\mathbf{H}\)</span>, which has dimensions <span class="math inline">\(\tau \times \omega\)</span> and is structured as shown in <a href="#fig-H-le" class="quarto-xref">Figure&nbsp;4</a>:</p>
+<div id="fig-H-le" class="quarto-figure quarto-figure-center quarto-float anchored" data-fig-align="center" width="40%">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-H-le-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <a href="images/H-LE.png" class="lightbox" data-glightbox="description: .lightbox-desc-10" data-gallery="quarto-lightbox-gallery-10"><img src="images/H-LE.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:40.0%"></a><span class="glightbox-desc lightbox-desc-10">Figure&nbsp;4: YLD reward matrix <span class="math inline">\(\mathbf{H}\)</span></span>
@@ -750,12 +754,12 @@ Figure&nbsp;4: YLD reward matrix <span class="math inline">\(\mathbf{H}\)</span>
 </figure>
 </div>
 <p>Cell values within this matrix can be set to one if we want to potentially “reward” that health state-age combination in our outcome measure, and zero otherwise.</p>
-<p>We use this matrix to define the reward vector <span class="math inline">\(\mathbf{h}\)</span>:<a href="#fn15" class="footnote-ref" id="fnref15" role="doc-noteref"><sup>15</sup></a></p>
+<p>We use this matrix to define the reward vector <span class="math inline">\(\mathbf{h}\)</span>, where <span class="math inline">\(\text{vec}\)</span> is an operator that stacks the columns of an <span class="math inline">\(m \times n\)</span> matrix into a <span class="math inline">\(mn \times 1\)</span> vector.</p>
 <p><span class="math display">\[
 \mathbf{h} = \text{vec } \mathbf{H}
 \]</span> We also define <span class="math inline">\(\neg \mathbf{h}\)</span> as the complement of <span class="math inline">\(\mathbf{h}\)</span>, (i.e., values of 1.0 become 0, and vice versa).</p>
-<p>We next define additional matrix <span class="math inline">\(\mathbf{V}\)</span>, which has the same structure as <span class="math inline">\(\mathbf{H}\)</span> but includes the (fully discounted) disability weight:</p>
-<div id="fig-H-yld" class="quarto-figure quarto-figure-center quarto-float anchored" width="60%" data-fig-align="center">
+<p>We next define additional matrix <span class="math inline">\(\mathbf{V}\)</span>, which has the same structure as <span class="math inline">\(\mathbf{H}\)</span> but includes the (fully discounted) disability weights:</p>
+<div id="fig-H-yld" class="quarto-figure quarto-figure-center quarto-float anchored" data-fig-align="center" width="60%">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-H-yld-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <a href="images/H-YLD.png" class="lightbox" data-glightbox="description: .lightbox-desc-11" data-gallery="quarto-lightbox-gallery-11"><img src="images/H-YLD.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%"></a><span class="glightbox-desc lightbox-desc-11">Figure&nbsp;5: YLD reward matrix <span class="math inline">\(\mathbf{V}\)</span></span>
@@ -765,14 +769,14 @@ Figure&nbsp;5: YLD reward matrix <span class="math inline">\(\mathbf{V}\)</span>
 </figcaption>
 </figure>
 </div>
-<p>where <span class="math inline">\(\texttt{dwS1}* = \texttt{dwS1} \times \Delta_t  \times  \frac{1}{r_{\Delta_t}}(1-e^{-r_{\Delta_t}}) \times e^{-r_{\Delta_t} t}\)</span>, etc.</p>
+<p>where <span class="math inline">\(\texttt{dwS1}* = \texttt{dwS1} \times \Delta_t  \times  \frac{1}{r_{\Delta_t}}(1-e^{-r_{\Delta_t}}) \times e^{-r_{\Delta_t} t}\)</span>, etc. This equation first converts the weights into the appropriate value for the time step, applies the cycle-specific discounting adjustment factor, and then discounts the resulting value to the baseline period.</p>
 <p>We similarly define an occupancy indicator vector <span class="math inline">\(\mathbf{v}\)</span> just as we did for <span class="math inline">\(\mathbf{h}\)</span>:</p>
 <p><span class="math display">\[
-\mathbf{v}_{m}=\operatorname{vec} \mathbf{V}_{m}
+\mathbf{v}=\operatorname{vec} \mathbf{V}
 \]</span></p>
 <section id="partial-occupancy" class="level4" data-number="6.1.1">
 <h4 data-number="6.1.1" class="anchored" data-anchor-id="partial-occupancy"><span class="header-section-number">6.1.1</span> Partial Occupancy</h4>
-<p>Because we are modeling a continuous-time disease progression progress in discrete time, it is useful to make corrections for partial occupancy in a cycle. Similar to a half-cycle correction often used in health economic applications, the Markov chain with rewards approach does so by assuming transitions occur half-way through a cycle. We operationalize this assumption by defining,</p>
+<p>Because we are modeling a continuous-time disease progression progress in discrete time, it is useful to make corrections for partial occupancy in a cycle. Similar to a half-cycle correction often used in health economic applications, the Markov chain with rewards approach does so by assuming transitions occur half-way through a cycle; the application of this assumption is slightly different, however, because the correction applies in every cycle, not just the first and last. We operationalize this assumption by defining,</p>
 <p><span class="math display">\[
 \begin{aligned}
 \widetilde{\mathbf{B}}_{1} &amp; =\mathbf{h} \mathbf{v}_{1}^{\top}+\frac{1}{2}(\neg \mathbf{h})\left(\mathbf{v}_{1}^{\top}\right)+\frac{1}{2}\left(\mathbf{v}_{1}\right)\left(\neg \mathbf{h}^{\top}\right) \\
@@ -781,13 +785,13 @@ Figure&nbsp;5: YLD reward matrix <span class="math inline">\(\mathbf{V}\)</span>
 <p><span class="math display">\[
 \widetilde{\mathbf{C}}_{1}=\frac{1}{2} \mathbf{1}_{\alpha} \mathbf{v_1}^{\top}
 \]</span> where <span class="math inline">\(\mathbf{1}_{\alpha}\)</span> is a vector of ones with length <span class="math inline">\(\alpha\)</span>.</p>
-<p>We combine <span class="math inline">\(\widetilde{\mathbf{B}}_{1}\)</span> and <span class="math inline">\(\widetilde{\mathbf{C}}_{1}\)</span> to obtain:</p>
+<p>We combine <span class="math inline">\(\widetilde{\mathbf{B}}_{1}\)</span> and <span class="math inline">\(\widetilde{\mathbf{C}}_{1}\)</span> to obtain the final reward matrix for expected YLD outcomes,</p>
 <p><span class="math display">\[
 \widetilde{\mathbf{R}}^{YLD}_{1}=\left(\begin{array}{c|c}
 \widetilde{\mathbf{B}}_{1} &amp; \mathbf{0} \\
 \hline \widetilde{\mathbf{C}}_{1} &amp; \mathbf{0}
 \end{array}\right)
-\]</span> which has same block structure and dimensions as the transition probability matrix <span class="math inline">\(\widetilde{\mathbf{P}}\)</span> (<a href="#eq-Ptilde" class="quarto-xref">Equation&nbsp;14</a>).</p>
+\]</span> which has same block structure and dimensions as the transition probability matrix <span class="math inline">\(\widetilde{\mathbf{P}}\)</span> (<a href="#eq-Ptilde" class="quarto-xref">Equation&nbsp;14</a>). We explain how to use this matrix to estimate expected YLDs in <a href="#sec-expected" class="quarto-xref">Section&nbsp;6.3</a> below.</p>
 </section>
 </section>
 <section id="years-of-life-lost-to-disease-yll" class="level3" data-number="6.2">
@@ -804,6 +808,18 @@ Figure&nbsp;5: YLD reward matrix <span class="math inline">\(\mathbf{V}\)</span>
 \eta_{\tau \omega}
 \end{array}\right)
 \]</span> where <span class="math inline">\(\eta_{i x}\)</span> is remaining life expectancy for an individual in health state <span class="math inline">\(i\)</span> at a given age <span class="math inline">\(x\)</span>. In this structure, remaining life expectancy for each health state is grouped within age classes. Remaining life expectancy should also enter <span class="math inline">\(\eta_{i x}\)</span> as fully discounted back to <span class="math inline">\(t=0\)</span>.</p>
+<p>Our model, for example, follows a cohort of 25 year old adults until death. The GBD reference life expectancy value for a 25 year old is 64.15, and the life expectancy for the last age class (95+) is 5.92. There are also <span class="math inline">\(\tau=3\)</span> non-absorbing health states. If we followed the cohort until age 95, <span class="math inline">\(\eta_{i x}\)</span> would take the following form:</p>
+<p><span class="math display">\[
+\widetilde{\mathbf{\eta}}=\left(\begin{array}{c}
+\eta_{H,25} =  64.15 \\
+\eta_{S1,25} =  64.15 \\
+\eta_{S2,25} =  64.15 \\
+\hline \vdots \\
+\hline \eta_{H,95} =  5.92 \\
+\eta_{S1,95} = 5.92 \\
+\eta_{S2,95} =  5.92 \\
+\end{array}\right)
+\]</span></p>
 <p>We next construct the reward matrices:</p>
 <p><span class="math display">\[
 \begin{aligned}
@@ -823,8 +839,8 @@ Figure&nbsp;5: YLD reward matrix <span class="math inline">\(\mathbf{V}\)</span>
 \end{array}\right)
 \]</span></p>
 </section>
-<section id="expected-yld-and-yll-outcomes" class="level3" data-number="6.3">
-<h3 data-number="6.3" class="anchored" data-anchor-id="expected-yld-and-yll-outcomes"><span class="header-section-number">6.3</span> Expected YLD and YLL Outcomes</h3>
+<section id="sec-expected" class="level3" data-number="6.3">
+<h3 data-number="6.3" class="anchored" data-anchor-id="sec-expected"><span class="header-section-number">6.3</span> Expected YLD and YLL Outcomes</h3>
 <p>The expected value of outcome <span class="math inline">\(Y\)</span> (where <span class="math inline">\(Y \in \{YLD, YLL\}\)</span>) is estimated by,</p>
 <p><span id="eq-app3out"><span class="math display">\[
 \begin{aligned}
@@ -841,7 +857,7 @@ Figure&nbsp;5: YLD reward matrix <span class="math inline">\(\mathbf{V}\)</span>
 <p><span id="eq-app3outstate"><span class="math display">\[
 \boldsymbol{\rho}_{1}^{Y,\text {stage }}(\operatorname{cycle} t)=\left(\mathbf{e}_{t}^{\top} \otimes \mathbf{I}_{\tau}\right) \widetilde{\boldsymbol{\rho}}^Y_{1} \quad \tau \times 1
 \tag{29}\]</span></span> where <span class="math inline">\(\otimes\)</span> is the Kronecker operator and <span class="math inline">\(\mathbf{e}_{t}\)</span> is a vector of length <span class="math inline">\(\omega\)</span> with a value of one in the first position and zero elsewhere; this facilitates calculating expected outcomes from the baseline period (i.e., <span class="math inline">\(t=0\)</span>).</p>
-<p>Alternatively, we may wish to calculate outcomes separately under different starting ages, and for a specified starting health state (e.g., healthy). This is given by</p>
+<p><a href="#eq-app3outstate" class="quarto-xref">Equation&nbsp;29</a> will yield expected outcomes as typically reported in health economic evaluations. Alternatively, we may wish to calculate outcomes separately under different baseline age-health state combinations (e.g., DALYs for healthy 55 year-old adults). We obtain these expected outcomes by,</p>
 <p><span id="eq-app3outage"><span class="math display">\[
 \boldsymbol{\rho}_{1}^{Y,\text {age }}(\text { stage } i)=\left(\mathbf{I}_{\omega} \otimes \mathbf{e}_{i}^{\top}\right) \widetilde{\boldsymbol{\rho}}^Y_{1} \quad \omega \times 1,
 \tag{30}\]</span></span> where <span class="math inline">\(\mathbf{e}_{i}\)</span> is a vector of length <span class="math inline">\(\tau\)</span> with a value of one in the initial health state position of interest (e.g., <code>Healthy</code>) and zero elsewhere.</p>
@@ -849,532 +865,204 @@ Figure&nbsp;5: YLD reward matrix <span class="math inline">\(\mathbf{V}\)</span>
 </section>
 <section id="sec-results" class="level2" data-number="7">
 <h2 data-number="7" class="anchored" data-anchor-id="sec-results"><span class="header-section-number">7</span> Results</h2>
-<p><a href="#tbl-trace1" class="quarto-xref">Table&nbsp;2</a> shows the Markov trace for the first five cycles under Approach 1, while <a href="#tbl-trace2" class="quarto-xref">Table&nbsp;3</a> shows the trace under Approach 2. <a href="#tbl-trace1" class="quarto-xref">Table&nbsp;2</a> also includes a new column (<code>deaths_disease</code>) that is calculated as the difference in state occupancy in the <code>DS</code> column between cycles. This extra step will be necessary later for calculating YLL outcomes. The trace shown under Approach 2 (<a href="#tbl-trace2" class="quarto-xref">Table&nbsp;3</a>), by comparison, automatically calculates new deaths through the inclusion of the transition state <code>trDS</code>; the values under <code>deaths_disease</code> and <code>trDS</code> are identical, again highlighting that either approach can be used to calculate the number of disease-related deaths in each cycle.</p>
+<section id="comparison-of-daly-outcomes-under-all-three-approaches" class="level3" data-number="7.1">
+<h3 data-number="7.1" class="anchored" data-anchor-id="comparison-of-daly-outcomes-under-all-three-approaches"><span class="header-section-number">7.1</span> Comparison of DALY Outcomes Under All Three Approaches</h3>
+<p><a href="#tbl-compare1" class="quarto-xref">Table&nbsp;2</a> draws on the Sick-Sicker model parameters and shows YLD, YLL and DALY outcomes estimates across the three approaches. Due to their similar structure, Approaches 1 and 2 yield identical estimates and are reported together in the table. Approach 3 draws on a slightly different partial occupancy assumption, though yields DALY estimates that are consistently within 2% of those under Approaches 1 &amp; 2. YLLs have the largest difference (up to 5%), while YLDs have the lowest (around 1%).</p>
 <div class="cell">
-<div id="tbl-trace1" class="cell quarto-float anchored">
+<div id="tbl-compare1" class="cell quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-trace1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;2: Markov Trace Under Approach 1
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-compare1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2: Comparison of Outcomes Under Three DALY Approaches
 </figcaption>
-<div aria-describedby="tbl-trace1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div aria-describedby="tbl-compare1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<table class="do-not-create-environment cell table table-sm table-striped small" data-quarto-postprocess="true">
+<table class="table do-not-create-environment cell table-sm table-striped small" data-quarto-postprocess="true">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
 <thead>
 <tr class="header">
-<th style="text-align: right;" data-quarto-table-cell-role="th">cycle</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">H</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">S1</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">S2</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">DOC</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">DS</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">deaths_disease</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; empty-cells: hide; border-bottom: hidden;"></th>
+<th colspan="2" data-quarto-table-cell-role="th" style="text-align: center; border-bottom: hidden; padding-bottom: 0; padding-left: 3px; padding-right: 3px;"><div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+YLD
+</div></th>
+<th colspan="2" data-quarto-table-cell-role="th" style="text-align: center; border-bottom: hidden; padding-bottom: 0; padding-left: 3px; padding-right: 3px;"><div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+YLL
+</div></th>
+<th colspan="2" data-quarto-table-cell-role="th" style="text-align: center; border-bottom: hidden; padding-bottom: 0; padding-left: 3px; padding-right: 3px;"><div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+DALY
+</div></th>
+</tr>
+<tr class="odd">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Markov Trace (1&amp;2)</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Markov Chain With Rewards (3)</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Markov Trace (1&amp;2)</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Markov Chain With Rewards (3)</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Markov Trace (1&amp;2)</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Markov Chain With Rewards (3)</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1.0000</td>
-<td style="text-align: right;">0.0000</td>
-<td style="text-align: right;">0.0000</td>
-<td style="text-align: right;">0.0000</td>
-<td style="text-align: right;">0.0000</td>
-<td style="text-align: right;">0.0000</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">0.8870</td>
-<td style="text-align: right;">0.1046</td>
-<td style="text-align: right;">0.0062</td>
-<td style="text-align: right;">0.0020</td>
-<td style="text-align: right;">0.0003</td>
-<td style="text-align: right;">0.0003</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">2</td>
-<td style="text-align: right;">0.8232</td>
-<td style="text-align: right;">0.1521</td>
-<td style="text-align: right;">0.0197</td>
-<td style="text-align: right;">0.0040</td>
-<td style="text-align: right;">0.0010</td>
-<td style="text-align: right;">0.0008</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">3</td>
-<td style="text-align: right;">0.7832</td>
-<td style="text-align: right;">0.1723</td>
-<td style="text-align: right;">0.0363</td>
-<td style="text-align: right;">0.0060</td>
-<td style="text-align: right;">0.0022</td>
-<td style="text-align: right;">0.0012</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0.7547</td>
-<td style="text-align: right;">0.1796</td>
-<td style="text-align: right;">0.0540</td>
-<td style="text-align: right;">0.0080</td>
-<td style="text-align: right;">0.0037</td>
-<td style="text-align: right;">0.0015</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0.7321</td>
-<td style="text-align: right;">0.1808</td>
-<td style="text-align: right;">0.0717</td>
-<td style="text-align: right;">0.0099</td>
-<td style="text-align: right;">0.0056</td>
-<td style="text-align: right;">0.0019</td>
-</tr>
-</tbody>
-</table>
-
-
-</div>
-</div>
-</figure>
-<a class="quarto-notebook-link" id="nblink-4" href="index-preview.html#tbl-trace1">Source: Article Notebook</a></div>
-<a class="quarto-notebook-link" id="nblink-3" href="index-preview.html">Source: Article Notebook</a></div>
-<div class="cell">
-<div id="tbl-trace2" class="cell quarto-float anchored">
-<figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-trace2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;3: Markov Trace Under Approach 2
-</figcaption>
-<div aria-describedby="tbl-trace2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="cell-output-display">
-<table class="do-not-create-environment cell table table-sm table-striped small" data-quarto-postprocess="true">
-<thead>
-<tr class="header">
-<th style="text-align: right;" data-quarto-table-cell-role="th">cycle</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">H</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">S1</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">S2</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">D</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">trDS</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1.0000</td>
-<td style="text-align: right;">0.0000</td>
-<td style="text-align: right;">0.0000</td>
-<td style="text-align: right;">0.0000</td>
-<td style="text-align: right;">0.0000</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">1.0000</td>
-<td style="text-align: right;">0.0000</td>
-<td style="text-align: right;">0.0000</td>
-<td style="text-align: right;">0.0000</td>
-<td style="text-align: right;">0.0000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">2</td>
-<td style="text-align: right;">0.8870</td>
-<td style="text-align: right;">0.1046</td>
-<td style="text-align: right;">0.0062</td>
-<td style="text-align: right;">0.0023</td>
-<td style="text-align: right;">0.0003</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">3</td>
-<td style="text-align: right;">0.8232</td>
-<td style="text-align: right;">0.1521</td>
-<td style="text-align: right;">0.0197</td>
-<td style="text-align: right;">0.0050</td>
-<td style="text-align: right;">0.0008</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0.7832</td>
-<td style="text-align: right;">0.1723</td>
-<td style="text-align: right;">0.0363</td>
-<td style="text-align: right;">0.0082</td>
-<td style="text-align: right;">0.0012</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0.7547</td>
-<td style="text-align: right;">0.1796</td>
-<td style="text-align: right;">0.0540</td>
-<td style="text-align: right;">0.0117</td>
-<td style="text-align: right;">0.0015</td>
-</tr>
-</tbody>
-</table>
-
-
-</div>
-</div>
-</figure>
-<a class="quarto-notebook-link" id="nblink-6" href="index-preview.html#tbl-trace2">Source: Article Notebook</a></div>
-<a class="quarto-notebook-link" id="nblink-5" href="index-preview.html">Source: Article Notebook</a></div>
-<div class="cell">
-<div class="cell-output-display">
-<table class="table table-sm table-striped small" data-quarto-postprocess="true">
-<thead>
-<tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th">Scenario</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">Life-Years</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">YLDs</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">YLLs</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">DALYs</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">DALY-Hack</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">QALY-like DALY</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">QALY</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">Costs</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd" data-grouplength="4">
-<td colspan="9" style="border-bottom: 1px solid"><strong>Approaches 1 and 2 (Markov Trace)</strong></td>
-</tr>
-<tr class="even">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">SoC</td>
-<td style="text-align: right;">86.567</td>
+<td style="text-align: left;">Standard of Care</td>
 <td style="text-align: right;">4.608</td>
-<td style="text-align: right;">2.683</td>
-<td style="text-align: right;">7.291</td>
-<td style="text-align: right;">9.624</td>
-<td style="text-align: right;">21.872</td>
-<td style="text-align: right;">21.872</td>
-<td style="text-align: right;">158566.1</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">A</td>
-<td style="text-align: right;">86.567</td>
-<td style="text-align: right;">3.901</td>
-<td style="text-align: right;">2.683</td>
-<td style="text-align: right;">6.584</td>
-<td style="text-align: right;">8.917</td>
-<td style="text-align: right;">22.590</td>
-<td style="text-align: right;">22.590</td>
-<td style="text-align: right;">292352.4</td>
-</tr>
-<tr class="even">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">B</td>
-<td style="text-align: right;">103.352</td>
-<td style="text-align: right;">3.820</td>
-<td style="text-align: right;">2.028</td>
-<td style="text-align: right;">5.847</td>
-<td style="text-align: right;">7.741</td>
-<td style="text-align: right;">23.699</td>
-<td style="text-align: right;">23.699</td>
-<td style="text-align: right;">255608.1</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">AB</td>
-<td style="text-align: right;">103.352</td>
-<td style="text-align: right;">2.953</td>
-<td style="text-align: right;">2.028</td>
-<td style="text-align: right;">4.981</td>
-<td style="text-align: right;">6.875</td>
-<td style="text-align: right;">24.579</td>
-<td style="text-align: right;">24.579</td>
-<td style="text-align: right;">375043.1</td>
-</tr>
-<tr class="even" data-grouplength="4">
-<td colspan="9" style="border-bottom: 1px solid"><strong>Approach 3 (Markov Chain With Rewards)</strong></td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">SoC</td>
-<td style="text-align: right;">86.644</td>
 <td style="text-align: right;">4.637</td>
+<td style="text-align: right;">2.683</td>
 <td style="text-align: right;">2.810</td>
+<td style="text-align: right;">7.291</td>
 <td style="text-align: right;">7.447</td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;">22.309</td>
-<td style="text-align: right;">158365.5</td>
 </tr>
 <tr class="even">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">A</td>
-<td style="text-align: right;">86.644</td>
+<td style="text-align: left;">Strategy A: Quality of Life Improvement</td>
+<td style="text-align: right;">3.901</td>
 <td style="text-align: right;">3.896</td>
+<td style="text-align: right;">2.683</td>
 <td style="text-align: right;">2.810</td>
+<td style="text-align: right;">6.584</td>
 <td style="text-align: right;">6.706</td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;">23.024</td>
-<td style="text-align: right;">291128.7</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">B</td>
-<td style="text-align: right;">103.717</td>
+<td style="text-align: left;">Strategy B: Reduce Disease Progression</td>
+<td style="text-align: right;">3.820</td>
 <td style="text-align: right;">3.844</td>
+<td style="text-align: right;">2.028</td>
 <td style="text-align: right;">2.124</td>
+<td style="text-align: right;">5.847</td>
 <td style="text-align: right;">5.969</td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;">24.142</td>
-<td style="text-align: right;">254886.6</td>
 </tr>
 <tr class="even">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">AB</td>
-<td style="text-align: right;">103.717</td>
+<td style="text-align: left;">Composite: Strategy A + Strategy B</td>
+<td style="text-align: right;">2.953</td>
 <td style="text-align: right;">2.949</td>
+<td style="text-align: right;">2.028</td>
 <td style="text-align: right;">2.124</td>
+<td style="text-align: right;">4.981</td>
 <td style="text-align: right;">5.074</td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;">25.019</td>
-<td style="text-align: right;">373515.0</td>
 </tr>
 </tbody>
 </table>
 
 
 </div>
-<a class="quarto-notebook-link" id="nblink-7" href="index-preview.html">Source: Article Notebook</a></div>
+</div>
+</figure>
+<a class="quarto-notebook-link" id="nblink-4" href="index-preview.html#tbl-compare1">Source: Article Notebook</a></div>
+<a class="quarto-notebook-link" id="nblink-3" href="index-preview.html">Source: Article Notebook</a></div>
+</section>
+<section id="comparison-with-shortcut-based-daly-approaches" class="level3" data-number="7.2">
+<h3 data-number="7.2" class="anchored" data-anchor-id="comparison-with-shortcut-based-daly-approaches"><span class="header-section-number">7.2</span> Comparison with “Shortcut-based” DALY Approaches</h3>
+<p><a href="#tbl-cea" class="quarto-xref">Table&nbsp;3</a> reports cost, effect and incremental cost-effectiveness ratio (ICER) results for our three DALY approaches. The table also includes results under two “shortcut” DALY strategies. As above, there is a roughly 3% difference in outcome estimates, including ICERs, across our three DALY approaches.</p>
+<p><a href="#tbl-cea" class="quarto-xref">Table&nbsp;3</a> also includes outcomes under alternative “shortcut”-based DALY estimation approaches. First, the method labeled <strong>death state occupancy</strong> defines cycle payoffs based on the disease weight for the diseased health states, and a payoff value of 1.0 for the disease-related death state. Inclusion of disease weights facilitates accumulation of YLDs; YLLs are calculated by accumulating time in the disease-related death state. This approach to YLLs is endogenous to the model, i.e., it does not incorporate exogenous life expectancy information from the GBD reference life table.</p>
+<p>The death state occupancy method yields DALY estimates that are 32-38% higher than our three approaches, and results in an ICER that is 25% lower for Strategy A vs.&nbsp;the standard of care. The ICER for strategy AB is calculated relative to strategy B, so the only difference is additional improvement in quality life from strategy A. This improvement works exclusively through the YLD channel, as there is no differential effect on mortality. With this key information in mind, we note that the ICER for AB vs.&nbsp;B is identical for the death state occupancy method vs.&nbsp;Approaches 1 &amp; 2.</p>
+<p>Next, the approach labeled <strong>QALY-like DALY</strong> defines the cycle occupancy payoff for the sick and sicker states as one minus the disability weight; as in many QALY applications, the healthy state receives a payoff value of 1.0. Because we have defined the disability weight in this example as one minus the utility weight, the <strong>QALY-like DALY</strong> approach yields estimates that are equivalent to estimating standard QALY outcomes.</p>
+<p>QALY-like DALY estimates are, not surprisingly, higher than the other DALY estimates, owing to their conceptual difference with DALYs (i.e., QALYs accumulate and reward the quality and extension of life, while DALYs accumulate years lost to disease). Again, ICERs for strategy A vs.&nbsp;the standard of care are about 25% lower, while they are very similar to our DALY approaches for the AB strategy that deferentially improves quality of life.</p>
 <div class="cell">
+<div id="tbl-cea" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-cea-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;3: Comparison of Cost-Effectiveness Analysis Results
+</figcaption>
+<div aria-describedby="tbl-cea-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<table class="table table-striped table-condensed table-sm small" data-quarto-postprocess="true">
+<table class="table do-not-create-environment cell table-sm table-striped small" data-quarto-postprocess="true">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 9%">
+<col style="width: 9%">
+<col style="width: 9%">
+<col style="width: 9%">
+<col style="width: 9%">
+<col style="width: 9%">
+<col style="width: 9%">
+<col style="width: 9%">
+<col style="width: 9%">
+<col style="width: 9%">
+</colgroup>
 <thead>
 <tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th">Strategy</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">Cost</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">Effect</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">Inc_Cost</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">Inc_Effect</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">ICER</th>
-<th style="text-align: left;" data-quarto-table-cell-role="th">Status</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; empty-cells: hide; border-bottom: hidden;"></th>
+<th colspan="2" data-quarto-table-cell-role="th" style="text-align: center; border-bottom: hidden; padding-bottom: 0; padding-left: 3px; padding-right: 3px;"><div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Cost Estimate
+</div></th>
+<th colspan="4" data-quarto-table-cell-role="th" style="text-align: center; border-bottom: hidden; padding-bottom: 0; padding-left: 3px; padding-right: 3px;"><div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+DALY Estimate
+</div></th>
+<th colspan="4" data-quarto-table-cell-role="th" style="text-align: center; border-bottom: hidden; padding-bottom: 0; padding-left: 3px; padding-right: 3px;"><div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+ICER
+</div></th>
+</tr>
+<tr class="odd">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Markov Trace (1&amp;2)</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Markov Chain With Rewards (3)</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Markov Trace (1&amp;2)</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Markov Chain With Rewards (3)</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Death State Occupancy</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">QALY-like DALY</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Markov Trace (1&amp;2)</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Markov Chain With Rewards (3)</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Death State Occupancy</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">QALY-like DALY</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd" data-grouplength="4">
-<td colspan="7" style="border-bottom: 1px solid"><strong>QALY - Approaches 1 &amp; 2</strong></td>
+<tr class="odd">
+<td style="text-align: left;">SoC</td>
+<td style="text-align: left;">158,566</td>
+<td style="text-align: left;">158,365</td>
+<td style="text-align: left;">7.29</td>
+<td style="text-align: left;">7.45</td>
+<td style="text-align: left;">9.62</td>
+<td style="text-align: left;">21.87</td>
+<td style="text-align: left;">ref.</td>
+<td style="text-align: left;">ref.</td>
+<td style="text-align: left;">ref.</td>
+<td style="text-align: left;">ref.</td>
 </tr>
 <tr class="even">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">SoC</td>
-<td style="text-align: right;">158566</td>
-<td style="text-align: right;">21.872</td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
-<td style="text-align: left;">ND</td>
+<td style="text-align: left;">B</td>
+<td style="text-align: left;">255,608</td>
+<td style="text-align: left;">254,887</td>
+<td style="text-align: left;">5.85</td>
+<td style="text-align: left;">5.97</td>
+<td style="text-align: left;">7.74</td>
+<td style="text-align: left;">23.7</td>
+<td style="text-align: left;">67,203</td>
+<td style="text-align: left;">65,287</td>
+<td style="text-align: left;">51,524</td>
+<td style="text-align: left;">53,119</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">B</td>
-<td style="text-align: right;">255608</td>
-<td style="text-align: right;">23.699</td>
-<td style="text-align: right;">97042</td>
-<td style="text-align: right;">1.827</td>
-<td style="text-align: right;">53119</td>
-<td style="text-align: left;">ND</td>
+<td style="text-align: left;">AB</td>
+<td style="text-align: left;">375,043</td>
+<td style="text-align: left;">373,515</td>
+<td style="text-align: left;">4.98</td>
+<td style="text-align: left;">5.07</td>
+<td style="text-align: left;">6.87</td>
+<td style="text-align: left;">24.58</td>
+<td style="text-align: left;">137,860</td>
+<td style="text-align: left;">132,583</td>
+<td style="text-align: left;">137,860</td>
+<td style="text-align: left;">135,813</td>
 </tr>
 <tr class="even">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">AB</td>
-<td style="text-align: right;">375043</td>
-<td style="text-align: right;">24.579</td>
-<td style="text-align: right;">119435</td>
-<td style="text-align: right;">0.879</td>
-<td style="text-align: right;">135813</td>
-<td style="text-align: left;">ND</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">A</td>
-<td style="text-align: right;">292352</td>
-<td style="text-align: right;">22.590</td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
+<td style="text-align: left;">A</td>
+<td style="text-align: left;">292,352</td>
+<td style="text-align: left;">291,129</td>
+<td style="text-align: left;">6.58</td>
+<td style="text-align: left;">6.71</td>
+<td style="text-align: left;">8.92</td>
+<td style="text-align: left;">22.59</td>
 <td style="text-align: left;">D</td>
-</tr>
-<tr class="even" data-grouplength="4">
-<td colspan="7" style="border-bottom: 1px solid"><strong>QALY - Approach 3</strong></td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">SoC</td>
-<td style="text-align: right;">158365</td>
-<td style="text-align: right;">22.309</td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
-<td style="text-align: left;">ND</td>
-</tr>
-<tr class="even">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">B</td>
-<td style="text-align: right;">254887</td>
-<td style="text-align: right;">24.142</td>
-<td style="text-align: right;">96521</td>
-<td style="text-align: right;">1.833</td>
-<td style="text-align: right;">52656</td>
-<td style="text-align: left;">ND</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">AB</td>
-<td style="text-align: right;">373515</td>
-<td style="text-align: right;">25.019</td>
-<td style="text-align: right;">118628</td>
-<td style="text-align: right;">0.877</td>
-<td style="text-align: right;">135271</td>
-<td style="text-align: left;">ND</td>
-</tr>
-<tr class="even">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">A</td>
-<td style="text-align: right;">291129</td>
-<td style="text-align: right;">23.024</td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
 <td style="text-align: left;">D</td>
-</tr>
-<tr class="odd" data-grouplength="4">
-<td colspan="7" style="border-bottom: 1px solid"><strong>DALY - Approaches 1 &amp; 2</strong></td>
-</tr>
-<tr class="even">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">SoC</td>
-<td style="text-align: right;">158566</td>
-<td style="text-align: right;">7.291</td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
-<td style="text-align: left;">ND</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">B</td>
-<td style="text-align: right;">255608</td>
-<td style="text-align: right;">5.847</td>
-<td style="text-align: right;">97042</td>
-<td style="text-align: right;">1.444</td>
-<td style="text-align: right;">67203</td>
-<td style="text-align: left;">ND</td>
-</tr>
-<tr class="even">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">AB</td>
-<td style="text-align: right;">375043</td>
-<td style="text-align: right;">4.981</td>
-<td style="text-align: right;">119435</td>
-<td style="text-align: right;">0.866</td>
-<td style="text-align: right;">137860</td>
-<td style="text-align: left;">ND</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">A</td>
-<td style="text-align: right;">292352</td>
-<td style="text-align: right;">6.584</td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
 <td style="text-align: left;">D</td>
-</tr>
-<tr class="even" data-grouplength="4">
-<td colspan="7" style="border-bottom: 1px solid"><strong>DALY - Approach 3</strong></td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">SoC</td>
-<td style="text-align: right;">158365</td>
-<td style="text-align: right;">7.447</td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
-<td style="text-align: left;">ND</td>
-</tr>
-<tr class="even">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">B</td>
-<td style="text-align: right;">254887</td>
-<td style="text-align: right;">5.969</td>
-<td style="text-align: right;">96521</td>
-<td style="text-align: right;">1.478</td>
-<td style="text-align: right;">65287</td>
-<td style="text-align: left;">ND</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">AB</td>
-<td style="text-align: right;">373515</td>
-<td style="text-align: right;">5.074</td>
-<td style="text-align: right;">118628</td>
-<td style="text-align: right;">0.895</td>
-<td style="text-align: right;">132583</td>
-<td style="text-align: left;">ND</td>
-</tr>
-<tr class="even">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">A</td>
-<td style="text-align: right;">291129</td>
-<td style="text-align: right;">6.706</td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
-<td style="text-align: left;">D</td>
-</tr>
-<tr class="odd" data-grouplength="4">
-<td colspan="7" style="border-bottom: 1px solid"><strong>DALY-Hack</strong></td>
-</tr>
-<tr class="even">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">SoC</td>
-<td style="text-align: right;">158566</td>
-<td style="text-align: right;">9.624</td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
-<td style="text-align: left;">ND</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">B</td>
-<td style="text-align: right;">255608</td>
-<td style="text-align: right;">7.741</td>
-<td style="text-align: right;">97042</td>
-<td style="text-align: right;">1.883</td>
-<td style="text-align: right;">51524</td>
-<td style="text-align: left;">ND</td>
-</tr>
-<tr class="even">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">AB</td>
-<td style="text-align: right;">375043</td>
-<td style="text-align: right;">6.875</td>
-<td style="text-align: right;">119435</td>
-<td style="text-align: right;">0.866</td>
-<td style="text-align: right;">137860</td>
-<td style="text-align: left;">ND</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">A</td>
-<td style="text-align: right;">292352</td>
-<td style="text-align: right;">8.917</td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
-<td style="text-align: left;">D</td>
-</tr>
-<tr class="even" data-grouplength="4">
-<td colspan="7" style="border-bottom: 1px solid"><strong>QALY-like DALY</strong></td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">SoC</td>
-<td style="text-align: right;">158566</td>
-<td style="text-align: right;">21.872</td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
-<td style="text-align: left;">ND</td>
-</tr>
-<tr class="even">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">B</td>
-<td style="text-align: right;">255608</td>
-<td style="text-align: right;">23.699</td>
-<td style="text-align: right;">97042</td>
-<td style="text-align: right;">1.827</td>
-<td style="text-align: right;">53119</td>
-<td style="text-align: left;">ND</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">AB</td>
-<td style="text-align: right;">375043</td>
-<td style="text-align: right;">24.579</td>
-<td style="text-align: right;">119435</td>
-<td style="text-align: right;">0.879</td>
-<td style="text-align: right;">135813</td>
-<td style="text-align: left;">ND</td>
-</tr>
-<tr class="even">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">A</td>
-<td style="text-align: right;">292352</td>
-<td style="text-align: right;">22.590</td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
 <td style="text-align: left;">D</td>
 </tr>
 </tbody>
@@ -1382,17 +1070,17 @@ Table&nbsp;3: Markov Trace Under Approach 2
 
 
 </div>
-<a class="quarto-notebook-link" id="nblink-8" href="index-preview.html">Source: Article Notebook</a></div>
+</div>
+</figure>
+<a class="quarto-notebook-link" id="nblink-6" href="index-preview.html#tbl-cea">Source: Article Notebook</a></div>
+<a class="quarto-notebook-link" id="nblink-5" href="index-preview.html">Source: Article Notebook</a></div>
 </section>
-<section id="conclusion" class="level2" data-number="8">
-<h2 data-number="8" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">8</span> Conclusion</h2>
 </section>
-<section id="to-incorporate" class="level2" data-number="9">
-<h2 data-number="9" class="anchored" data-anchor-id="to-incorporate"><span class="header-section-number">9</span> To Incorporate</h2>
-<ul>
-<li><a href="https://academic.oup.com/heapol/article/21/5/402/578296?login=false">Link</a></li>
-<li><a href="https://link.springer.com/article/10.1007/s40258-022-00722-3">Link</a> ## References {.unnumbered}</li>
-</ul>
+<section id="discussion" class="level2" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="discussion"><span class="header-section-number">8</span> Discussion</h2>
+</section>
+<section id="references" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-alarid2023introductory" class="csl-entry" role="listitem">
 Alarid-Escudero, Fernando, Eline Krijkamp, Eva A Enns, Alan Yang, MG Myriam Hunink, Petros Pechlivanoglou, and Hawre Jalal. 2023. <span>“An Introductory Tutorial on Cohort State-Transition Models in r Using a Cost-Effectiveness Analysis Example.”</span> <em>Medical Decision Making</em> 43 (1): 3–20.
@@ -1452,34 +1140,33 @@ Wilkinson, Thomas, Mark J. Sculpher, Karl Claxton, Paul Revill, Andrew Briggs, J
 <div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 
 <ol>
-<li id="fn1"><p>The adoption of DALYs over other common health outcomes in health economics (e.g., quality-adjusted life years, or QALYs) stems from several practical and theoretical considerations. See <span class="citation" data-cites="Feng2020">Feng et al. (<a href="#ref-Feng2020" role="doc-biblioref">2020</a>)</span> and <span class="citation" data-cites="Wilkinson2016">Wilkinson et al. (<a href="#ref-Wilkinson2016" role="doc-biblioref">2016</a>)</span> for futher discussion.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>In contrast, QALYs are calculated based on utility weights derived from general and patient surveys. See <span class="citation" data-cites="Feng2020">Feng et al. (<a href="#ref-Feng2020" role="doc-biblioref">2020</a>)</span> and <span class="citation" data-cites="Wilkinson2016">Wilkinson et al. (<a href="#ref-Wilkinson2016" role="doc-biblioref">2016</a>)</span> for futher discussion.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p>The adoption of DALYs over other common health outcomes in health economics (e.g., quality-adjusted life years, or QALYs) stems from several practical and theoretical considerations. See <span class="citation" data-cites="Feng2020">Feng et al. (<a href="#ref-Feng2020" role="doc-biblioref">2020</a>)</span> and <span class="citation" data-cites="Wilkinson2016">Wilkinson et al. (<a href="#ref-Wilkinson2016" role="doc-biblioref">2016</a>)</span> for further discussion.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>In contrast, QALYs are calculated based on utility weights derived from general and patient surveys. See <span class="citation" data-cites="Feng2020">Feng et al. (<a href="#ref-Feng2020" role="doc-biblioref">2020</a>)</span> and <span class="citation" data-cites="Wilkinson2016">Wilkinson et al. (<a href="#ref-Wilkinson2016" role="doc-biblioref">2016</a>)</span> for further discussion.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn3"><p>Practitioners who do not wish to discount DALY outcomes can simply set the annual discount rate <span class="math inline">\(r\)</span> to zero. <!-- In addition, our approach differentiates from common practice in the use of a continuous-time discount factor (i.e., $\frac{1}{r}(1-e^{rt})$), rather than a discrete-time discount factor (i.e., $1/(1+r)^t$). We do so to maintain consistency with the original GBD equations---though an approach based on discrete-time discounting could be used and will yield broadly similar results.  --><a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn4"><p>In this example, disease-specific death rates are goverened by a hazard ratio applied to the background mortality rate. Because we are operating on the rate scale, we can separate out disease-related deaths from other-cause mortality by simply taking a difference in the rates. Other applications for prevalent conditions with high death rates, however, may require us to construct a cause-deleted life table to obtain background mortality rates that net out deaths from the modeled disease.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>In this example, disease-specific death rates are governed by a hazard ratio applied to the background mortality rate. Because we are operating on the rate scale, we can separate out disease-related deaths from other-cause mortality by simply taking a difference in the rates. Other applications for prevalent conditions with high death rates, however, may require us to construct a cause-deleted life table to obtain background mortality rates that net out deaths from the modeled disease.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn5"><p>In Markov theory, <span class="math inline">\(\mathbf{P}\)</span> is called the “discrete skeleton” of the continuous model <span class="citation" data-cites="iosifescu1980">(<a href="#ref-iosifescu1980" role="doc-biblioref">Iosifescu 1980</a>)</span>. The conversion formula used to calculate <span class="math inline">\(mathbf{P}\)</span> is the matrix analogue to the standard rate-to-probability formula commonly taught in health economics textbooks, i.e., <span class="math inline">\(p = 1 - e^{r\Delta t}\)</span>, where <span class="math inline">\(r\)</span> is the rate and <span class="math inline">\(\Delta t\)</span> is the time step (i.e., “cycle length”).<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn6"><p>For example, in the continuous time rate matrix <span class="math inline">\(\mathbf{Q}_t\)</span> above, there is a zero-valued rate defined for progressions from Healthy (H) to Disease-related death (DS), since individuals must first become ill before they can die from disease-related causes. However, after embedding, the matrix <span class="math inline">\(\mathbf{P}\)</span> has a non-zero cycle transition probability from Healthy (H) to Disease-related death (DS) (i.e., <span class="math inline">\(\texttt{p\_HDS}\)</span>). This value captures the probability of a compound or “jumpover” transition from Healthy and through the Sick and/or Sicker state to death from disease-related causes within the same discrete time cycle; see <span class="citation" data-cites="graves2021">Graves et al. (<a href="#ref-graves2021" role="doc-biblioref">2021</a>)</span> for further discussion, and <span class="citation" data-cites="iosifescu1980">Iosifescu (<a href="#ref-iosifescu1980" role="doc-biblioref">1980</a>)</span> for additional theory.[^comparison]<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn7"><p>Tracking states also allow for accurate bookeeping for other outcomes such as costs. For example, if developing the disease incurs a one-time diagnosis or treatment cost, the compound transitions implied by the embedded transition probability matrix indicate that some individuals will transiently enter (and then exit) the Sick state in a single cycle. When calculating costs, practitioners may want to include a tracking state for the Sick state to be sure to capture these one-time costs, which would be masked if cost payoffs are simply multiplied by state occupancy at the end of each cycle (e.g., costs for individuals with a sojourn through the Sick state in a single cycle would not be accounted for).<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>Tracking states also allow for accurate bookkeeping for other outcomes such as costs. For example, if developing the disease incurs a one-time diagnosis or treatment cost, the compound transitions implied by the embedded transition probability matrix indicate that some individuals will transiently enter (and then exit) the Sick state in a single cycle. When calculating costs, practitioners may want to include a tracking state for the Sick state to be sure to capture these one-time costs, which would be masked if cost payoffs are simply multiplied by state occupancy at the end of each cycle (e.g., costs for individuals with a sojourn through the Sick state in a single cycle would not be accounted for).<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn8"><p>More generally, accumulator and transition states can be defined for any number of transition types, as they are useful for capturing one-time costs in the model, or for for calculating other decision-relevant outcomes such as the total number of people who developed the disease or died from the disease as secondary outcomes.<a href="#fnref8" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn9"><p>For an example of how to do this using Global Burden of Disease cause of death and life table data, see the <a href="https://graveja0.github.io/vchem-website/blog/posts/modeling-dalys/modeling-dalys.html">example here</a><a href="#fnref9" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn10"><p>To build on the example of compound “jumpover” transitions above, suppose an individual starts off healthy in a cycle, then rapidly transitions through the Sick and Sicker state and dies due to disease-related causes within the same cycle. If there is some treatment cost associated with being in the Sicker state, a traditional approach that applies cost payoffs to state occupancy at the (beginning) end of the cycle would miss treatment costs for this individual because they <em>transition</em> through the Sicker state, but never occupy it at the beginning or end of a cycle. Adding a non-Markovian transition state to the model facilitates more accurate bookkeeping because the transition state would pick up on this transition through the Sicker state.<a href="#fnref10" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn11"><p>The method also easily accomodates other common outcomes such as QALYs and costs.<a href="#fnref11" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn12"><p>See <span class="citation" data-cites="henderson1981">Henderson and Searle (<a href="#ref-henderson1981" role="doc-biblioref">1981</a>)</span> and Appendix B in <span class="citation" data-cites="caswell2021a">Caswell and van Daalen (<a href="#ref-caswell2021a" role="doc-biblioref">2021</a>)</span> for further information. A function to construct a vec-permultation matrix is provided within our replication code.<a href="#fnref12" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn10"><p>To build on the example of compound “jump-over” transitions above, suppose an individual starts off healthy in a cycle, then rapidly transitions through the Sick and Sicker state and dies due to disease-related causes within the same cycle. If there is some treatment cost associated with being in the Sicker state, a traditional approach that applies cost payoffs to state occupancy at the (beginning) end of the cycle would miss treatment costs for this individual because they <em>transition</em> through the Sicker state, but never occupy it at the beginning or end of a cycle. Adding a non-Markovian transition state to the model facilitates more accurate bookkeeping because the transition state would pick up on this transition through the Sicker state.<a href="#fnref10" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn11"><p>The method also easily accommodates other common outcomes such as QALYs and costs.<a href="#fnref11" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn12"><p>See <span class="citation" data-cites="henderson1981">Henderson and Searle (<a href="#ref-henderson1981" role="doc-biblioref">1981</a>)</span> and Appendix B in <span class="citation" data-cites="caswell2021a">Caswell and van Daalen (<a href="#ref-caswell2021a" role="doc-biblioref">2021</a>)</span> for further information. A function to construct a vec-permutation matrix is provided within our replication code.<a href="#fnref12" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn13"><p>For a time-homogeneous model, <a href="#eq-trace" class="quarto-xref">Equation&nbsp;15</a> simplifies to <span class="math inline">\(\mathbf{s}'_t=\mathbf{s}'_0 \mathbf{P}^t\)</span>.<a href="#fnref13" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn14"><p>Common discounting formulas, such as the discrete time discount factor <span class="math inline">\(\frac{1}{(1+r)^t}\)</span>, as well as the continuous time discount factor <span class="math inline">\(e^{-rt}\)</span>, are designed for a series of discrete “payoffs” at specific time points. By comparison, the continuous time discounting used in the GBD DALY equations (<a href="#eq-yld" class="quarto-xref">Equation&nbsp;4</a> and <a href="#eq-yll" class="quarto-xref">Equation&nbsp;5</a>) is based on an assumption that payffs accrue in a continuous stream. The discount adjustment factor shown here (<span class="math inline">\(\frac{1}{r}(1-e^{-rt})\)</span>)—and introduced in <span class="citation" data-cites="larson2013calculating">Larson (<a href="#ref-larson2013calculating" role="doc-biblioref">2013</a>)</span>)—essentially “smooths out” the discrete YLD weight applied in each cycle to reflect this continuous flow. We have verified that application of this factor in our approach exactly replicate the example results using the GBD equations in <span class="citation" data-cites="rushby2001">Fox-Rushby and Hanson (<a href="#ref-rushby2001" role="doc-biblioref">2001</a>)</span>; see the Supplementary Appendix for these examples and code.<a href="#fnref14" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn15"><p>The <span class="math inline">\(\text{vec}\)</span> operator stacks the columns of an <span class="math inline">\(m \times n\)</span> matrix into a <span class="math inline">\(mn \times 1\)</span> vector.<a href="#fnref15" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn14"><p>Common discounting formulas, such as the discrete time discount factor <span class="math inline">\(\frac{1}{(1+r)^t}\)</span>, as well as the continuous time discount factor <span class="math inline">\(e^{-rt}\)</span>, are designed for a series of discrete “payoffs” at specific time points. By comparison, the continuous time discounting used in the GBD DALY equations (<a href="#eq-yld" class="quarto-xref">Equation&nbsp;4</a> and <a href="#eq-yll" class="quarto-xref">Equation&nbsp;5</a>) is based on an assumption that payoffs accrue in a continuous stream. The discount adjustment factor shown here (<span class="math inline">\(\frac{1}{r}(1-e^{-rt})\)</span>)—and introduced in <span class="citation" data-cites="larson2013calculating">Larson (<a href="#ref-larson2013calculating" role="doc-biblioref">2013</a>)</span>)—essentially “smooths out” the discrete YLD weight applied in each cycle to reflect this continuous flow. We have verified that application of this factor in our approach exactly replicate the example results using the GBD equations in <span class="citation" data-cites="rushby2001">Fox-Rushby and Hanson (<a href="#ref-rushby2001" role="doc-biblioref">2001</a>)</span>; see the Supplementary Appendix for these examples and code.<a href="#fnref14" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{2024,
   author = {},
   title = {Modeling {Disability-Adjusted} {Life} {Years} for {Policy}
     and {Decision} {Analysis}},
-  date = {2024-01-07},
+  date = {2024-01-09},
   langid = {en},
   abstract = {This study outlines a methodological framework for joint
     modeling of Disability- and Quality-Adjusted Life Year outcomes.}
 }
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-2024" class="csl-entry quarto-appendix-citeas" role="listitem">
 <span>“Modeling Disability-Adjusted Life Years for Policy and Decision
-Analysis.”</span> 2024. Citation Title. January 7, 2024.
+Analysis.”</span> 2024. Citation Title. January 9, 2024.
 </div></div></section></div></main>
 <!-- /main column -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -1865,7 +1552,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 });
 </script>
 </div> <!-- /content -->
-<script>var lightboxQuarto = GLightbox({"openEffect":"zoom","selector":".lightbox","descPosition":"bottom","closeEffect":"zoom","loop":false});
+<script>var lightboxQuarto = GLightbox({"selector":".lightbox","descPosition":"bottom","closeEffect":"zoom","loop":false,"openEffect":"zoom"});
 window.onload = () => {
   lightboxQuarto.on('slide_before_load', (data) => {
     const { slideIndex, slideNode, slideConfig, player, trigger } = data;
