@@ -76,7 +76,7 @@ $$
 YLD(c) = D_c \cdot L_c
 $$ {#eq-yld1} 
 
-YLLs are determined by a loss function, which is typically defined as the number of years lost to premature mortality at age $a$. This value is often taken directly from a life table that provides information on remaining life expectancy at age $a$,
+YLLs are determined by a loss function, which is typically defined as the number of years lost to premature mortality. This value is often taken from a life table that provides information on remaining life expectancy at age $a$,
 
 $$
 YLL(a)= Ex(a)
@@ -1433,7 +1433,7 @@ We similarly define an occupancy indicator vector $\mathbf{v}$ just as
 we did for $\mathbf{h}$:
 
 $$
-\mathbf{v}_{m}=\operatorname{vec} \mathbf{V}_{m}
+\mathbf{v}=\operatorname{vec} \mathbf{V}
 $$
 
 #### Partial Occupancy 
@@ -1699,7 +1699,7 @@ result1 %>%
 
 ### Comparison with "Shortcut-based" DALY Approaches
 
-@tbl-cea reports cost, effect and incremental cost-effectiveness ratio (ICER) results for our three strategies. The table also includes results under two "shortcut" DALY strategies. As above, there is a roughly 3% difference in outcome estimates, including ICERs, across our three approaches. 
+@tbl-cea reports cost, effect and incremental cost-effectiveness ratio (ICER) results for our three DALY approaches. The table also includes results under two "shortcut" DALY strategies. As above, there is a roughly 3% difference in outcome estimates, including ICERs, across our three DALY approaches. 
 
 @tbl-cea also includes outcomes under alternative "shortcut"-based DALY estimation approaches. First, the method labeled **death state occupancy** defines cycle payoffs based on the disease weight for the diseased health states, and a payoff value of 1.0 for the disease-related death state. Inclusion of disease weights facilitates accumulation of YLDs; YLLs are calculated by accumulating time in the disease-related death state. This approach to YLLs is endogenous to the model, i.e., it does not incorporate exogenous life expectancy information from the GBD reference life table. 
 
@@ -1768,10 +1768,6 @@ cea %>%
 
 ## Discussion 
 
-## To Incorporate
-
-- [Link](https://academic.oup.com/heapol/article/21/5/402/578296?login=false)
-- [Link](https://link.springer.com/article/10.1007/s40258-022-00722-3)
 ## References {.unnumbered}
 
 :::{#refs}
