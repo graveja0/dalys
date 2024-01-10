@@ -1,13 +1,10 @@
 ---
 title: Modeling Disability-Adjusted Life Years for Policy and Decision Analysis
-subtitle: A Tutorial
 keywords:
   - Cost-Effectiveness Analysis
   - Microsimulation
   - Discrete Event Simulation
   - Markov Cohort Models
-abstract: |
-  This study outlines a methodological framework for joint modeling of Disability- and Quality-Adjusted Life Year outcomes.
 plain-language-summary: |
   Modeling Disability-Adjusted Life Years for Policy and Decision Analysis
 key-points:
@@ -98,7 +95,6 @@ In the original GBD study, additional age-weighting and time discounting practic
 While the GBD no longer uses age and time discounting, the World Health Organization's Choosing Interventions that are Cost-Effective (WHO-CHOICE) program recommends consideration of time discounting of health outcomes [@murray2020; @bertram2021]. We therefore adopt the WHO-CHOICE recommendation and include discounting in our DALY modeling approach.[^whodisc] We do, however, maintain the continuous-time discounting used in the original GBD DALY equations---which differs slightly from the more common use of discrete time discounting in Markov cohort models. 
 
 [^whodisc]: Practitioners who do not wish to discount DALY outcomes can simply set the annual discount rate $r$ to zero. 
-<!-- In addition, our approach differentiates from common practice in the use of a continuous-time discount factor (i.e., $\frac{1}{r}(1-e^{rt})$), rather than a discrete-time discount factor (i.e., $1/(1+r)^t$). We do so to maintain consistency with the original GBD equations---though an approach based on discrete-time discounting could be used and will yield broadly similar results.  -->
 
 For an annual discount rate $r$, for condition $c$, and at age $a$, the equation for YLDs is,
 
@@ -144,7 +140,10 @@ transpose <- purrr::transpose
 select <- dplyr::select
 options(knitr.kable.NA = '')
 
-gen_wcc <- function (n_cycles, method = c("Simpson1/3", "half-cycle", "none")) 
+gen_wcc <- 
+  # Please Note: This function is adapted from the dampack package. 
+  # https://github.com/feralaes/dampack
+  function (n_cycles, method = c("Simpson1/3", "half-cycle", "none")) 
 {
     if (n_cycles <= 0) {
         stop("Number of cycles should be positive")
@@ -186,8 +185,7 @@ params_ <- list(
     Delta_t = 1,      # time step (1 = yearly, 1/12 = monthly, etc.)
     age0 = 25,         # age at baseline
     v_s0T = c(1,0,0,0,0), # initial state occupancy  
-                      # c(1,0,0,0,0) means the modeled cohort starts off healthy
-    
+
     r_HS1 = 0.15,   # disease onset rate
     r_S1H = 0.5,    # recovery rate
     r_S1S2 = 0.105,   # disease progression rate
@@ -201,7 +199,6 @@ params_ <- list(
     u_S2 = 0.5,        # Sicker utility weight
     u_D = 0,           # Death utility weight
 
-    
     dw_S1 = 0.25,      # Sick disability weight
     dw_S2 = 0.5,       # Sicker disability weight
     
@@ -217,7 +214,10 @@ params_ <- list(
     c_trtB = 12000, # cost of treatment B
     hr_S1S2_trtB = 0.6, # reduction in rate of disease progression 
 
-    df_ExR =  # Reference life table from GBD
+    df_ExR =  
+      # Global Burden of Disease Collaborative Network. Global Burden of Disease Study 2019 
+      # (GBD 2019) Reference Life Table. Institute for Health Metrics and Evaluation (IHME); 
+      # 2021. doi:10.6069/1D4Y-YQ37. Accessed November 30, 2023.
           tibble::tribble(
               ~Age, ~Life.Expectancy,
               0L,       88.8718951,
@@ -258,38 +258,16 @@ params <-
     })
 
 params$ages_trace <- params$ages
-params$ages <- params$ages[-length(params$ages)]
+params$ages <- params$ages[-length(params$ages)] 
+
+# Discounting vectors 
 
 v_disc_h =  # Continuous time discounting
   exp(-params$r_v_disc_h_Delta_t  * 0:(params$omega))
-# v_disc_h =  # Discrete time discounting
-#   with(params,1 / (( 1 + (r_v_disc_h * Delta_t)) ^ (0 : omega)))
+
 v_disc_c = 
   exp(-params$r_v_disc_c_Delta_t  * 0:(params$omega))
 ```
-
-```{r, eval = FALSE}
-#https://resource-allocation.biomedcentral.com/articles/10.1186/1478-7547-11-18/tables/3
-r = 0.03
-Delta_t = 1
-t = 10
-
-r_ = r * Delta_t
-(1/r_)*(1-exp(-r_*t/Delta_t))*Delta_t
-adj = (1/r_)*(1-exp(-r_))
-disc = exp(-r_*(0:(t/Delta_t-1)))
-sum(rep(1,t/Delta_t)*adj*disc)*Delta_t
-
-# YLL
-Ex = 20
-(1/r)*(1-exp(-r*Ex))*exp(-r*(t-1))
-Ex_ <- (1/r)*(1-exp(-r*Ex))
-sum(c(rep(0,(t-1)/Delta_t),Ex_)*disc)
-
-# basic intuition is that discrete time formula (1/(1+r)^t) and continuous time formula exp(-rt) are designed to discount a series of discrete "payoffs." but health doesn't accrue with a single lump-sum value in each cycle; it is continuous flow throughout the cycle. by comparison, the GBD (1/r)(1-exp(-rt)) assumes a continuous flow. we can adjust the cycle "payoff" to reflect a continuous flow by applyign the adjustment factor (1/r)*(1-exp(-r)), and thus once adjusted, any sum total that uses exp(-rt) will be identical as a value that uses (1/r)*(1-exp(-rt)).
-
-```
-
 
 ```{r}
 #| tbl-cap: Model Parameters
@@ -350,9 +328,6 @@ tibble(parameter = c(sc_params,vec_params),value = unname(c(params_[sc_params],v
   arrange(parameter) %>% 
   kable(col.names = c("Parameter","Value","Description")) %>% 
   kable_styling()
-
-
-
 ```
 
 ## Transition Matrices
@@ -378,6 +353,7 @@ Under this approach, we separate out deaths from disease vs. other causes by def
 ![State transition diagram for progressive disease model with separate cause-specific death state](images/state-transition-diagram-2.svg){#fig-modelDS}
 
 Transitions among health states are defined in terms of continuous rates ("intensities") and are captured within an intensity matrix $\mathbf{Q}_t$,
+
 
 ![Transition Intensity Matrix for Approach 1](images/Q_model2.png)
 
@@ -427,7 +403,7 @@ Second, two transition intensities---from the S1 (Sick) and S2 (Sicker) states t
 
 [^causedeleted]: For an example of how to do this using Global Burden of Disease cause of death and life table data, see the [example here](https://graveja0.github.io/vchem-website/blog/posts/modeling-dalys/modeling-dalys.html)
 
-As above, we obtain the transition probability matrix by embedding $\mathbf{Q}_t$ into the discrete time step (@eq-embed). However, the resulting transition probability matrix treats $\texttt{trDS}$ as an absorbing state (i.e., individuals are retained in the $\texttt{trDS}$ with probability one). Using the terminology introduced above, this absorbing state could serve as an **accumulator** state that (in the constructed Markov trace) records the total number of people who have died from the disease up to any given cycle. This may be a decision-relevant health outcome to consider on its own; indeed, so long as the Markovian submatrix remains closed, there is no limit to the number of accumulator and/or transition states one might add along the "edges" of a model.[^transex]
+As above, we obtain the transition probability matrix by embedding $\mathbf{Q}_t$ into the discrete time step (@eq-embed). However, the resulting transition probability matrix treats $\texttt{trDS}$ as an absorbing state (i.e., individuals are retained in $\texttt{trDS}$ with probability one). Using the terminology introduced above, this absorbing state could serve as an **accumulator** state that (in the constructed Markov trace) records the total number of people who have died from the disease up to any given cycle. This may be a decision-relevant health outcome to consider on its own; indeed, so long as the Markovian submatrix remains closed, there is no limit to the number of accumulator and/or transition states one might add along the "edges" of a model.[^transex]
 
 [^transex]: To build on the example of compound "jump-over" transitions above, suppose an individual starts off healthy in a cycle, then rapidly transitions through the Sick and Sicker state and dies due to disease-related causes within the same cycle. If there is some treatment cost associated with being in the Sicker state, a traditional approach that applies cost payoffs to state occupancy at the (beginning) end of the cycle would miss treatment costs for this individual because they *transition* through the Sicker state, but never occupy it at the beginning or end of a cycle. Adding a non-Markovian transition state to the model facilitates more accurate bookkeeping because the transition state would pick up on this transition through the Sicker state. 
 
@@ -654,8 +630,6 @@ params2[["m_P_"]] <- NULL
 
 ### Approach 3 (Advanced): Markov Chain With Rewards
 
-<!-- From Caswell (2021): MCWR methods were introduced by Howard (1960) as the basis for stochastic dynamic programming (e.g., Puterman 1994; Sheskin 2010). Extensions of the theory to random rewards and demographic models were introduced by Caswell (2011) and have been extended with applications to lifetime reproductive output (Caswell 2011; van Daalen and Caswell 2015; van Daalen and Caswell 2017), evolutionary biodemography (van Daalen and Caswell 2020), income and expenditures (Caswell and Kluge 2015), and healthy longevity in prevalence-based models (Caswell and Zarulli 2018; Owoeye, Oseni, and Gayawan 2020). -->
-
 Our final approach adapts methods from mathematical demography to estimate YLD, YLL and DALY outcomes [@caswell2021a].[^otherout] This approach requires a separate disease-related absorbing state as shown in  @fig-modelDS. While our focus here is on expected outcomes, this method can also be used to estimate higher order moments (e.g., variance, skewness). It is also quite flexible and can estimate separate outcomes for any combination of health states and age classes (e.g., disease-free survival among those aged 40-45, etc.); see @caswell2018 and @caswell2021a for details. 
 
 [^otherout]: The method also easily accommodates other common outcomes such as QALYs and costs. 
@@ -687,16 +661,6 @@ columns correspond to the starting state; this is essentially the transpose of t
 [^vecperm]: See @henderson1981 and Appendix B in @caswell2021a for
 further information. A function to construct a vec-permutation matrix is provided
 within our replication code.
-
-
-
-
-<!-- $$ -->
-<!-- \mathbf{P}_t=\left(\begin{array}{c|c} -->
-<!-- \mathbf{U} & \mathbf{0} \\ -->
-<!-- \hline \mathbf{M} & \mathbf{I} -->
-<!-- \end{array}\right) -->
-<!-- $$ -->
 
 The overall intensity matrix $\mathbf{Q}_t$ is given by
 
@@ -744,7 +708,6 @@ right corner; this assumes that after the last specified age, the cohort
 continues to experience transitions among health states according to the
 transition probabilities defined for the last age class. If this value
 is zero, the model will assume that everyone dies after the last cycle.
-
 
 We next combine the transition matrices (for all age classes as defined by discrete time cycles) together
 into a series of block-structured matrices as follows:
@@ -801,7 +764,6 @@ params3_ <- with(params3_,modifyList(params3_,list(
   }))
 )))
 
-# not sure why this is needed, but otherwise the length gets set too long...
 params3 <- with(params3_, modifyList(params3_, list(m_R_ = m_R_t %>% transpose())))
 params3$m_R = params3$m_R_
 
@@ -833,7 +795,6 @@ params3 <- with(params3,modifyList(params3,list(
           Q %>% map(~(expm(.x * Delta_t)))
     }))
 )))
-# For some reason, can't replace m_P directly, so resorting to this .. 
 params3$m_P = params3$m_P3
 
 params3 <- with(params3,modifyList(params3,list(
@@ -882,7 +843,6 @@ vecperm <-
                 K <- K + kronecker(e, t(e))
             }
         }
-        
         return(K)
     }
 
@@ -912,7 +872,9 @@ params3 <- with(params3,modifyList(params3,list(
         }))
 )))
 
-healthy_longevity_occupancy <- function(params, H, V) {
+# Markov chain with rewards functions
+
+mcwr_occupancy <- function(params, H, V) {
     with(params,{
         map(v_tx_names,~({
             U = mUtilde[[.x]]
@@ -931,17 +893,12 @@ healthy_longevity_occupancy <- function(params, H, V) {
             Z = cbind(diag(tau*omega),matrix(0,nrow=tau*omega, ncol=alpha))
             e = rep(1,s)
             rho1_ <- t(N)%*% Z %*% t(P * R1) %*% e
-            # The following needs to be debugged
-            # rho2_ <-
-            #   N %*% (Z %*% t(.y * R1) %*% e + 2 * t(.x * B1) %*% rho1_)
-            # B2 <- R2[1:(tau * omega), 1:(tau * omega)]
-            # rho3_ <- t(N) %*% (Z %*% ((t(.y * R3) %*% e)) + 3 * (t(.x * B2) %*% rho1_) + 3 * (t(.x * B1) %*% rho2_))
             rho1_
         }))
     })
 }
 
-healthy_longevity_yll <- function(params, life_expectancy, disc) {
+mcwr_yll <- function(params, life_expectancy, disc) {
     with(params,{
         map2(mUtilde,mPtilde,~({
             U = .x
@@ -960,11 +917,6 @@ healthy_longevity_yll <- function(params, life_expectancy, disc) {
             Z = cbind(diag(tau*omega),matrix(0,nrow=tau*omega, ncol=alpha))
             e = rep(1,s)
             rho1_ = t(N) %*% Z %*% t(.y * R1) %*% e
-            # The following needs to be debugged
-            # rho2_ <-
-            #   N %*% (Z %*% t(.y * R1) %*% e + 2 * t(.x * B1) %*% rho1_)
-            # B2 <- R2[1:(tau * omega), 1:(tau * omega)]
-            # rho3_ <- t(N) %*% (Z %*% ((t(.y * R3) %*% e)) + 3 * (t(.x * B2) %*% rho1_) + 3 * (t(.x * B1) %*% rho2_))
             rho1_
         }))
     })
@@ -1071,7 +1023,6 @@ $$
 YLL=\sum_{t=1}^{\omega-1} YLL_t = \sum_{t=1}^{\omega-1}m_t Ex_{t}  \times{c_t} 
 $$ {#eq-yllcum1}
 
-
 ### Years of Life Lost to Disease (YLLs): Approach 2
 
 YLLs under Approach 2 can be calculated in a similar way as YLDs, since we have augmented the model with a transition tracking state that directly estimates new deaths in each cycle. Define the YLL payoff vector $\mathbf{d}_{YLL,t}$, which has value $Ex_{t}$ for the transition tracker health state (```trDS```) and zeros elsewhere,
@@ -1089,7 +1040,6 @@ Alternatively, using the Markov trace, we stack each $k \times 1$ payoff vector 
 $$
 YLL = \sum_{t=0}^{\omega-1} \text{sum}(\mathbf{S} \odot \mathbf{D}) \odot \mathbf{c}
 $$ {#eq-ylltrace}   where the $\text{sum}()$ operator sums each row across the $k$ columns that result from $\mathbf{S} \odot \mathbf{D}$. 
-
 
 ```{r trace}
 trace1 <- 
@@ -1399,7 +1349,6 @@ result1 <- cbind(LY, YLD, YLL, DALY, ACCDALY, QALY_DALY, QALY,COST) %>%
 
 ## DALY Outcomes Under Approach 3 {#sec-outcomes3}
 
-
 Our advanced approach draws on Markov chain with rewards methods that define reward matrices for occupancy-based (YLD) and transition-based (YLL) outcomes. These reward matrices allow us to estimate outcomes for any combination of health states and/or ages. Reward matrices have notation $\mathbf{R}_m$, where $m$ indexes the moment of interest (e.g., expected
 value, variance, etc.). We focus here on expected outcomes (i.e., outcomes based on $\mathbf{R}_1$)---though equations for higher-order moments are available in @caswell2021a. 
 
@@ -1614,16 +1563,16 @@ with(params3,{
     set_names(v_tx_names)
 })
 
-LY3_ <- params3 %>% healthy_longevity_occupancy(H = H, V = V_LY)
-QALY3_ <- params3 %>% healthy_longevity_occupancy(H = H, V = V_QALY)
+LY3_ <- params3 %>% mcwr_occupancy(H = H, V = V_LY)
+QALY3_ <- params3 %>% mcwr_occupancy(H = H, V = V_QALY)
 HYLD = H
 HYLD[1,] = rep(0,ncol(H))
-YLD3_ <- params3 %>% healthy_longevity_occupancy(H = HYLD, V = V_YLD)
-COST3_ <- params3 %>% healthy_longevity_occupancy(H = H, V = V_COST)
+YLD3_ <- params3 %>% mcwr_occupancy(H = HYLD, V = V_YLD)
+COST3_ <- params3 %>% mcwr_occupancy(H = H, V = V_COST)
 
 remaining_life_expectancy <- with(params3,(1/r_v_disc_h) * (1 - exp(-r_v_disc_h * f_ExR(ages))))
 
-YLL3_ <- params3 %>% healthy_longevity_yll(life_expectancy = remaining_life_expectancy, disc = v_disc_h[-length(v_disc_h)])
+YLL3_ <- params3 %>% mcwr_yll(life_expectancy = remaining_life_expectancy, disc = v_disc_h[-length(v_disc_h)])
 DALY3_ <- map2(YLL3_,YLD3_,~(.x+.y))
 
 LY3 <- LY3_ %>% map(~({
@@ -1768,9 +1717,9 @@ This study extends the methodological toolkit available to decision modelers by 
 
 Our methods also extend to other common decision modeling frameworks. For example, Approach 2 directly estimates YLDs and YLLs in each cycle---and can therefore be adapted to efficiently execute microsimulation models in which cycle transition probabilities depend on patient attributes or disease history.  Discrete event simulation models, moreover, can apply the YLD and YLL equations provided (@eq-yll and @eq-yld) to simulated time-to-death and duration of disease values. 
 
-A subset of our results yielded similar or even exact values when comparing DALY shortcuts to our DALY approaches, so it is useful to walk through the circumstances when various approaches will be similar and differ. In general, DALY shortcut methods will be more accurate when YLDs dominate the DALY value. The reason is that our methods, as well as standard ("QALY-like") methods apply identical payoff weights to occupancy in diseased states. The methods differ substantially, however, in how they "reward" deaths from disease. Our methods mirror the GBD approach of penalizing a disease-related death using an exogenous remaining life expectancy value. Shortcut-based methods, by comparison, accumulate time in the disease-related death state---thus, the payoffs are determined endogenously within the model. Moreover, because a payoff value is applied to an absorbing state, results under the shortcut-based DALY method will be highly sensitive to the time horizon in a model. That is, "YLLs" will continue to accumulate even after all cohort members have died. This will not impact ICER calculations that make comparisons *across* strategies, but will yield inaccurate DALY levels in a modeled population. Reflecting the above observations, our ICER results comparing strategy AB to B---where the only difference is in the improved quality-of-life from strategy A, which will affect YLDs but not YLLs---are identical using Approaches 1&2 and using the shortcut method based on accumulating time in the death state. 
+A subset of our results yielded similar or even exact values when comparing DALY shortcuts to our DALY approaches, so it is useful to walk through the circumstances when various approaches will be similar and differ. In general, DALY shortcut methods will be more accurate when YLDs dominate the DALY value. The reason is that our methods, as well as standard ("QALY-like") methods, apply identical payoff weights to occupancy in diseased states. The methods differ substantially, however, in how they "reward" deaths from disease. Our methods mirror the GBD approach of penalizing a disease-related death using an exogenous remaining life expectancy value. Shortcut-based methods, by comparison, accumulate time in the disease-related death state---thus, the payoffs are determined endogenously within the model. Moreover, because a payoff value is applied to an absorbing state, results under the shortcut-based DALY method will be highly sensitive to the time horizon in a model. That is, "YLLs" will continue to accumulate even after all cohort members have died. This will not impact ICER calculations that make comparisons *across* strategies, but will yield inaccurate DALY levels in a modeled population. Reflecting the above observations, our ICER results comparing strategy AB to B---where the only difference is in the improved quality-of-life from strategy A, which will affect YLDs but not YLLs---are identical using Approaches 1&2 and using the shortcut method based on accumulating time in the death state. 
 
-Another important consideration is the role of discounting. Our approaches apply continuous-time discounting approach to maintain consistency with the GBD assumption that remaining life expectancy accrues as a continuous "flow" of health. This manifests in our approaches through the use fo a cycle-specific discount factor ($\frac{1}{r_{\Delta_t}}(1-e^{-r_{\Delta_t}})$) and a continuous-time formula $e^{-rt}$ to discount values to baseline. If practitioners do not wish to discount, the discount rate value can simply be set to zero.[^zero] Alternatively, practitioners may also elect to use the standard discrete time discounting formula ($\frac{1}{(1+r^*)^t}$), but can first convert the discount rate as $r^*=e^{r}-1$. 
+Another important consideration is the role of discounting. Our approaches apply continuous-time discounting approach to maintain consistency with the GBD assumption that remaining life expectancy accrues as a continuous "flow" of health. This manifests in our approaches through the use of a cycle-specific discount factor ($\frac{1}{r_{\Delta_t}}(1-e^{-r_{\Delta_t}})$) and a continuous-time formula $e^{-rt}$ to discount values to baseline. If practitioners do not wish to discount, the discount rate value can simply be set to zero.[^zero] Alternatively, practitioners may also elect to use the standard discrete time discounting formula ($\frac{1}{(1+r^*)^t}$), but can first convert the discount rate as $r^*=e^{r}-1$. 
 
 Finally, it is important to note that the methods outlined here are not purely restricted to DALY outcomes. Indeed, all three approaches facilitate the estimation of other common outcomes such as QALYs, life-years, etc. The adaption of the healthy longevity approach developed in @caswell2021a to common decision modeling environments, in particular, opens up new outcomes (e.g., variance of QALYs) and flexible new methods for decision modelers. 
 
