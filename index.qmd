@@ -20,7 +20,6 @@ editor_options:
 prefer-html: true 
 ---
 
-
 ## Introduction {#sec-introduction}
 
 ```{r}
@@ -39,9 +38,18 @@ library(Hmisc)
 library(hrbrthemes)
 library(ggsci)
 library(janitor)
+library(flextable)
 options(scipen = 5) 
 transpose <- purrr::transpose
 select <- dplyr::select
+
+format_number <- function(x, k = 3, m = 0) {
+    ifelse(x == 0, 
+           "0.0", 
+           ifelse(x >= 1000, 
+                  formatC(round(x, m), format = "f", big.mark = ",", digits = m),
+                  formatC(round(x, k), format = "f", big.mark = ",", digits = k)))
+}
 #quarto preview index.qmd --to html --no-watch-inputs --no-browse
 ```
 
@@ -109,6 +117,7 @@ YLL(a)= \frac{1}{r}\left(1-e^{-r Ex(a)}\right).
 $$ {#eq-yll} 
 
 It is important to note that the discounting shown in @eq-yld and @eq-yll yields the present value of YLD and YLL outcomes at a single point in time, when the duration of disease ($L_c$) and time of death from disease ($a$) are known. For a decision model where not all cohort members start off ill, that point in time very likely occurs at some point after the baseline period---and different illness durations and death times will, of course, occur across individuals in a modeled cohort. As such, we must discount YLL and YLD outcomes further, to time $t=0$ period. This additional discounting step will become apparent in @sec-outcomes below. 
+
 
 ## Model Overview {#sec-overview}
 
@@ -269,6 +278,7 @@ v_disc_c =
   exp(-params$r_v_disc_c_Delta_t  * 0:(params$omega))
 ```
 
+
 ```{r}
 #| tbl-cap: Model Parameters
 #| label: tbl-params
@@ -321,14 +331,35 @@ vec_params_ <-
 labels_params <- intersect(names(params),c(vec_params,sc_params))
 
 names(vec_params_) = vec_params
-tibble(parameter = c(sc_params,vec_params),value = unname(c(params_[sc_params],vec_params_))) %>% 
+# tibble(parameter = c(sc_params,vec_params),value = unname(c(params_[sc_params],vec_params_))) %>% 
+#   mutate(value = paste0(value)) %>% 
+#   mutate(label = paste0(factor(parameter,levels = labels_params, labels = params_lut[labels_params]))) %>% 
+#   mutate(parameter = factor(parameter,levels = labels_params)) %>% 
+#   arrange(parameter) %>% 
+#   kable(col.names = c("Parameter","Value","Description")) %>% 
+#   kable_styling()
+
+
+
+set_flextable_defaults(
+    font.size=10,
+    theme_fun = theme_vanilla,
+    padding = 6
+)
+
+ft <- tibble(parameter = c(sc_params,vec_params),value = unname(c(params_[sc_params],vec_params_))) %>% 
   mutate(value = paste0(value)) %>% 
   mutate(label = paste0(factor(parameter,levels = labels_params, labels = params_lut[labels_params]))) %>% 
   mutate(parameter = factor(parameter,levels = labels_params)) %>% 
   arrange(parameter) %>% 
-  kable(col.names = c("Parameter","Value","Description")) %>% 
-  kable_styling()
+  rename("Parameter Name" = parameter, "Value" = value, "Description" = label) %>% 
+  flextable(cwidth = 2) %>% 
+  add_footer_lines("Source: Alarid-Escudero et al. (2023) and authors' assumptions.") 
+
+ft
+
 ```
+
 
 ## Transition Matrices
 
@@ -1069,6 +1100,7 @@ trace2 <-
     })  
 ```
 
+
 ```{r}
 # YYs
 ly_ = with(params1,(matrix(c(1,
@@ -1489,7 +1521,7 @@ Total (across all ages) outcomes for each starting health state are
 calculated as
 
 $$
-\boldsymbol{\rho}_{1}^{Y,\text {stage }}(\operatorname{cycle} t)=\left(\mathbf{e}_{t}^{\top} \otimes \mathbf{I}_{\tau}\right) \widetilde{\boldsymbol{\rho}}^Y_{1} \quad \tau \times 1
+\boldsymbol{\rho}_{1}^{Y,\text {stage }}(\operatorname{cycle } t)=\left(\mathbf{e}_{t}^{\top} \otimes \mathbf{I}_{\tau}\right) \widetilde{\boldsymbol{\rho}}^Y_{1} \quad \tau \times 1
 $$ {#eq-app3outstate} where $\otimes$ is the Kronecker operator and $\mathbf{e}_{t}$ is a vector of length $\omega$ with a value of one in the first position and zero elsewhere; this facilitates calculating expected outcomes from the baseline period (i.e., $t=0$). 
 
 
@@ -1624,7 +1656,7 @@ result3 <- cbind(LY3, YLD3, YLL3, DALY3, QALY3,COST3) %>%
 ```{r}
 #| label: tbl-compare1
 #| tbl-cap: "Comparison of Outcomes Under Three DALY Approaches"
-#| 
+
 result1 %>% 
   bind_rows(result3) %>% 
   select(approach,strategy,YLD,YLL,DALY) %>% 
@@ -1636,14 +1668,30 @@ result1 %>%
   unite(outcome,outcome,approach) %>% 
   pivot_wider(names_from = outcome, values_from = value) %>% 
   mutate(strategy = case_when(
-    strategy ==  "SoC" ~ "Standard of Care", 
+    strategy ==  "SoC" ~ "Standard of Care",
     strategy == "A" ~ "Strategy A: Quality of Life Improvement",
     strategy == "B" ~ "Strategy B: Reduce Disease Progression",
     strategy == "AB" ~ "Composite: Strategy A + Strategy B"
-  )) %>% 
-  kable(col.names = c("",rep(c("Markov Trace (1&2)","Markov Chain With Rewards (3)"),3)), digits = 3) %>% 
-  kable_styling() %>% 
-  add_header_above(c("", "YLD" = 2, "YLL"=2, "DALY"=2)) 
+  ))  %>% 
+  janitor::clean_names()   %>% 
+  mutate_at(vars(-strategy), function(x) format_number(x))  %>% 
+  flextable( ) %>% 
+    #set_table_properties(layout="autofit") %>% 
+  set_header_labels(
+      strategy = "",
+      yld_1_2 = "Markov Trace (1&2)",
+      yll_1_2 = "Markov Trace (1&2)",
+      daly_1_2 = "Markov Trace (1&2)",
+      yll_3 = "Markov Chain With Rewards (3)"  ,
+      yld_3 = "Markov Chain With Rewards (3)"   ,
+      daly_3 = "Markov Chain With Rewards (3)"   
+  ) %>% 
+    add_header_row( values = c("","Years Living With Disease","Years of Life Lost to Premature Mortality","Disability-Adjusted Life Years"),colwidths = c(1,2,2,2)) %>% 
+    align(part="header",align="right") %>% 
+    align(part = "body", align = "right") %>% 
+    width(j = 1, width=2) %>% 
+    width(j=2:7,width=.75) 
+
 ```
 
 ### Comparison with "Shortcut-based" DALY Approaches
@@ -1661,7 +1709,8 @@ QALY-like DALY estimates are, not surprisingly, higher than the other DALY estim
 ```{r}
 #| tbl-cap: Comparison of Cost-Effectiveness Analysis Results
 #| label: tbl-cea
-#| 
+
+
 cea <- 
   bind_rows(
     dampack::calculate_icers(cost = result1$COST, effect = -result1$DALY, strategies = result1$strategy) %>% 
@@ -1700,15 +1749,26 @@ cea %>%
          res_qaly_like_daly = glue::glue("{effect_qaly_like_daly}")) %>% 
   select(strategy,cost_1_2,cost_3,res_1_2,res_3,res_acc_daly,res_qaly_like_daly,icer_1_2,icer_3,icer_acc_daly,icer_qaly_like_daly) %>% 
   mutate_at(vars(cost_1_2,cost_3,res_acc_daly,res_qaly_like_daly,res_1_2,res_3),function(x) ifelse(x=="D","",x)) %>% 
-  kable(col.names = c("","Markov Trace (1&2)","Markov Chain With Rewards (3)", "Markov Trace (1&2)","Markov Chain With Rewards (3)","Death State Occupancy","QALY-like DALY",
-                     "Markov Trace (1&2)","Markov Chain With Rewards (3)", "Death State Occupancy","QALY-like DALY")) %>% 
-  kable_styling() %>% 
-  add_header_above(c("", "Cost Estimate" = 2, "DALY Estimate"=4, "ICER"=4))  
-
-```
-
-```{r}
-
+  flextable() %>% 
+  set_header_labels(
+      strategy = "",
+      cost_1_2 = "MT",
+      cost_3 = "MCwR",
+      res_1_2 = "MT",
+      res_3 = "MCwR",
+      res_acc_daly = "AccDeath",
+      res_qaly_like_daly = "QALY-DALY",
+      icer_1_2 = "MT",
+      icer_3 = "MCwR",  
+      icer_acc_daly =  "AccDeath",
+      icer_qaly_like_daly = "QALY-DALY"    
+    ) %>% 
+    add_footer_lines("MT: Markov Trace [Approach 1]; MCwR = Markov Chain with Rewards [Approach 3]; AccDeath = Accumulate time in absorbing death state; QALY-DALY = QALY-like DALY; D = dominated strategy") %>% 
+     add_header_row( values = c("","Cost Estimate","DALY Estimate","ICER"),colwidths = c(1,2,4,4)) %>% 
+    align(part="header",align="right") %>% 
+    align(part = "body", align = "right") %>% 
+    width(j = 1, width=1) %>% 
+    width(j=2:11,width=.75) 
 ```
 
 ## Discussion 
