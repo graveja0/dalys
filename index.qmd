@@ -38,6 +38,7 @@ library(Hmisc)
 library(hrbrthemes)
 library(ggsci)
 library(janitor)
+#remotes::install_github("davidgohel/flextable")
 library(flextable)
 options(scipen = 5) 
 transpose <- purrr::transpose
@@ -341,11 +342,11 @@ names(vec_params_) = vec_params
 
 
 
-set_flextable_defaults(
-    font.size=10,
-    theme_fun = theme_vanilla,
-    padding = 6
-)
+# set_flextable_defaults(
+#     font.size=10,
+#     theme_fun = theme_vanilla,
+#     padding = 6
+# )
 
 ft <- tibble(parameter = c(sc_params,vec_params),value = unname(c(params_[sc_params],vec_params_))) %>% 
   mutate(value = paste0(value)) %>% 
@@ -1657,7 +1658,8 @@ result3 <- cbind(LY3, YLD3, YLL3, DALY3, QALY3,COST3) %>%
 #| label: tbl-compare1
 #| tbl-cap: "Comparison of Outcomes Under Three DALY Approaches"
 
-result1 %>% 
+tab <- 
+  result1 %>% 
   bind_rows(result3) %>% 
   select(approach,strategy,YLD,YLL,DALY) %>% 
   gather(outcome,value,-strategy,-approach) %>% 
@@ -1674,23 +1676,28 @@ result1 %>%
     strategy == "AB" ~ "Composite: Strategy A + Strategy B"
   ))  %>% 
   janitor::clean_names()   %>% 
-  mutate_at(vars(-strategy), function(x) format_number(x))  %>% 
-  flextable( ) %>% 
-    #set_table_properties(layout="autofit") %>% 
+  mutate_at(vars(-strategy), function(x) format_number(x)) 
+
+tab %>% flextable( 
+  col_keys = c("strategy","blah","yld_1_2","yld_3","foo","yll_1_2","yll_3","foo2","daly_1_2","daly_3")) %>% 
+  #set_table_properties(layout="autofit") %>% 
   set_header_labels(
-      strategy = "",
-      yld_1_2 = "Markov Trace (1&2)",
-      yll_1_2 = "Markov Trace (1&2)",
-      daly_1_2 = "Markov Trace (1&2)",
-      yll_3 = "Markov Chain With Rewards (3)"  ,
-      yld_3 = "Markov Chain With Rewards (3)"   ,
-      daly_3 = "Markov Chain With Rewards (3)"   
+    strategy = "",
+    foofoo = "",
+    yld_1_2 = "Markov Trace (1&2)",
+    yll_1_2 = "Markov Trace (1&2)",
+    daly_1_2 = "Markov Trace (1&2)",
+    yll_3 = "Markov Chain With Rewards (3)"  ,
+    yld_3 = "Markov Chain With Rewards (3)"   ,
+    daly_3 = "Markov Chain With Rewards (3)"   
   ) %>% 
-    add_header_row( values = c("","Years Living With Disease (YLDs)","Years of Life Lost to Premature Mortality (YLLs)","Disability-Adjusted Life Years (DALYs)"),colwidths = c(1,2,2,2)) %>% 
-    align(part="header",align="right") %>% 
-    align(part = "body", align = "right") %>% 
-    width(j = 1, width=2) %>% 
-    width(j=2:7,width=.75) 
+  add_header_row( values = c("Strategy","","Years Living With Disease (YLDs)","","Years of Life Lost to Premature Mortality (YLLs)","","Disability-Adjusted Life Years (DALYs)"),colwidths = c(1,1,2,1,2,1,2)) %>% 
+  align(part="header",align="right") %>% 
+  align(part = "body", align = "right") %>% 
+  width(j = 1, width=2) %>% 
+  width(j=2:7,width=.75) %>% 
+  flextable::theme_vanilla() %>% 
+  empty_blanks()
 
 ```
 
@@ -1743,32 +1750,49 @@ cea %>%
   pivot_wider(names_from = outcome, values_from = value) %>% 
   janitor::clean_names() %>% 
   select(strategy,contains("1_2"), contains("_3"),contains("acc_daly"), contains("qaly_like")) %>% 
-  mutate(res_1_2 = glue::glue("{effect_1_2}"),
-         res_3 = glue::glue("{effect_3}"),
-         res_acc_daly = glue::glue("{effect_acc_daly}"),
-         res_qaly_like_daly = glue::glue("{effect_qaly_like_daly}")) %>% 
-  select(strategy,cost_1_2,cost_3,res_1_2,res_3,res_acc_daly,res_qaly_like_daly,icer_1_2,icer_3,icer_acc_daly,icer_qaly_like_daly) %>% 
-  mutate_at(vars(cost_1_2,cost_3,res_acc_daly,res_qaly_like_daly,res_1_2,res_3),function(x) ifelse(x=="D","",x)) %>% 
-  flextable() %>% 
+  gather(outcome_,value,-strategy) %>% 
+  mutate(outcome = case_when(
+    grepl("^cost_",outcome_) ~ "Cost",
+    grepl("^inc_cost",outcome_) ~ "inc_cost",
+    grepl("^inc_effect",outcome_) ~ "inc_effect",
+    grepl("^effect",outcome_) ~ "DALY",
+    grepl("icer",outcome_) ~ "ICER")
+  ) %>% 
+  mutate(approach = case_when(
+    grepl("_1_2",outcome_) ~ "1_2",
+    grepl("_3",outcome_) ~ "3",
+    grepl("acc_daly",outcome_)~ "accDALY",
+    grepl("qaly_like_daly",outcome_) ~ "QALYDALY"
+  )) %>% 
+  mutate(strategy = case_when(
+    strategy ==  "SoC" ~ "Standard of Care",
+    strategy == "A" ~ "Strategy A: Quality of Life Improvement",
+    strategy == "B" ~ "Strategy B: Reduce Disease Progression",
+    strategy == "AB" ~ "Composite: Strategy A + Strategy B"
+  )) %>% 
+  select(-outcome_) %>% 
+  spread(approach,value) %>% 
+  mutate(strategy = factor(strategy,levels = c("Standard of Care","Strategy B: Reduce Disease Progression","Composite: Strategy A + Strategy B","Strategy A: Quality of Life Improvement"))) %>% 
+  filter(outcome %in% c("Cost","DALY","ICER")) %>% 
+  mutate(outcome = factor(outcome,levels = c("Cost","DALY","ICER"))) %>% 
+  arrange(outcome,strategy) %>% 
+  as_grouped_data(groups = "outcome", columns = NULL) %>% 
+  as_flextable(hide_grouplabel = TRUE,
+               col_keys = c("strategy","blah","1_2","3","foo","accDALY","foo2","QALYDALY") )  %>% 
   set_header_labels(
-      strategy = "",
-      cost_1_2 = "MT",
-      cost_3 = "MCwR",
-      res_1_2 = "MT",
-      res_3 = "MCwR",
-      res_acc_daly = "AccDeath",
-      res_qaly_like_daly = "QALY-DALY",
-      icer_1_2 = "MT",
-      icer_3 = "MCwR",  
-      icer_acc_daly =  "AccDeath",
-      icer_qaly_like_daly = "QALY-DALY"    
-    ) %>% 
-    add_footer_lines("MT: Markov Trace [Approaches 1 & 2]; MCwR = Markov Chain with Rewards [Approach 3]; AccDeath = Accumulate time in absorbing death state; QALY-DALY = QALY-like DALY; D = dominated strategy") %>% 
-     add_header_row( values = c("","Cost Estimate","DALY Estimate","ICER"),colwidths = c(1,2,4,4)) %>% 
-    align(part="header",align="right") %>% 
-    align(part = "body", align = "right") %>% 
-    width(j = 1, width=1) %>% 
-    width(j=2:11,width=.75) 
+    strategy = "",
+    "1_2" = "Markov Trace (1&2)",
+    "3" = "Markov Chain With Rewards (3)",
+    "accDALY" = "Shortcut 1: Accumulate Death State Occupancy",
+    "QALYDALY" = "Shortcut 2: QALY-like DALY"
+  ) %>% 
+  align(part="header",align="left") %>% 
+  #align(part = "body", align = "right") %>% 
+  width(j = 1, width=2) %>% 
+  width(j=2:8,width=1) %>% 
+  #flextable::theme_vanilla() %>% 
+  empty_blanks()
+  
 ```
 
 ## Discussion 
