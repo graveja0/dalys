@@ -67,7 +67,7 @@ As a consequence, and in practice, health economic applications often resort to 
 
 This study outlines methods for direct incorporation of DALY outcomes in common decision modeling environments. Our primary focus is on discrete-time Markov cohort models---however, our framework extends directly to microsimulation and is also easily adapted for continuous time discrete event simulation (DES) models. As such, our study provides a comprehensive roadmap for incorporating DALY outcomes into common decision modeling frameworks.
 
-To maintain consistency within the literature, we build on an existing didactic disease progression model [@alarid2023introductory]. The underlying discrete time Markov cohort model is time homogeneous---that is, transition probabilities do not vary as a function of age/time in model. However, our methods and code are developed to accommodate time-homogeneous models. Finally, recognizing the wide spectrum of experience and programming comfort level among practitioners, we offer three approaches for modeling DALYs (beginner, intermediate and advanced) and provide replication materials for implementing our approaches in R and Microsoft Excel. 
+To maintain consistency within the literature, we build on an existing didactic disease progression model [@alarid2023introductory]. The underlying discrete time Markov cohort model is time homogeneous---that is, transition probabilities do not vary as a function of age/time in model. However, our methods and code are developed to accommodate time-inhomogeneous models. Finally, recognizing the wide spectrum of experience and programming comfort level among practitioners, we offer three approaches for modeling DALYs (beginner, intermediate and advanced) and provide replication materials for implementing our approaches in R and Microsoft Excel. 
 
 ## Background {#sec-background}
 
@@ -967,7 +967,7 @@ $$
 \mathbf{s}^\top_t=\mathbf{s}^\top_0 \mathbf{P}_1\mathbf{P}_2\dots\mathbf{P}_t
 $$ {#eq-trace} where $\mathbf{P}_t$ is the $k \times k$ transition probability matrix at time $t$.[^simplify] 
 
-[^simplify]: For a time-homogeneous model, @eq-trace simplifies to $\mathbf{s}'_t=\mathbf{s}'_0 \mathbf{P}^t$.
+[^simplify]: For a time-homogeneous model, @eq-trace simplifies to $\mathbf{s}^\top_t=\mathbf{s}^\top_0 \mathbf{P}^t$.
 
 We apply @eq-trace at each cycle to construct a Markov trace $\mathbf{S}$, which has dimensions $\omega \times k$,
 
@@ -1686,7 +1686,7 @@ result1 %>%
       yld_3 = "Markov Chain With Rewards (3)"   ,
       daly_3 = "Markov Chain With Rewards (3)"   
   ) %>% 
-    add_header_row( values = c("","Years Living With Disease","Years of Life Lost to Premature Mortality","Disability-Adjusted Life Years"),colwidths = c(1,2,2,2)) %>% 
+    add_header_row( values = c("","Years Living With Disease (YLDs)","Years of Life Lost to Premature Mortality (YLLs)","Disability-Adjusted Life Years (DALYs)"),colwidths = c(1,2,2,2)) %>% 
     align(part="header",align="right") %>% 
     align(part = "body", align = "right") %>% 
     width(j = 1, width=2) %>% 
@@ -1763,7 +1763,7 @@ cea %>%
       icer_acc_daly =  "AccDeath",
       icer_qaly_like_daly = "QALY-DALY"    
     ) %>% 
-    add_footer_lines("MT: Markov Trace [Approach 1]; MCwR = Markov Chain with Rewards [Approach 3]; AccDeath = Accumulate time in absorbing death state; QALY-DALY = QALY-like DALY; D = dominated strategy") %>% 
+    add_footer_lines("MT: Markov Trace [Approaches 1 & 2]; MCwR = Markov Chain with Rewards [Approach 3]; AccDeath = Accumulate time in absorbing death state; QALY-DALY = QALY-like DALY; D = dominated strategy") %>% 
      add_header_row( values = c("","Cost Estimate","DALY Estimate","ICER"),colwidths = c(1,2,4,4)) %>% 
     align(part="header",align="right") %>% 
     align(part = "body", align = "right") %>% 
