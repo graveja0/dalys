@@ -11,7 +11,7 @@ key-points:
   - Key Point 1
   - Key Point 2
 abstract: |
-  This study outlines methods for direct incorporation of multidimensional health outcomes in common decision modeling frameworks, with a particular focus on disability-adjusted life years (DALYs) and its constituent parts---years of life lived with disease (YLDs) and years of life lost to premature mortality (YLLs). Recognizing the wide spectrum of experience and programming comfort level among practitioners, we offer three approaches (beginner, intermediate and advanced). Our beginner approach draws on the Markov trace, while the intermediate approach facilitates more efficient estimation for computationally-intensive exercises (e.g., microsimulation, probabilistic sensitivity analyses) by incorporating non-Markovian tracking elements into transition probability matrices. Finally, our advanced approach adapts methods from mathematical demography. This approach allows for direct calculation of expected values without the need for a Markov trace, and facilitates additional insights because it can also solve for higher-order moments in the health outcome distribution (e.g., variance, skewness). Drawing on an existing disease progression discrete time Markov cohort model, we demonstrate exact or near- numeric equivalence of DALY estimates and cost-effectiveness analysis results across our three methods, and show that other commonly used "shortcuts" for estimating DALYs will not, in general, yield accurate estimates of DALY levels nor ICERs in a modeled population. 
+  This study outlines methods for direct incorporation of multidimensional health outcomes in common decision modeling frameworks, with a particular focus on disability-adjusted life years (DALYs) and its constituent parts---years of life lived with disability (YLDs) and years of life lost to premature mortality (YLLs). Recognizing the wide spectrum of experience and programming comfort level among practitioners, we offer three approaches (beginner, intermediate and advanced). Our beginner approach draws on the Markov trace, while the intermediate approach facilitates more efficient estimation for computationally-intensive exercises (e.g., microsimulation, probabilistic sensitivity analyses) by incorporating non-Markovian tracking elements into transition probability matrices. Finally, our advanced approach adapts methods from mathematical demography. This approach allows for direct calculation of expected values without the need for a Markov trace, and facilitates additional insights because it can also solve for higher-order moments in the health outcome distribution (e.g., variance, skewness). Drawing on an existing disease progression discrete time Markov cohort model, we demonstrate exact or near- numeric equivalence of DALY estimates and cost-effectiveness analysis results across our three methods, and show that other commonly used "shortcuts" for estimating DALYs will not, in general, yield accurate estimates of DALY levels nor ICERs in a modeled population. 
 
 date: last-modified
 bibliography: references.bib
@@ -1040,7 +1040,7 @@ YLLs under Approach 2 can be calculated in a similar way as YLDs, since we have 
 We can now apply similar equations as used for YLD outcomes to calculate fully discounted YLLs,
 
 $$
-YLL=\sum_{t=0}^{\omega-1} YLD(t)=\sum_{t=0}^{\omega-1}\left(\mathbf{s}'_0 \mathbf{P}_1\mathbf{P}_2\dots\mathbf{P}_t \mathbf{d}_{YLL,t}  \times c_t \right)
+YLL=\sum_{t=0}^{\omega-1} YLL(t)=\sum_{t=0}^{\omega-1}\left(\mathbf{s}'_0 \mathbf{P}_1\mathbf{P}_2\dots\mathbf{P}_t \mathbf{d}_{YLL,t}  \times c_t \right)
 $$ {#eq-yllcum}
 
 Alternatively, using the Markov trace, we stack each $k \times 1$ payoff vector (using $\mathbf{d}_{YLL,t}^\top$ as rows) into an $\omega \times k$ payoff matrix $\mathbf{D}$, and obtain total adjusted YLLs as
@@ -1503,10 +1503,10 @@ with(params3,{
 with(params3,{
   V_YLD <<- v_tx_names %>% map(~({
     v_ <- matrix(0,nrow=tau, ncol = omega) 
-    v_[2,] <- v_disc_h[-length(v_disc_h)]*dw_S1 * Delta_t * (1/r_v_disc_h_Delta_t) * (1 - exp(-r_v_disc_h_Delta_t))
-    v_[3,] <- v_disc_h[-length(v_disc_h)]*dw_S2 * Delta_t * (1/r_v_disc_h_Delta_t) * (1 - exp(-r_v_disc_h_Delta_t))
+    v_[2,] <- v_disc_h[-1]*dw_S1 * Delta_t * (1/r_v_disc_h_Delta_t) * (1 - exp(-r_v_disc_h_Delta_t))
+    v_[3,] <- v_disc_h[-1]*dw_S2 * Delta_t * (1/r_v_disc_h_Delta_t) * (1 - exp(-r_v_disc_h_Delta_t))
     if (.x %in% c("A","AB")) {
-      v_[2,] <- v_disc_h[-length(v_disc_h)]*dw_trtA * Delta_t * (1/r_v_disc_h_Delta_t) * (1 - exp(-r_v_disc_h_Delta_t))
+      v_[2,] <- v_disc_h[-1]*dw_trtA * Delta_t * (1/r_v_disc_h_Delta_t) * (1 - exp(-r_v_disc_h_Delta_t))
     }
     v_
   })) %>% 
@@ -1516,11 +1516,11 @@ with(params3,{
 with(params3,{
   V_QALY <<- v_tx_names %>% map(~({
     v_ <- matrix(0,nrow=tau, ncol = omega) 
-    v_[1,] <- v_disc_h[-length(v_disc_h)]*u_H * Delta_t     
-    v_[2,] <- v_disc_h[-length(v_disc_h)]*u_S1 * Delta_t 
-    v_[3,] <- v_disc_h[-length(v_disc_h)]*u_S2 * Delta_t 
+    v_[1,] <- v_disc_h[-1]*u_H * Delta_t     
+    v_[2,] <- v_disc_h[-1]*u_S1 * Delta_t 
+    v_[3,] <- v_disc_h[-1]*u_S2 * Delta_t 
     if (.x %in% c("A","AB")) {
-      v_[2,] <- v_disc_h[-length(v_disc_h)]*u_trtA * Delta_t 
+      v_[2,] <- v_disc_h[-1]*u_trtA * Delta_t 
     }
     v_
   })) %>% 
@@ -1530,20 +1530,20 @@ with(params3,{
 with(params3,{
   V_COST <<- v_tx_names %>% map(~({
     v_ <- matrix(0,nrow=tau, ncol = omega) 
-    v_[1,] <- v_disc_c[-length(v_disc_c)]*c_H * Delta_t     
-    v_[2,] <- v_disc_c[-length(v_disc_c)]*c_S1 * Delta_t 
-    v_[3,] <- v_disc_c[-length(v_disc_c)]*c_S2 * Delta_t 
+    v_[1,] <- v_disc_c[-1]*c_H * Delta_t     
+    v_[2,] <- v_disc_c[-1]*c_S1 * Delta_t 
+    v_[3,] <- v_disc_c[-1]*c_S2 * Delta_t 
     if (.x %in% c("A")) {
-      v_[2,] <- v_disc_c[-length(v_disc_c)]*(c_S1 + c_trtA) * Delta_t 
-      v_[3,] <- v_disc_c[-length(v_disc_c)]*(c_S2 + c_trtA) * Delta_t  
+      v_[2,] <- v_disc_c[-1]*(c_S1 + c_trtA) * Delta_t 
+      v_[3,] <- v_disc_c[-1]*(c_S2 + c_trtA) * Delta_t  
     }
     if (.x %in% c("B")) {
-      v_[2,] <- v_disc_c[-length(v_disc_c)]*(c_S1 + c_trtB) * Delta_t 
-      v_[3,] <- v_disc_c[-length(v_disc_c)]*(c_S2 + c_trtB) * Delta_t  
+      v_[2,] <- v_disc_c[-1]*(c_S1 + c_trtB) * Delta_t 
+      v_[3,] <- v_disc_c[-1]*(c_S2 + c_trtB) * Delta_t  
     }    
     if (.x %in% c("AB")) {
-      v_[2,] <- v_disc_c[-length(v_disc_c)]*(c_S1 + c_trtA + c_trtB) * Delta_t 
-      v_[3,] <- v_disc_c[-length(v_disc_c)]*(c_S2 + c_trtA + c_trtA) * Delta_t  
+      v_[2,] <- v_disc_c[-1]*(c_S1 + c_trtA + c_trtB) * Delta_t 
+      v_[3,] <- v_disc_c[-1]*(c_S2 + c_trtA + c_trtA) * Delta_t  
     }    
     v_
   })) %>% 
@@ -1557,9 +1557,9 @@ HYLD[1,] = rep(0,ncol(H))
 YLD3_ <- params3 %>% mcwr_occupancy(H = HYLD, V = V_YLD)
 COST3_ <- params3 %>% mcwr_occupancy(H = H, V = V_COST)
 
-remaining_life_expectancy <- with(params3,(1/r_v_disc_h) * (1 - exp(-r_v_disc_h * f_ExR(ages))))
+remaining_life_expectancy <- with(params3,(1/r_v_disc_h) * (1 - exp(-r_v_disc_h * f_ExR(ages+1))))
 
-YLL3_ <- params3 %>% mcwr_yll(life_expectancy = remaining_life_expectancy, disc = v_disc_h[-length(v_disc_h)])
+YLL3_ <- params3 %>% mcwr_yll(life_expectancy = remaining_life_expectancy, disc = v_disc_h[-1])
 DALY3_ <- map2(YLL3_,YLD3_,~(.x+.y))
 
 LY3 <- LY3_ %>% map(~({
