@@ -1,5 +1,11 @@
 ---
 title: Modeling Disability-Adjusted Life Years for Policy and Decision Analysis
+author:
+  - John Graves
+  - Ashley Leech
+  - Jinyi Zhu
+  - Marie Martin
+  - Shawn Garbett
 keywords:
   - Cost-Effectiveness Analysis
   - Microsimulation
@@ -58,7 +64,8 @@ format_number <- function(x, k = 3, m = 0) {
 ```
 
 ::: {.callout-tip appearance="minimal"}
-Support for this work is graciously acknowledged from the [Data to Policy](https://www.d4hdataimpact.org/data-to-policy) initiative administered by Vital Strategies and funded by Bloomberg Philanthropies and the CDC Foundation. 
+Support for this work is graciously acknowledged from the [Data to Policy](https://www.d4hdataimpact.org/data-to-policy)  program administered by Vital Strategies and the CDC Foundation with funding from the Bloomberg Philanthropies Data for Health Initiative
+
 :::
 
 Disability-adjusted life years (DALYs) measure disease burden in a population. Conceptualized in the Global Burden of Disease (GBD) study [@Murray1997], DALYs quantify the total sum of years of life lost due to disability attributable to a disease (YLD), plus years of life lost to premature mortality from the disease (YLL; i.e., DALY = YLD + YLL).
