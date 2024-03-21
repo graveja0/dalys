@@ -1625,7 +1625,7 @@ result3 <- cbind(LY3, YLD3, YLL3, DALY3, QALY3,COST3) %>%
 
 ### Comparison of DALY Outcomes Under All Three Approaches
 
-@tbl-compare1 draws on the Sick-Sicker model parameters and shows YLD, YLL and DALY outcomes estimates across the three approaches. Due to their similar structure, Approaches 1 and 2 yield identical estimates and are reported together in the table. Approach 3 draws on a slightly different partial occupancy assumption, though yields DALY estimates that are consistently within 2% of those under Approaches 1 & 2. YLLs have the largest difference (up to 5%), while YLDs have the lowest (around 1%).
+@tbl-compare1 draws on the Sick-Sicker model parameters and shows YLD, YLL and DALY outcomes estimates across the three approaches. Due to their similar structure, Approaches 1 and 2 yield identical estimates and are reported together in the table. Approach 3 draws on a slightly different partial occupancy assumption, though yields DALY estimates that are consistently within less than 1% of those under Approaches 1 & 2. YLLs are identical across the three approaches.
 
 ```{r}
 #| label: tbl-compare1
