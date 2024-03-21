@@ -1,5 +1,11 @@
 ---
 title: Modeling Disability-Adjusted Life Years for Policy and Decision Analysis
+author:
+  - John Graves
+  - Ashley Leech
+  - Jinyi Zhu
+  - Marie Martin
+  - Shawn Garbett
 keywords:
   - Cost-Effectiveness Analysis
   - Microsimulation
@@ -195,7 +201,7 @@ params_ <- list(
     v_ab_names = c("DOC","DS"), # absorbing health states
     n_states = 5, # total number of health states
     
-    horizon = 400,  # TK 400 # model time horizon (in years)  
+    horizon = 500,  # TK 400 # model time horizon (in years)  
     r_v_disc_h  = 0.03,     # annual discount rate for health outcomes
     r_v_disc_c = 0.03,     # annual discount rate for cost outcomes
     Delta_t = 1,      # time step (1 = yearly, 1/12 = monthly, etc.)
@@ -547,6 +553,7 @@ params1 <- with(params1,modifyList(params1,list(
       }))
 )))
 
+# 2023-03-11 JAG Adding in an initial matrix with the initial state occupancy
 params1 <- with(params1,modifyList(params1,list(
   m_P_ = m_P %>% map(~({
     tmp <- .x
@@ -557,6 +564,7 @@ params1 <- with(params1,modifyList(params1,list(
 )))
 params1$m_P = params1$m_P_
 params1[["m_P_"]] <- NULL
+
 
 params2 <- with(params,modifyList(params,list(
     v_tr_names = c("H","S1","S2"), # transient health states
@@ -762,11 +770,14 @@ $$ {#eq-Ptilde} where $\mathbf{I}$ is the identity matrix and $\mathbf{0}$ is a 
 $\widetilde{\mathbf{P}}$ is the analogue to the transition matrix $\mathbf{P}_t$ (@eq-embed) under Approaches 1 and 2 above.
 
 ```{r approach-3, cache=TRUE}
-params3_ <- with(params1,modifyList(params1,list(
+
+params3_ <- with(params,modifyList(params1,list(
     alpha = length(v_ab_names),
     tau = length(v_tr_names), 
     s = length(v_tr_names)*omega + length(v_ab_names) #total number of states;s=τω+α
 )))
+
+# approach 3 requires us to transpose transition intensity matrices from approaches 1 & 2 
 params3_ <- with(params3_,modifyList(params3_,list(
   m_R_t = m_R %>% map(~({
     tmp <- .x
@@ -774,6 +785,8 @@ params3_ <- with(params3_,modifyList(params3_,list(
   }))
 )))
 
+# this transpose command is not on the matrix, but on the list object; it inverts the
+# nested list
 params3 <- with(params3_, modifyList(params3_, list(m_R_ = m_R_t %>% transpose())))
 params3$m_R = params3$m_R_
 
@@ -799,13 +812,15 @@ params3 <- with(params3,modifyList(params3,list(
     }))    
 )))
 
+# clear out approach 1 version
+params3$m_P = NULL
+
 params3 <- with(params3,modifyList(params3,list(
-    m_P3 = m_Q %>% map(~({
+    m_P = m_Q %>% map(~({
           Q = .x
           Q %>% map(~(expm(.x * Delta_t)))
     }))
 )))
-params3$m_P = params3$m_P3
 
 params3 <- with(params3,modifyList(params3,list(
     m_U = m_P %>% map(~({
@@ -853,8 +868,10 @@ vecperm <-
                 K <- K + kronecker(e, t(e))
             }
         }
+        
         return(K)
     }
+
 
 params3 <- with(params3,modifyList(params3,list(
     bbD_ = kronecker(diag(tau), D),
@@ -882,55 +899,7 @@ params3 <- with(params3,modifyList(params3,list(
         }))
 )))
 
-# Markov chain with rewards functions
 
-mcwr_occupancy <- function(params, H, V) {
-    with(params,{
-        map(v_tx_names,~({
-            U = mUtilde[[.x]]
-            P = mPtilde[[.x]]
-            v_ = V[[.x]]
-            N = solve(diag(tau*omega)-U)
-            h = vec(H) %>% as.matrix()
-            not_h = 1-h
-            v <- vec(v_) %>% as.matrix()
-            B1 <- h %*% t(v) + 0.5 * (not_h %*% t(v)) + 0.5 * (v %*% t(not_h)) # Eq. 46
-            C1 = 0.5 * (rep(1,alpha) %*%  t(v)) # Eq. 48
-            R1 = rbind(cbind(B1, matrix(0, tau * omega, alpha)) ,
-                              cbind(C1, diag(alpha))) 
-            R2 = R1 * R1
-            R3 = R1 * R1 * R1
-            Z = cbind(diag(tau*omega),matrix(0,nrow=tau*omega, ncol=alpha))
-            e = rep(1,s)
-            rho1_ <- t(N)%*% Z %*% t(P * R1) %*% e
-            rho1_
-        }))
-    })
-}
-
-mcwr_yll <- function(params, life_expectancy, disc) {
-    with(params,{
-        map2(mUtilde,mPtilde,~({
-            U = .x
-            P = .y
-            N = solve(diag(tau*omega)-U)
-            Z = cbind(diag(tau*omega),matrix(0,nrow=tau*omega, ncol=alpha))
-            disc_ = rev(sort(rep(disc,length(v_tr_names))))
-            eta1_ex_ = rev(sort(rep(life_expectancy,length(v_tr_names))))
-            eta1_ex =  eta1_ex_
-            
-            B1 = matrix(0,nrow=tau*omega, ncol = tau*omega)
-            C1 = rbind(matrix(0,nrow=1,ncol=tau*omega),eta1_ex*disc_) 
-            R1 = cbind(rbind(B1,C1),matrix(0,nrow=tau*omega+2,ncol=2))
-            R2 = R1 * R1
-            R3 = R1 * R1 * R1
-            Z = cbind(diag(tau*omega),matrix(0,nrow=tau*omega, ncol=alpha))
-            e = rep(1,s)
-            rho1_ = t(N) %*% Z %*% t(.y * R1) %*% e
-            rho1_
-        }))
-    })
-}
 ```
 
 ## DALY Outcomes Under Approaches 1 and 2 {#sec-outcomes}
@@ -1195,7 +1164,7 @@ YLDt <-
     }))
   })  %>% 
   set_names(params1$v_tx_names)
-YLD = YLDt %>% map(~sum(.x*  v_disc_h * gen_wcc(params1$omega, method = params1$cycle_correction)))
+YLD = YLDt %>% map(~sum(.x*  v_disc_h[-1] * gen_wcc(params1$omega, method = params1$cycle_correction)))
 
 # YLL
 new_deaths_from_disease <- 
@@ -1491,6 +1460,54 @@ $$
 $$ {#eq-app3outage} where $\mathbf{e}_{i}$ is a vector of length $\tau$ with a value of one in the initial health state position of interest (e.g., `Healthy`) and zero elsewhere.
 
 ```{r markov-chain-rewards, cache=TRUE}
+mcwr_occupancy <- function(params, H, V) {
+  with(params,{
+    map(v_tx_names,~({
+      U = mUtilde[[.x]]
+      P = mPtilde[[.x]]
+      v_ = V[[.x]]
+      N = solve(diag(tau*omega)-U)
+      h = vec(H) %>% as.matrix()
+      not_h = 1-h
+      v <- vec(v_) %>% as.matrix()
+      B1 <- h %*% t(v) + 0.5 * (not_h %*% t(v)) + 0.5 * (v %*% t(not_h)) # Eq. 46
+      C1 = 0.5 * (rep(1,alpha) %*%  t(v)) # Eq. 48
+      R1 = rbind(cbind(B1, matrix(0, tau * omega, alpha)) ,
+                 cbind(C1, diag(alpha))) 
+      R2 = R1 * R1
+      R3 = R1 * R1 * R1
+      Z = cbind(diag(tau*omega),matrix(0,nrow=tau*omega, ncol=alpha))
+      e = rep(1,s)
+      rho1_ <- t(N)%*% Z %*% t(P * R1) %*% e
+      rho1_
+    }))
+  })
+}
+
+mcwr_yll <- function(params, life_expectancy, disc) {
+  with(params,{
+    map2(mUtilde,mPtilde,~({
+      U = .x
+      P = .y
+      N = solve(diag(tau*omega)-U)
+      Z = cbind(diag(tau*omega),matrix(0,nrow=tau*omega, ncol=alpha))
+      disc_ = rev(sort(rep(disc,length(v_tr_names))))
+      eta1_ex_ = rev(sort(rep(life_expectancy,length(v_tr_names))))
+      eta1_ex =  eta1_ex_
+      
+      B1 = matrix(0,nrow=tau*omega, ncol = tau*omega)
+      C1 = rbind(matrix(0,nrow=1,ncol=tau*omega),eta1_ex*disc_) 
+      R1 = cbind(rbind(B1,C1),matrix(0,nrow=tau*omega+2,ncol=2))
+      R2 = R1 * R1
+      R3 = R1 * R1 * R1
+      Z = cbind(diag(tau*omega),matrix(0,nrow=tau*omega, ncol=alpha))
+      e = rep(1,s)
+      rho1_ = t(N) %*% Z %*% t(.y * R1) %*% e
+      rho1_
+    }))
+  })
+}
+
 H = with(params3,matrix(1,nrow=tau, ncol=omega))
 
 with(params3,{
@@ -1500,6 +1517,7 @@ with(params3,{
   })) %>% 
     set_names(v_tx_names)
 })
+
 
 with(params3,{
   V_YLD <<- v_tx_names %>% map(~({
@@ -1768,3 +1786,8 @@ Finally, it is important to note that the methods outlined here are not purely r
 
 ::: {#refs}
 :::
+
+```{r}
+
+```
+
