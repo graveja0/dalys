@@ -17,7 +17,7 @@ key-points:
   - Key Point 1
   - Key Point 2
 abstract: |
-  This study outlines methods for direct incorporation of multidimensional health outcomes in common decision modeling frameworks, with a particular focus on disability-adjusted life years (DALYs) and its constituent parts---years of life lived with disability (YLDs) and years of life lost to premature mortality (YLLs). Recognizing the wide spectrum of experience and programming comfort level among practitioners, we offer two approaches (beginner, intermediate). Our beginner approach draws on the Markov trace, while the intermediate approach facilitates more efficient estimation for computationally-intensive exercises (e.g., microsimulation, probabilistic sensitivity analyses) by incorporating non-Markovian tracking elements into transition probability matrices. Drawing on an existing disease progression discrete time Markov cohort model, we demonstrate exact or near- numeric equivalence of DALY estimates and cost-effectiveness analysis results across our methods, and show that other commonly used "shortcuts" for estimating DALYs will not, in general, yield accurate estimates of DALY levels nor ICERs in a modeled population. 
+  This study outlines methods for direct incorporation of multidimensional health outcomes in common decision modeling frameworks, with a particular focus on disability-adjusted life years (DALYs) and its constituent parts---years of life lived with disability (YLDs) and years of life lost to premature mortality (YLLs). Recognizing the wide spectrum of experience and programming comfort level among practitioners, we offer three approaches (beginner, intermediate and advanced). Our beginner approach draws on the Markov trace, while the intermediate approach facilitates more efficient estimation for computationally-intensive exercises (e.g., microsimulation, probabilistic sensitivity analyses) by incorporating non-Markovian tracking elements into transition probability matrices. Finally, our advanced approach adapts methods from mathematical demography. This approach allows for direct calculation of expected values without the need for a Markov trace, and facilitates additional insights because it can also solve for higher-order moments in the health outcome distribution (e.g., variance, skewness). Drawing on an existing disease progression discrete time Markov cohort model, we demonstrate exact or near- numeric equivalence of DALY estimates and cost-effectiveness analysis results across our three methods, and show that other commonly used "shortcuts" for estimating DALYs will not, in general, yield accurate estimates of DALY levels nor ICERs in a modeled population. 
 
 date: last-modified
 bibliography: references.bib
@@ -82,7 +82,7 @@ As a consequence, and in practice, health economic applications often resort to 
 
 This study outlines methods for direct incorporation of DALY outcomes in common decision modeling environments. Our primary focus is on discrete-time Markov cohort models---however, our framework extends directly to microsimulation and is also easily adapted for continuous time discrete event simulation (DES) models. As such, our study provides a comprehensive roadmap for incorporating DALY outcomes into common decision modeling frameworks.
 
-To maintain consistency within the literature, we build on an existing didactic disease progression model [@alarid2023introductory]. The underlying discrete time Markov cohort model is time homogeneous---that is, transition probabilities do not vary as a function of age/time in model. However, our methods and code are developed to accommodate time-inhomogeneous models. Finally, recognizing the wide spectrum of experience and programming comfort level among practitioners, we offer two approaches for modeling DALYs (beginner, intermediate) and provide replication materials for implementing our approaches in R and Microsoft Excel.
+To maintain consistency within the literature, we build on an existing didactic disease progression model [@alarid2023introductory]. The underlying discrete time Markov cohort model is time homogeneous---that is, transition probabilities do not vary as a function of age/time in model. However, our methods and code are developed to accommodate time-inhomogeneous models. Finally, recognizing the wide spectrum of experience and programming comfort level among practitioners, we offer three approaches for modeling DALYs (beginner, intermediate and advanced) and provide replication materials for implementing our approaches in R and Microsoft Excel.
 
 ## Background {#sec-background}
 
@@ -157,7 +157,6 @@ library(MASS)
 library(expm)
 library(knitr)
 library(kableExtra)
-library(flextable)
 options(scipen = 5) 
 transpose <- purrr::transpose
 select <- dplyr::select
@@ -377,15 +376,17 @@ ft
 
 With the model parameterized, we next define the matrices that govern transitions. The state transition diagram represented in @fig-model1 is not yet well-suited to calculate DALY outcomes, however. A primary reason is that transitions to the absorbing death state capture transitions due to all causes of death. To calculate YLLs, we must separately track the timing and number of deaths *due to disease*.
 
-To accommodate this need, we develop two approaches for modeling DALY outcomes. We categorize each based on the level of experience and skill required:
+To accommodate this need, several approaches are available. We categorize each based on the level of experience and skill required (beginner, intermediate, advanced):
 
 1.  **Approach 1 (Beginner): Separate Death State**: Re-define the health states to include a separate cause-specific death state as depicted in @fig-modelDS.[^4] We then construct a Markov trace tracking state occupancy in each cycle, and use changes in the number of cause-specific deaths across cycles to calculate YLLs.
 
 2.  **Approach 2 (Intermediate): Non-Markovian Trackers**: Augment the transition matrices to include a non-Markovian transition state for cause-specific deaths. This approach allows for efficient calculation of YLD, YLL and DALY outcomes (often useful for microsimulation or probabilistic sensitivity analyses) because it sidesteps the need to derive a Markov trace.
 
+3.  **Approach 3 (Advanced): Markov Chain with Rewards** Define a block matrix Markov chain with rewards for occupancy (YLDs) and disease-related death transitions (YLLs) by adapting the methods in @caswell2021a. This approach is the most efficient since it solves directly for expected outcomes; it also facilitates estimation of higher order moments such as variance and skewness of DALYs in a population.
+
 [^4]: In this example, disease-specific death rates are governed by a hazard ratio applied to the background mortality rate. Because we are operating on the rate scale, we can separate out disease-related deaths from other-cause mortality by simply taking a difference in the rates. Other applications for prevalent conditions with high death rates, however, may require us to construct a cause-deleted life table to obtain background mortality rates that net out deaths from the modeled disease.
 
-Each approach facilitates the design and execution of a decision-analytic model that correctly calculates YLD, YLL, and DALY outcomes---as well as other common outcomes such as life-years (LYs), QALYs and costs. In practice, Approaches (1) and (2) will produce identical results.  We show in @sec-results that other shortcut-based approaches previously used in the literature---such as modeling a QALY-like DALY and/or accumulating time in the absorbing death state---will not in general yield similar results.
+Each approach facilitates the design and execution of a decision-analytic model that correctly calculates YLD, YLL, and DALY outcomes---as well as other common outcomes such as life-years (LYs), QALYs and costs. In practice, Approaches (1) and (2) will produce identical results. Approach (3) draws on slightly different assumptions on partial health state occupancy in a cycle, but yields results quite similar to (1) and (2). We show in @sec-results that other shortcut-based approaches previously used in the literature---such as modeling a QALY-like DALY and/or accumulating time in the absorbing death state---will not in general yield similar results.
 
 ### Approach 1 (Beginner): Cause-Specific Death State
 
@@ -666,7 +667,242 @@ params2$m_P = params2$m_P_
 params2[["m_P_"]] <- NULL
 ```
 
-## DALY Outcomes  {#sec-outcomes}
+### Approach 3 (Advanced): Markov Chain With Rewards
+
+Our final approach adapts methods from mathematical demography to estimate YLD, YLL and DALY outcomes [@caswell2021a].[^11] This approach requires a separate disease-related absorbing state as shown in @fig-modelDS. While our focus here is on expected outcomes, this method can also be used to estimate higher order moments (e.g., variance, skewness). It is also quite flexible and can estimate separate outcomes for any combination of health states and age classes (e.g., disease-free survival among those aged 40-45, etc.); see @caswell2018 and @caswell2021a for details.
+
+[^11]: The method also easily accommodates other common outcomes such as QALYs and costs.
+
+To implement Approach 3 we define some additional parameters:
+
+$$
+\begin{aligned}
+\tau &= \text{Number of transient (non-absorbing) states}\\
+\alpha &= \text{Number of absorbing states}\\
+\omega &= \text{Number of cycles (age classes)} \\
+s &= \text{Total number of states; }s=\tau\omega+\alpha \\
+\mathbf{K} &= \text{vec-permutation matrix; parameters }\tau,\omega\\
+\mathbf{U}_{t} &= \text{Transition matrix at time }t, \text{for }t=1,\dots,\omega\\
+\mathbf{M}_{t} &= \text{Mortality matrix at time  }t, \text{for } t = 1,\dots\omega \\
+\mathbf{D}_{j} &=\text{Age advancement matrix for stage }j, \text{for }j=1,\dots,\tau 
+\end{aligned}
+$$ In the above notation, $\mathbf{K}$ is a permutation matrix known as the vec-permutation matrix.[^12] The matrix $\mathbf{U}_t$ captures transition probabilities among transient (i.e., non-absorbing) health states, while $\mathbf{M}_t$ contains transition probabilities from transient health states to the absorbing (death) states.
+
+[^12]: See @henderson1981 and Appendix B in @caswell2021a for further information. A function to construct a vec-permutation matrix is provided within our replication code.
+
+To construct $\mathbf{U}_t$ and $\mathbf{M}_t$ we define transition rate ("intensity") matrices as in Approaches 1 and 2 above. One important (minor) difference is that the rows in $\mathbf{Q}_t$, $\mathbf{V}_t$, and $\mathbf{S}_t$ now correspond to the final state, while the columns correspond to the starting state; this is essentially the transpose of the rate matrices defined for Approaches 1 and 2.
+
+The overall intensity matrix $\mathbf{Q}_t$ is given by
+
+$$
+\mathbf{Q}_t=\left(\begin{array}{c|c}
+\mathbf{V}_t & \mathbf{0} \\
+\hline \mathbf{S}_t  & \mathbf{0}
+\end{array}\right)
+$$ {#eq-Qx} where $\mathbf{V}_t$ is the rate matrix for the transitory (i.e., non-absorbing) states and $\mathbf{S}_t$ is the rate matrix for the absorbing states. The diagonal elements of $\mathbf{Q}_t$ are the negative sum of the non-diagonal column elements, thus making the column sums of $\mathbf{Q}_t$ zero (i.e., the model is "closed" and does not gain or lose cohort members over time).
+
+For the defined time step $\Delta_t$, the discrete time transition probability matrix $\mathbf{P}_t$ is again obtained by taking the matrix exponential of the intensity matrix ($\mathbf{Q}_t$) multiplied by the time step, i.e., @eq-embed:
+
+$$
+\mathbf{P}_t =e^{\mathbf{Q}_t  \Delta t}
+$$
+
+We obtain $\mathbf{U}_t$ and $\mathbf{M}_t$ from the block matrix structure of $\mathbf{P}_t$:
+
+$$
+\mathbf{P}_t =\left(\begin{array}{c|c}
+\mathbf{U}_t  & \mathbf{0} \\
+\hline \mathbf{M}_t  & \mathbf{0}
+\end{array}\right)
+$$ {#eq-P3}
+
+In addition, the matrix $\mathbf{D}_j$ defines age advancement in the model. Borrowing from an example in @caswell2021a, if $\omega=3$ then
+
+$$
+\mathbf{D}_j=\left(\begin{array}{ccc}
+0 & 0 & 0 \\
+1 & 0 & 0 \\
+0 & 1 & {[1]}
+\end{array}\right) \quad j=1, \ldots, \tau
+$$ {#eq-D}
+
+In our implementation, we include the (optional) value of one in the lower right corner; this assumes that after the last specified age, the cohort continues to experience transitions among health states according to the transition probabilities defined for the last age class. If this value is zero, the model will assume that everyone dies after the last cycle.
+
+We next combine the transition matrices (for all age classes as defined by discrete time cycles) together into a series of block-structured matrices as follows:
+
+$$
+\mathbb{U}=\left(\begin{array}{c|c|c}
+\mathbf{U}_1 & \cdots & \mathbf{0} \\
+\hline & \ddots & \\
+\hline \mathbf{0} & \cdots & \mathbf{U}_\omega
+\end{array}\right)
+$$ {#eq-bbU}
+
+$$
+\mathbb{D}=\left(\begin{array}{c|c|c}
+\mathbf{D}_1 & \cdots & \mathbf{0} \\
+\hline & \ddots & \\
+\hline \mathbf{0} & \cdots & \mathbf{D}_\tau
+\end{array}\right)
+$$ {#eq-BBD}
+
+$$
+\widetilde{\mathbf{U}}=\mathbf{K}^{\top} \mathbb{D} \mathbf{K} \mathbb{U} \quad \tau \omega \times \tau \omega
+$$ {#eq-Utilde} where $^\top$ is the transpose operator.
+
+We also define
+
+$$
+\widetilde{\mathbf{M}}=\left(\begin{array}{lll}
+\mathbf{M}_1 & \cdots & \mathbf{M}_\omega
+\end{array}\right) \quad \alpha \times \tau \omega
+$$ {#eq-Mtilde}
+
+Finally, we capture the entire Markov chain in a block transition matrix,
+
+$$
+\widetilde{\mathbf{P}}=\left(\begin{array}{c|c}
+\widetilde{\mathbf{U}} & \mathbf{0}_{\tau \omega \times \alpha} \\
+\hline \widetilde{\mathbf{M}} & \mathbf{I}_{\alpha \times \alpha}
+\end{array}\right) \quad(\tau \omega+\alpha) \times(\tau \omega+\alpha)
+$$ {#eq-Ptilde} where $\mathbf{I}$ is the identity matrix and $\mathbf{0}$ is a matrix of zeros.
+
+$\widetilde{\mathbf{P}}$ is the analogue to the transition matrix $\mathbf{P}_t$ (@eq-embed) under Approaches 1 and 2 above.
+
+```{r approach-3, cache=TRUE}
+
+params3_ <- with(params,modifyList(params1,list(
+    alpha = length(v_ab_names),
+    tau = length(v_tr_names), 
+    s = length(v_tr_names)*omega + length(v_ab_names) #total number of states;s=τω+α
+)))
+
+# approach 3 requires us to transpose transition intensity matrices from approaches 1 & 2 
+params3_ <- with(params3_,modifyList(params3_,list(
+  m_R_t = m_R %>% map(~({
+    tmp <- .x
+    tmp %>% map(~(t(.x)))
+  }))
+)))
+
+# this transpose command is not on the matrix, but on the list object; it inverts the
+# nested list
+params3 <- with(params3_, modifyList(params3_, list(m_R_ = m_R_t %>% transpose())))
+params3$m_R = params3$m_R_
+
+params3 <- with(params3,modifyList(params3,list(
+    m_V = m_R %>% map(~({
+            R = .x
+            R %>% map(~({
+              m <- .x[v_tr_names,v_tr_names] 
+            }))
+            
+        })),
+     
+    m_Q = m_R %>% map(~({
+      R = .x 
+      R %>% map(~({
+                V = .x[v_tr_names,v_tr_names]
+                S = .x[v_ab_names,v_tr_names]
+                zero_ <- matrix(0, nrow = length(v_tr_names)+length(v_ab_names), ncol = length(v_ab_names))
+                tmp <- cbind(rbind(V,S),zero_)
+                dimnames(tmp) <- list(c(v_tr_names,v_ab_names),c(v_tr_names,v_ab_names))
+                tmp
+      }))
+    }))    
+)))
+
+# clear out approach 1 version
+params3$m_P = NULL
+
+params3 <- with(params3,modifyList(params3,list(
+    m_P = m_Q %>% map(~({
+          Q = .x
+          Q %>% map(~(expm(.x * Delta_t)))
+    }))
+)))
+
+params3 <- with(params3,modifyList(params3,list(
+    m_U = m_P %>% map(~({
+          P <- .x 
+          P %>% map(~(.x[v_tr_names,v_tr_names]))
+    })),
+    m_M = m_P %>% map(~({
+        P = .x
+        P %>% map(~(.x[v_ab_names,v_tr_names]))
+        
+    }))
+)))
+
+params3 <- with(params3,modifyList(params3,list(
+    D = {
+        # Create diagonal age advancement matrix
+        D <- matrix(0, omega, omega)
+        vec <- rep(1, omega-1)
+        D[row(D)-1 == col(D)] <- vec
+        D[omega,omega] = 1
+        D
+    }
+)))
+
+vec <-  # a simple function to return the vec of an array
+    function(x) {
+        y <- c(x)
+        return(y)
+    }
+
+vecperm <- 
+    # vecperm
+    # function to calculate the vec permutation matrix K of index m,n
+    # let X be a m x n matrix, and X' the transpose of X
+    # then K satisfies 
+    # vec(X') = K*vec(X)
+    function(m, n) {
+        K <- matrix(0, m * n, m * n)
+        a <- matrix(0, m, n)
+        
+        for (i in 1:m) {
+            for (j in 1:n) {
+                e <- a
+                e[i, j] <- 1
+                K <- K + kronecker(e, t(e))
+            }
+        }
+        
+        return(K)
+    }
+
+
+params3 <- with(params3,modifyList(params3,list(
+    bbD_ = kronecker(diag(tau), D),
+    bbU_ =  m_U %>% 
+            map(~(bdiag(.x))),
+    K = vecperm(tau, omega)
+)))
+
+params3 <- with(params3,modifyList(params3,list(
+    mUtilde = bbU_ %>% map( ~ ({
+        t(K) %*% bbD_ %*% K %*% .x
+    }))
+)))
+
+params3 <- with(params3,modifyList(params3,list(
+    mMtilde = m_M %>% map(~({
+      do.call(cbind,.x) 
+    }))  
+)))
+
+params3 <- with(params3,modifyList(params3,list(
+    mPtilde =  map2(mUtilde, mMtilde,  ~ ({
+            rbind(cbind(.x, matrix(0, tau * omega, alpha)) ,
+                  cbind(.y, diag(alpha)))
+        }))
+)))
+
+
+```
+
+## DALY Outcomes Under Approaches 1 and 2 {#sec-outcomes}
 
 With transition matrices and other relevant model objects defined, we next define formulas for estimating outcomes. Our three approaches differ in how total (or expected) outcomes are calculated. Approach 1 requires a Markov trace that tracks occupancy in each cycle; for YLL outcomes, we use this information to calculate the number of new disease-related deaths in each cycle. Approach 2 does not require this extra step, as both cycle-specific and total outcomes are calculated directly. Finally, Approach 3 differs insofar as it directly solves for expected outcomes (i.e., the approach does not require calculation of cycle-specific values).
 
@@ -1088,6 +1324,303 @@ result1 <- cbind(LY, YLD, YLL, DALY, ACCDALY, QALY_DALY, QALY,COST) %>%
   dplyr::select(approach, strategy, everything()) 
 ```
 
+## DALY Outcomes Under Approach 3 {#sec-outcomes3}
+
+Our advanced approach draws on Markov chain with rewards methods that define reward matrices for occupancy-based (YLD) and transition-based (YLL) outcomes. These reward matrices allow us to estimate outcomes for any combination of health states and/or ages. Reward matrices have notation $\mathbf{R}_m$, where $m$ indexes the moment of interest (e.g., expected value, variance, etc.). We focus here on expected outcomes (i.e., outcomes based on $\mathbf{R}_1$)---though equations for higher-order moments are available in @caswell2021a.
+
+### Years of Life Lived With Disease (YLD)
+
+To estimate YLDs, we first define a $\tau \times \omega$ reward matrix $\mathbf{H}$, which has dimensions $\tau \times \omega$ and is structured as shown in @fig-H-le:
+
+![YLD reward matrix $\mathbf{H}$](images/H-LE.png){#fig-H-le fig-align="center" width="40%"}
+
+Cell values within this matrix can be set to one if we want to potentially "reward" that health state-age combination in our outcome measure, and zero otherwise.
+
+We use this matrix to define the reward vector $\mathbf{h}$, where $\text{vec}$ is an operator that stacks the columns of an $m \times n$ matrix into a $mn \times 1$ vector.
+
+$$
+\mathbf{h} = \text{vec } \mathbf{H}
+$$ We also define $\neg \mathbf{h}$ as the complement of $\mathbf{h}$, (i.e., values of 1.0 become 0, and vice versa).
+
+We next define additional matrix $\mathbf{V}$, which has the same structure as $\mathbf{H}$ but includes the (fully discounted) disability weights:
+
+![YLD reward matrix $\mathbf{V}$](images/H-YLD.png){#fig-H-yld fig-align="center" width="60%"}
+
+where $\texttt{dwS1}* = \texttt{dwS1} \times \Delta_t \times \frac{1}{r_{\Delta_t}}(1-e^{-r_{\Delta_t}}) \times e^{-r_{\Delta_t} t}$, etc. This equation first converts the weights into the appropriate value for the time step, applies the cycle-specific discounting adjustment factor, and then discounts the resulting value to the baseline period.
+
+We similarly define an occupancy indicator vector $\mathbf{v}$ just as we did for $\mathbf{h}$:
+
+$$
+\mathbf{v}=\operatorname{vec} \mathbf{V}
+$$
+
+#### Partial Occupancy
+
+Because we are modeling a continuous-time disease progression progress in discrete time, it is useful to make corrections for partial occupancy in a cycle. Similar to a half-cycle correction often used in health economic applications, the Markov chain with rewards approach does so by assuming transitions occur half-way through a cycle; the application of this assumption is slightly different, however, because the correction applies in every cycle, not just the first and last. We operationalize this assumption by defining,
+
+$$
+\begin{aligned}
+\widetilde{\mathbf{B}}_{1} & =\mathbf{h} \mathbf{v}_{1}^{\top}+\frac{1}{2}(\neg \mathbf{h})\left(\mathbf{v}_{1}^{\top}\right)+\frac{1}{2}\left(\mathbf{v}_{1}\right)\left(\neg \mathbf{h}^{\top}\right) \\
+\end{aligned}
+$$ and
+
+$$
+\widetilde{\mathbf{C}}_{1}=\frac{1}{2} \mathbf{1}_{\alpha} \mathbf{v_1}^{\top}
+$$ where $\mathbf{1}_{\alpha}$ is a vector of ones with length $\alpha$.
+
+We combine $\widetilde{\mathbf{B}}_{1}$ and $\widetilde{\mathbf{C}}_{1}$ to obtain the final reward matrix for expected YLD outcomes,
+
+$$
+\widetilde{\mathbf{R}}^{YLD}_{1}=\left(\begin{array}{c|c}
+\widetilde{\mathbf{B}}_{1} & \mathbf{0} \\
+\hline \widetilde{\mathbf{C}}_{1} & \mathbf{0}
+\end{array}\right) 
+$$ which has same block structure and dimensions as the transition probability matrix $\widetilde{\mathbf{P}}$ (@eq-Ptilde). We explain how to use this matrix to estimate expected YLDs in @sec-expected below.
+
+### Years of Life Lost to Disease (YLL)
+
+For transition-based outcomes such as YLLs, we define the first moment of remaining life expectancy as the vector $\widetilde{\boldsymbol{\eta}}^{\top}$. This vector has dimensions $\tau\omega \times 1$ and has the following basic structure:
+
+$$
+\widetilde{\mathbf{\eta}}=\left(\begin{array}{c}
+\eta_{11} \\
+\vdots \\
+\eta_{\tau 1} \\
+\hline \vdots \\
+\hline \eta_{1 \omega} \\
+\vdots \\
+\eta_{\tau \omega}
+\end{array}\right)
+$$ where $\eta_{i x}$ is remaining life expectancy for an individual in health state $i$ at a given age $x$. In this structure, remaining life expectancy for each health state is grouped within age classes. Remaining life expectancy should also enter $\eta_{i x}$ as fully discounted back to $t=0$.
+
+Our model, for example, follows a cohort of 25 year old adults until death. The GBD reference life expectancy value for a 25 year old is 64.15, and the life expectancy for the last age class (95+) is 5.92. There are also $\tau=3$ non-absorbing health states. If we followed the cohort until age 95, $\eta_{i x}$ would take the following form:
+
+$$
+\widetilde{\mathbf{\eta}}=\left(\begin{array}{c}
+\eta_{H,25} =  64.15 \\
+\eta_{S1,25} =  64.15 \\
+\eta_{S2,25} =  64.15 \\
+\hline \vdots \\
+\hline \eta_{H,95} =  5.92 \\
+\eta_{S1,95} = 5.92 \\
+\eta_{S2,95} =  5.92 \\
+\end{array}\right)
+$$
+
+We next construct the reward matrices:
+
+$$
+\begin{aligned}
+\widetilde{\mathbf{B}}_{1} & =\left(\mathbf{0}_{\tau \omega \times \tau \omega}\right) \\
+\widetilde{\mathbf{C}}_{1} & =\left(\begin{array}{c}
+\widetilde{\boldsymbol{\eta}}_{1}^{\top} \\
+\mathbf{0}_{1 \times \tau \omega}
+\end{array}\right) .
+\end{aligned}
+$$
+
+and
+
+$$
+\widetilde{\mathbf{R}}^{YLL}_{1}=\left(\begin{array}{c|c}
+\mathbf{0}_{\tau \omega \times \tau \omega} & \mathbf{0}_{\tau \omega \times 2} \\
+\hline \widetilde{\boldsymbol{\eta}}_{1}^{\top} & \mathbf{0}_{1 \times 2} \\
+\mathbf{0}_{1 \times \tau \omega} & \mathbf{0}_{1 \times 2}
+\end{array}\right)
+$$
+
+### Expected YLD and YLL Outcomes {#sec-expected}
+
+The expected value of outcome $Y$ (where $Y \in \{YLD, YLL\}$) is estimated by,
+
+$$
+\begin{aligned}
+& \widetilde{\boldsymbol{\rho}}^{Y}_{1}=\widetilde{\mathbf{N}}^{\top} \mathbf{Z}\left(\widetilde{\mathbf{P}} \odot \widetilde{\mathbf{R}}^Y_{1}\right)^{\top} \mathbf{1}_{s} 
+\end{aligned}
+$$ {#eq-app3out} where $\widetilde{\mathbf{N}}$ is the fundamental matrix,
+
+$$
+\widetilde{\mathbf{N}}=(\mathbf{I}-\widetilde{\mathbf{U}})^{-1}
+$$ and $\mathbf{Z}$ is
+
+$$
+\mathbf{Z}=\left(\mathbf{I}_{\tau \omega} \mid \mathbf{0}_{\tau \omega \times \alpha}\right)
+$$
+
+Total (across all ages) outcomes for each starting health state are calculated as
+
+$$
+\boldsymbol{\rho}_{1}^{Y,\text {stage }}(\operatorname{cycle } t)=\left(\mathbf{e}_{t}^{\top} \otimes \mathbf{I}_{\tau}\right) \widetilde{\boldsymbol{\rho}}^Y_{1} \quad \tau \times 1
+$$ {#eq-app3outstate} where $\otimes$ is the Kronecker operator and $\mathbf{e}_{t}$ is a vector of length $\omega$ with a value of one in the first position and zero elsewhere; this facilitates calculating expected outcomes from the baseline period (i.e., $t=0$).
+
+@eq-app3outstate will yield expected outcomes as typically reported in health economic evaluations. Alternatively, we may wish to calculate outcomes separately under different baseline age-health state combinations (e.g., DALYs for healthy 55 year-old adults). We obtain these expected outcomes by,
+
+$$
+\boldsymbol{\rho}_{1}^{Y,\text {age }}(\text { stage } i)=\left(\mathbf{I}_{\omega} \otimes \mathbf{e}_{i}^{\top}\right) \widetilde{\boldsymbol{\rho}}^Y_{1} \quad \omega \times 1,
+$$ {#eq-app3outage} where $\mathbf{e}_{i}$ is a vector of length $\tau$ with a value of one in the initial health state position of interest (e.g., `Healthy`) and zero elsewhere.
+
+```{r markov-chain-rewards, cache=TRUE}
+mcwr_occupancy <- function(params, H, V) {
+  with(params,{
+    map(v_tx_names,~({
+      U = mUtilde[[.x]]
+      P = mPtilde[[.x]]
+      v_ = V[[.x]]
+      N = solve(diag(tau*omega)-U)
+      h = vec(H) %>% as.matrix()
+      not_h = 1-h
+      v <- vec(v_) %>% as.matrix()
+      B1 <- h %*% t(v) + 0.5 * (not_h %*% t(v)) + 0.5 * (v %*% t(not_h)) # Eq. 46
+      C1 = 0.5 * (rep(1,alpha) %*%  t(v)) # Eq. 48
+      R1 = rbind(cbind(B1, matrix(0, tau * omega, alpha)) ,
+                 cbind(C1, diag(alpha))) 
+      R2 = R1 * R1
+      R3 = R1 * R1 * R1
+      Z = cbind(diag(tau*omega),matrix(0,nrow=tau*omega, ncol=alpha))
+      e = rep(1,s)
+      rho1_ <- t(N)%*% Z %*% t(P * R1) %*% e
+      rho1_
+    }))
+  })
+}
+
+mcwr_yll <- function(params, life_expectancy, disc) {
+  with(params,{
+    map2(mUtilde,mPtilde,~({
+      U = .x
+      P = .y
+      N = solve(diag(tau*omega)-U)
+      Z = cbind(diag(tau*omega),matrix(0,nrow=tau*omega, ncol=alpha))
+      disc_ = rev(sort(rep(disc,length(v_tr_names))))
+      eta1_ex_ = rev(sort(rep(life_expectancy,length(v_tr_names))))
+      eta1_ex =  eta1_ex_
+      
+      B1 = matrix(0,nrow=tau*omega, ncol = tau*omega)
+      C1 = rbind(matrix(0,nrow=1,ncol=tau*omega),eta1_ex*disc_) 
+      R1 = cbind(rbind(B1,C1),matrix(0,nrow=tau*omega+2,ncol=2))
+      R2 = R1 * R1
+      R3 = R1 * R1 * R1
+      Z = cbind(diag(tau*omega),matrix(0,nrow=tau*omega, ncol=alpha))
+      e = rep(1,s)
+      rho1_ = t(N) %*% Z %*% t(.y * R1) %*% e
+      rho1_
+    }))
+  })
+}
+
+H = with(params3,matrix(1,nrow=tau, ncol=omega))
+
+with(params3,{
+  V_LY <<- v_tx_names %>% map(~({
+    v_ <- matrix(1,nrow=tau, ncol = omega) 
+    v_
+  })) %>% 
+    set_names(v_tx_names)
+})
+
+
+with(params3,{
+  V_YLD <<- v_tx_names %>% map(~({
+    v_ <- matrix(0,nrow=tau, ncol = omega) 
+    v_[2,] <- v_disc_h[-1]*dw_S1 * Delta_t * (1/r_v_disc_h_Delta_t) * (1 - exp(-r_v_disc_h_Delta_t))
+    v_[3,] <- v_disc_h[-1]*dw_S2 * Delta_t * (1/r_v_disc_h_Delta_t) * (1 - exp(-r_v_disc_h_Delta_t))
+    if (.x %in% c("A","AB")) {
+      v_[2,] <- v_disc_h[-1]*dw_trtA * Delta_t * (1/r_v_disc_h_Delta_t) * (1 - exp(-r_v_disc_h_Delta_t))
+    }
+    v_
+  })) %>% 
+    set_names(v_tx_names)
+})
+
+with(params3,{
+  V_QALY <<- v_tx_names %>% map(~({
+    v_ <- matrix(0,nrow=tau, ncol = omega) 
+    v_[1,] <- v_disc_h[-1]*u_H * Delta_t     
+    v_[2,] <- v_disc_h[-1]*u_S1 * Delta_t 
+    v_[3,] <- v_disc_h[-1]*u_S2 * Delta_t 
+    if (.x %in% c("A","AB")) {
+      v_[2,] <- v_disc_h[-1]*u_trtA * Delta_t 
+    }
+    v_
+  })) %>% 
+    set_names(v_tx_names)
+})
+
+with(params3,{
+  V_COST <<- v_tx_names %>% map(~({
+    v_ <- matrix(0,nrow=tau, ncol = omega) 
+    v_[1,] <- v_disc_c[-1]*c_H * Delta_t     
+    v_[2,] <- v_disc_c[-1]*c_S1 * Delta_t 
+    v_[3,] <- v_disc_c[-1]*c_S2 * Delta_t 
+    if (.x %in% c("A")) {
+      v_[2,] <- v_disc_c[-1]*(c_S1 + c_trtA) * Delta_t 
+      v_[3,] <- v_disc_c[-1]*(c_S2 + c_trtA) * Delta_t  
+    }
+    if (.x %in% c("B")) {
+      v_[2,] <- v_disc_c[-1]*(c_S1 + c_trtB) * Delta_t 
+      v_[3,] <- v_disc_c[-1]*(c_S2 + c_trtB) * Delta_t  
+    }    
+    if (.x %in% c("AB")) {
+      v_[2,] <- v_disc_c[-1]*(c_S1 + c_trtA + c_trtB) * Delta_t 
+      v_[3,] <- v_disc_c[-1]*(c_S2 + c_trtA + c_trtA) * Delta_t  
+    }    
+    v_
+  })) %>% 
+    set_names(v_tx_names)
+})
+
+LY3_ <- params3 %>% mcwr_occupancy(H = H, V = V_LY)
+QALY3_ <- params3 %>% mcwr_occupancy(H = H, V = V_QALY)
+HYLD = H
+HYLD[1,] = rep(0,ncol(H))
+YLD3_ <- params3 %>% mcwr_occupancy(H = HYLD, V = V_YLD)
+COST3_ <- params3 %>% mcwr_occupancy(H = H, V = V_COST)
+
+remaining_life_expectancy <- with(params3,(1/r_v_disc_h) * (1 - exp(-r_v_disc_h * f_ExR(ages+1))))
+
+YLL3_ <- params3 %>% mcwr_yll(life_expectancy = remaining_life_expectancy, disc = v_disc_h[-1])
+DALY3_ <- map2(YLL3_,YLD3_,~(.x+.y))
+
+LY3 <- LY3_ %>% map(~({
+  tmp <- (kronecker(t(c(1,rep(0,params3$omega-1))) ,diag(params3$tau)) %*% as.matrix(.x))
+  tmp[1,1]
+}))
+
+QALY3 <- QALY3_ %>% map(~({
+  tmp <- (kronecker(t(c(1,rep(0,params3$omega-1))) ,diag(params3$tau)) %*% as.matrix(.x))
+  tmp[1,1]
+}))
+
+YLD3 <- YLD3_ %>% map(~({
+  tmp <- (kronecker(t(c(1,rep(0,params3$omega-1))) ,diag(params3$tau)) %*% as.matrix(.x))
+  tmp[1,1]
+}))
+
+YLL3 <- YLL3_ %>% map(~({
+  tmp <- (kronecker(t(c(1,rep(0,params3$omega-1))) ,diag(params3$tau)) %*% as.matrix(.x))
+  tmp[1,1]
+}))
+
+DALY3 <- DALY3_ %>% map(~({
+  tmp <- (kronecker(t(c(1,rep(0,params3$omega-1))) ,diag(params3$tau)) %*% as.matrix(.x))
+  tmp[1,1]
+}))
+
+COST3 <- COST3_ %>% map(~({
+  tmp <- (kronecker(t(c(1,rep(0,params3$omega-1))) ,diag(params3$tau)) %*% as.matrix(.x))
+  tmp[1,1]
+}))
+
+result3 <- cbind(LY3, YLD3, YLL3, DALY3, QALY3,COST3) %>%
+  as.data.frame() %>%
+  rename(LY = LY3, YLD = YLD3, YLL = YLL3, DALY = DALY3, QALY = QALY3, COST = COST3) %>% 
+  mutate_all( ~ as.numeric(.))  %>%
+  rownames_to_column(var = "strategy") %>%
+  mutate(approach = "Markov Chain With Rewards") %>% 
+  dplyr::select(approach, strategy, everything())
+
+```
+
 ## Results {#sec-results}
 
 ### Comparison of DALY Outcomes Under All Three Approaches
@@ -1100,7 +1633,7 @@ result1 <- cbind(LY, YLD, YLL, DALY, ACCDALY, QALY_DALY, QALY,COST) %>%
 
 tab <- 
   result1 %>% 
-  #bind_rows(result3) %>% 
+  bind_rows(result3) %>% 
   select(approach,strategy,YLD,YLL,DALY) %>% 
   gather(outcome,value,-strategy,-approach) %>% 
   mutate(approach = case_when(
@@ -1119,16 +1652,19 @@ tab <-
   mutate_at(vars(-strategy), function(x) format_number(x)) 
 
 tab %>% flextable( 
-  col_keys = c("strategy","blah","yld_1_2","foo","yll_1_2","foo2","daly_1_2")) %>% 
+  col_keys = c("strategy","blah","yld_1_2","yld_3","foo","yll_1_2","yll_3","foo2","daly_1_2","daly_3")) %>% 
   #set_table_properties(layout="autofit") %>% 
   set_header_labels(
     strategy = "",
     foofoo = "",
     yld_1_2 = "Markov Trace (1&2)",
     yll_1_2 = "Markov Trace (1&2)",
-    daly_1_2 = "Markov Trace (1&2)"
+    daly_1_2 = "Markov Trace (1&2)",
+    yll_3 = "Markov Chain With Rewards (3)"  ,
+    yld_3 = "Markov Chain With Rewards (3)"   ,
+    daly_3 = "Markov Chain With Rewards (3)"   
   ) %>% 
-  add_header_row( values = c("Strategy","","Years Living With Disease (YLDs)","","Years of Life Lost to Premature Mortality (YLLs)","","Disability-Adjusted Life Years (DALYs)"),colwidths = c(1,1,1,1,1,1,1)) %>% 
+  add_header_row( values = c("Strategy","","Years Living With Disease (YLDs)","","Years of Life Lost to Premature Mortality (YLLs)","","Disability-Adjusted Life Years (DALYs)"),colwidths = c(1,1,2,1,2,1,2)) %>% 
   align(part="header",align="right") %>% 
   align(part = "body", align = "right") %>% 
   width(j = 1, width=2) %>% 
@@ -1161,6 +1697,10 @@ cea <-
       mutate(Effect = -Effect) %>% mutate(approach = "1 & 2")
   ) %>% 
   bind_rows(
+    dampack::calculate_icers(cost = result3$COST, effect = -result3$DALY, strategies = result3$strategy) %>% 
+      mutate(Effect = -Effect) %>%  mutate(approach = "3")
+  )   %>% 
+  bind_rows(
     dampack::calculate_icers(cost = result1$COST, effect = -result1$ACCDALY, strategies = result1$strategy) %>% 
             mutate(Effect = -Effect) %>% mutate(approach = "AccDALY")
     
@@ -1182,7 +1722,7 @@ cea %>%
   unite(outcome,outcome,approach) %>% 
   pivot_wider(names_from = outcome, values_from = value) %>% 
   janitor::clean_names() %>% 
-  select(strategy,contains("1_2"), contains("acc_daly"), contains("qaly_like")) %>% 
+  select(strategy,contains("1_2"), contains("_3"),contains("acc_daly"), contains("qaly_like")) %>% 
   gather(outcome_,value,-strategy) %>% 
   mutate(outcome = case_when(
     grepl("^cost_",outcome_) ~ "Cost",
@@ -1193,6 +1733,7 @@ cea %>%
   ) %>% 
   mutate(approach = case_when(
     grepl("_1_2",outcome_) ~ "1_2",
+    grepl("_3",outcome_) ~ "3",
     grepl("acc_daly",outcome_)~ "accDALY",
     grepl("qaly_like_daly",outcome_) ~ "QALYDALY"
   )) %>% 
@@ -1210,17 +1751,18 @@ cea %>%
   arrange(outcome,strategy) %>% 
   as_grouped_data(groups = "outcome", columns = NULL) %>% 
   as_flextable(hide_grouplabel = TRUE,
-               col_keys = c("strategy","blah","1_2","foo","accDALY","foo2","QALYDALY") )  %>% 
+               col_keys = c("strategy","blah","1_2","3","foo","accDALY","foo2","QALYDALY") )  %>% 
   set_header_labels(
     strategy = "",
     "1_2" = "Markov Trace (1&2)",
+    "3" = "Markov Chain With Rewards (3)",
     "accDALY" = "Shortcut 1: Accumulate Death State Occupancy",
     "QALYDALY" = "Shortcut 2: QALY-like DALY"
   ) %>% 
   align(part="header",align="left") %>% 
   #align(part = "body", align = "right") %>% 
   width(j = 1, width=2) %>% 
-  width(j=2:7,width=1) %>% 
+  width(j=2:8,width=1) %>% 
   #flextable::theme_vanilla() %>% 
   empty_blanks()
   
