@@ -4,6 +4,7 @@ author:
   - John Graves
   - Jinyi Zhu
   - Grace Ratcliff
+  - Hannah Peterson
   - Marie Martin
   - Shawn Garbett
   - Ashley Leech
