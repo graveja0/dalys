@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+    <meta charset="utf-8">
+    <meta name="generator" content="quarto-1.4.549">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+    <title>Modeling DALYs in Excel</title>
+    <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      div.columns{display: flex; gap: min(4vw, 1.5em);}
+      div.column{flex: auto; overflow-x: auto;}
+      div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+      ul.task-list{list-style: none;}
+      ul.task-list li input[type="checkbox"] {
+        width: 0.8em;
+        margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+        vertical-align: middle;
+      }
+    </style>
+
+    <style>
+      body.hypothesis-enabled #quarto-embed-header {
+        padding-right: 36px;
+      }
+
+      #quarto-embed-header {
+        height: 3em;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: solid 1px;
+      }
+
+      #quarto-embed-header h6 {
+        font-size: 1.1em;
+        padding-top: 0.6em;
+        margin-left: 1em;
+        margin-right: 1em;
+        font-weight: 400;
+      }
+
+      #quarto-embed-header a.quarto-back-link,
+      #quarto-embed-header a.quarto-download-embed {
+        font-size: 0.8em;
+        margin-top: 1em;
+        margin-bottom: 1em;
+        margin-left: 1em;
+        margin-right: 1em;
+      }
+
+      .quarto-back-container {
+        padding-left: 0.5em;
+        display: flex;
+      }
+
+      .headroom {
+          will-change: transform;
+          transition: transform 200ms linear;
+      }
+
+      .headroom--pinned {
+          transform: translateY(0%);
+      }
+
+      .headroom--unpinned {
+          transform: translateY(-100%);
+      }      
+    </style>
+
+    <script>
+    window.document.addEventListener("DOMContentLoaded", function () {
+
+      var header = window.document.querySelector("#quarto-embed-header");
+      const titleBannerEl = window.document.querySelector("body > #title-block-header");
+      if (titleBannerEl) {
+        titleBannerEl.style.paddingTop = header.clientHeight + "px";
+      }
+      const contentEl = window.document.getElementById('quarto-content');
+      for (const child of contentEl.children) {
+        child.style.paddingTop = header.clientHeight + "px";
+        child.style.marginTop = "1em";
+      }
+
+      // Use the article root if the `back` call doesn't work. This isn't perfect
+      // but should typically work
+      window.quartoBackToArticle = () => {
+        var currentUrl = window.location.href;
+        window.history.back();
+        setTimeout(() => {
+            // if location was not changed in 100 ms, then there is no history back
+            if(currentUrl === window.location.href){              
+                // redirect to site root
+                window.location.href = "../index.html";
+            }
+        }, 100);
+      }
+
+      const headroom = new window.Headroom(header, {
+        tolerance: 5,
+        onPin: function () {
+        },
+        onUnpin: function () {
+        },
+      });
+      headroom.init();
+    });
+    </script>
+
+    
+<script src="../site_libs/manuscript-notebook/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+     <script async="" src="https://hypothes.is/embed.js"></script>
+<script>
+  window.document.addEventListener("DOMContentLoaded", function (_event) {
+    document.body.classList.add('hypothesis-enabled');
+  });
+</script>   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script> 
+      </head>
+
+  <body class="quarto-notebook">
+    <div id="quarto-embed-header" class="headroom fixed-top bg-primary">
+      
+      <a onclick="window.quartoBackToArticle(); return false;" class="btn btn-primary quarto-back-link" href=""><i class="bi bi-caret-left"></i> Back to Article</a>
+      <h6><i class="bi bi-journal-code"></i> Modeling DALYs in Excel</h6>
+
+            <a href="../notebooks/dalys-in-excel.qmd" class="btn btn-primary quarto-download-embed" download="dalys-in-excel.qmd">Download Source</a>
+          </div>
+
+     <header id="title-block-header" class="quarto-title-block default toc-left page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Modeling DALYs in Excel</h1>
+          </div>
+
+    
+    <div class="quarto-title-meta-container">
+      <div class="quarto-title-meta-column-start">
+        
+        <div class="quarto-title-meta">
+
+                
+          
+                
+              </div>
+      </div>
+      <div class="quarto-title-meta-column-end quarto-other-formats-target">
+      </div>
+    </div>
+
+
+
+    <div class="quarto-other-links-text-target">
+    </div>  </div>
+</header><div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#step-1-define-parameters" id="toc-step-1-define-parameters" class="nav-link" data-scroll-target="#step-1-define-parameters">Step 1: Define Parameters</a>
+  <ul class="collapse">
+  <li><a href="#naming-variables" id="toc-naming-variables" class="nav-link" data-scroll-target="#naming-variables">Naming Variables</a></li>
+  </ul></li>
+  <li><a href="#step-2-construct-transition-matrices" id="toc-step-2-construct-transition-matrices" class="nav-link" data-scroll-target="#step-2-construct-transition-matrices">Step 2: Construct Transition Matrices</a>
+  <ul class="collapse">
+  <li><a href="#beginner-approach" id="toc-beginner-approach" class="nav-link" data-scroll-target="#beginner-approach">Beginner Approach</a></li>
+  <li><a href="#approach-2-intermediate" id="toc-approach-2-intermediate" class="nav-link" data-scroll-target="#approach-2-intermediate">Approach 2 (Intermediate)</a></li>
+  </ul></li>
+  <li><a href="#step-3-outcomes" id="toc-step-3-outcomes" class="nav-link" data-scroll-target="#step-3-outcomes">Step 3: Outcomes</a>
+  <ul class="collapse">
+  <li><a href="#input-objects" id="toc-input-objects" class="nav-link" data-scroll-target="#input-objects">Input Objects</a></li>
+  <li><a href="#markov-trace" id="toc-markov-trace" class="nav-link" data-scroll-target="#markov-trace">Markov Trace</a></li>
+  <li><a href="#cycle-adjustments" id="toc-cycle-adjustments" class="nav-link" data-scroll-target="#cycle-adjustments">Cycle Adjustments</a></li>
+  <li><a href="#years-of-life-lost-to-premature-mortality-ylls" id="toc-years-of-life-lost-to-premature-mortality-ylls" class="nav-link" data-scroll-target="#years-of-life-lost-to-premature-mortality-ylls">Years of Life Lost to Premature Mortality (YLLs)</a></li>
+  <li><a href="#years-of-life-lost-to-disability-and-costs" id="toc-years-of-life-lost-to-disability-and-costs" class="nav-link" data-scroll-target="#years-of-life-lost-to-disability-and-costs">Years of Life Lost to Disability and Costs</a></li>
+  <li><a href="#outcomes-under-approach-2" id="toc-outcomes-under-approach-2" class="nav-link" data-scroll-target="#outcomes-under-approach-2">Outcomes Under Approach 2</a></li>
+  </ul></li>
+  <li><a href="#summary-and-cost-effectiveness-analysis" id="toc-summary-and-cost-effectiveness-analysis" class="nav-link" data-scroll-target="#summary-and-cost-effectiveness-analysis">Summary and Cost-Effectiveness Analysis</a></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+</div>
+<main class="content quarto-banner-title-block" id="quarto-document-content">      
+
+       <section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>The objective of this notebook is to walk readers through the process of modeling Disability-Adjusted Life Years (DALYs) in Microsoft Excel. We detail both (beginner, intermediate) approaches outlined in the tutorial manuscript.</p>
+<p>The model and results can all be found in the accompanying Excel document <code>sick-sicker-DALY.xlsm</code>.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Outcomes and results in the Excel document are slightly different than in the tutorial manuscript. A primary reason why is that the R code used for the main results interpolates (by age) the reference life table values for YLL calculations, while the Excel-based results rely on the <code>LOOKUP()</code> function, which does not interpolate.</p>
+<p>For example, the Global Burden of Deases Reference Life Table lists remaining life expectancy of 88.0 years for a 1 year old and 84.0 for a 5 year old. Thus, our R code would assign 3 year olds a remaining life expectancy value between 84.0 and 88.0, while Excel assigns a value of 88.0 (the value at 1 years old, which is the next-closest value that does not exceed 3 years of age).</p>
+<p>A second reason why results may differ slightly is that Excel does not have the capability to perform matrix exponentiation to embed the transition rate matrix into the defined discrete time step. Consequently, as discussed below we rely on a power series expansion of the rate matrix to embed the transition probability matrix. In practice, this results in transition probabilities that are very close to, but do not exactly match, what we obtain via matrix exponentiation in R using the <code>expm()</code> command.</p>
+</div>
+</div>
+</section>
+<section id="step-1-define-parameters" class="level1">
+<h1>Step 1: Define Parameters</h1>
+<p>The worksheet <strong>Parameters</strong> is used to specify parameter names, values and descriptions. Note that the worksheet is divided into two (color-coded) sections: (1) parameters that are scalar inputs are shown in blue; while (2) those that are calculated as functions of other parameters are shown in red.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="images/clipboard-2767656166.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" data-glightbox="description: .lightbox-desc-1" title="Parameters Tab"><img src="images/clipboard-2767656166.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="400" alt="Parameters Tab"></a></p>
+<figcaption>Parameters Tab</figcaption>
+</figure>
+</div>
+<section id="naming-variables" class="level2">
+<h2 class="anchored" data-anchor-id="naming-variables">Naming Variables</h2>
+<p>Throughout the Excel document we rely on parameter and matrix names rather than cell definitions (e.g., “r_HD” is used in lieu of “Parameters$B11”). To name variables, one can simply type in the preferred name into the upper left box (shown below for the parameter “n_cohort”).</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="images/clipboard-1402404779.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="images/clipboard-1402404779.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></a></p>
+</figure>
+</div>
+<p>A similar approach will be used later to name matrices—but instead of selecting a single cell to name, we will select a region of cells to assign a single name to .</p>
+<p>An alternative (more efficient) approach may be to batch name parameters all at once. To do this, select the region with parameters and values to be named, and then click “Create from Selection” in the <strong><em>Formulas</em></strong> tab. Make sure that the parameter names are to the left of the value for that parameter. Select “Left column” in the resulting popup box, and Excel will automatically assign parameter names to each value.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="images/clipboard-2584198409.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" data-glightbox="description: .lightbox-desc-3" title="Naming parameters"><img src="images/clipboard-2584198409.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="600" alt="Naming parameters"></a></p>
+<figcaption>Naming parameters</figcaption>
+</figure>
+</div>
+<p>Names can be managed (e.g., edited, deleted, etc.) by clicking on the “Name Manager” in the <em>Formulas</em> tab:</p>
+<p><a href="images/clipboard-3902356175.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4"><img src="images/clipboard-3902356175.png" class="img-fluid"></a></p>
+</section>
+</section>
+<section id="step-2-construct-transition-matrices" class="level1">
+<h1>Step 2: Construct Transition Matrices</h1>
+<p>The Excel document also contains two worksheets for constructing transition probability matrices—one for each Approach.</p>
+<section id="beginner-approach" class="level2">
+<h2 class="anchored" data-anchor-id="beginner-approach">Beginner Approach</h2>
+<p>Transition probability matrices for Approach 1 (Beginner) are constructed in the Worksheet <strong>Transition Matrices (App. 1).</strong> Transition rates are inserted into a separate rate matrix for each strategy under the section titled “Transition Rate Matrices”:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="images/clipboard-3075821080.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" data-glightbox="description: .lightbox-desc-5" title="Transition rates"><img src="images/clipboard-3075821080.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Transition rates"></a></p>
+<figcaption>Transition rates</figcaption>
+</figure>
+</div>
+<p>Again, direct inputs are shown in Blue text while calculated values are shown in Red. In the table above, the rates are inserted using their parameter names, while the diagonal elements are calculated as the negative sum of the off-diagonal elements in the same row.</p>
+<p>Above and two the left of each matrix you will also find a matrix name. To define matrices, we select the cell values of the matrix and then input the name into the cell directly to the left of the formula bar:</p>
+<p><a href="images/clipboard-1297328356.png" class="lightbox" data-gallery="quarto-lightbox-gallery-6"><img src="images/clipboard-1297328356.png" class="img-fluid"></a></p>
+<p>To the right of the transition rate matrix is a series of matrices that are used in the power series expansion that helps create the transition probability matrix (shown in red in the image above). The formula used for the power series expansion is</p>
+<p><span class="math display">\[
+e^{\mathbf{R}} = \sum_{k=0}^4 \frac{\mathbf{R}^k}{k!}
+\]</span></p>
+<p>Note that we only go up to <span class="math inline">\(k=1,\dots, 4\)</span> in the Excel document. Higher-order (e.g., <span class="math inline">\(k = 1, \dots, 10\)</span>) approaches do not materially change the transition probabilities—though practitioners may find additional expansions are necessary for their applications.</p>
+<p>The far-most left panel shows the final transition probability matrices calculated via the power series expansion. Again, one can see the defined matrix names (one for each strategy) just above and to the left of each matrix.</p>
+</section>
+<section id="approach-2-intermediate" class="level2">
+<h2 class="anchored" data-anchor-id="approach-2-intermediate">Approach 2 (Intermediate)</h2>
+<p>Our intermediate approach relies on non-Markovian tracking states added to the “edges” of each matrix. The approach to embedding the transition probability matrix is essentially the same, with a few minor wrinkles which we discuss below.</p>
+<p>The worksheet <strong>Transition Matrices (App. 2)</strong> details the transition matrices and calculations for Approach 2. As above, transition rates are entered directly (as parameter names) in the section titled “Transition Rate Matrices.</p>
+<p>A key difference, however, is that the transition rate matrix is split into two parts: a Markovian submatrix and the Non-Markovian tracking states (which are highlighted in light blue):</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="images/clipboard-548781575.png" class="lightbox" data-gallery="quarto-lightbox-gallery-7"><img src="images/clipboard-548781575.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></a></p>
+</figure>
+</div>
+<p>It is critically important that the diagonal elements are set to sum to zero <em>only for the cells in the Markovian submatrix</em> (i.e., these values do not include the cells highlighted in blue). In our formulation, all transitions to death are recorded in the “D” column, while only transitions to death due to disease-related causes are captured in the “trDS” tracking state column. This is a slight difference from Approach 1, which treats disease-related and other-cause-related death transitions separately as health states.</p>
+<p>As under Approach 1, the transition probability matrix is calculated via a power series expansion. However, there is one manual change that must be made to the matrix. After embedding, the tracking state “trDS” will be treated as an absorbing state (i.e., the probability of transition from trDS to trDS is 1.0). We must manually change this value to 0 to make “trDs” a transition tracking state:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="images/clipboard-3939085462.png" class="lightbox" data-gallery="quarto-lightbox-gallery-8"><img src="images/clipboard-3939085462.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></a></p>
+</figure>
+</div>
+</section>
+</section>
+<section id="step-3-outcomes" class="level1">
+<h1>Step 3: Outcomes</h1>
+<p>The Excel document contains a series of worksheets that work through outcome calculations under each strategy and methodological approach. For a given approach (beginner, intermediate), the worksheets for each strategy are essentially identical—the only differences are in the transition probability matrices and payoff vectors, which vary by strategy.</p>
+<p>We will walk readers through a single strategy (“Standard of Care,” or “SOC”) as an example.</p>
+<section id="input-objects" class="level2">
+<h2 class="anchored" data-anchor-id="input-objects">Input Objects</h2>
+<p>The leftmost side of the worksheet has a variety of input objects; these are merely summaries that refer to parameter and matrix names defined above. This area also includes the reference life table from the GBD to facilitate calculation of YLL outcomes.</p>
+<p>Payoffs are defined using parameters and the formulas as outlined in the main manuscript. A few are highlighted in the image below:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="images/clipboard-664062931.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9"><img src="images/clipboard-664062931.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="600"></a></p>
+</figure>
+</div>
+</section>
+<section id="markov-trace" class="level2">
+<h2 class="anchored" data-anchor-id="markov-trace">Markov Trace</h2>
+<p>The next section over calculates the Markov trace for the modeled time horizon (500 years in this case). In cycle zero, we start with a healthy cohort (with size defined by the <code>n_cohort</code> parameter). The next row (cycle 1) is then calculated via matrix multiplication of the current state occupancy (i.e., the row for cycle=0) and the transition probability matrix):</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="images/clipboard-1229984883.png" class="lightbox" data-gallery="quarto-lightbox-gallery-10"><img src="images/clipboard-1229984883.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></a></p>
+</figure>
+</div>
+<p>Each subsequent row is calculated using a similar process.</p>
+</section>
+<section id="cycle-adjustments" class="level2">
+<h2 class="anchored" data-anchor-id="cycle-adjustments">Cycle Adjustments</h2>
+<p>The next panel contains columns for cycle adjustments based on discounting and a half-cycle correction. We combine these together to construct a cycle adjustment factor ($c_t$ in the manuscript) that will be used later.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="images/clipboard-921475456.png" class="lightbox" data-gallery="quarto-lightbox-gallery-11"><img src="images/clipboard-921475456.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="600"></a></p>
+</figure>
+</div>
+</section>
+<section id="years-of-life-lost-to-premature-mortality-ylls" class="level2">
+<h2 class="anchored" data-anchor-id="years-of-life-lost-to-premature-mortality-ylls">Years of Life Lost to Premature Mortality (YLLs)</h2>
+<p>Columns U through Y provide the necessary numbers for YLL outcomes. We start by determining the age of the cohort in the model (<span class="math inline">\(a_t\)</span>; Column U):</p>
+<p><span class="math display">\[
+a_t = a_0 +t \cdot \Delta_t
+\]</span> {#eq-aget} where <span class="math inline">\(a_0\)</span> is the age of the cohort at <span class="math inline">\(t=0\)</span>.</p>
+<p>Column V then plugs this calculated age into a <code>LOOKUP()</code> function to obtain the value for remaining life expectancy from the reference life table (<span class="math inline">\(Ex(a_t)\)</span>). As noted at the beginning of this document, <code>LOOKUP()</code> finds the value associated with closest age. The formulas then discount this value to the present value at the cycle using the following formula:</p>
+<p><span class="math display">\[
+Ex_{t} = \frac{1}{r}\big (1 - e^{-rEx(a_{t})} \big )
+\]</span> {#eq-pvEx}</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="images/clipboard-3000480319.png" class="lightbox" data-gallery="quarto-lightbox-gallery-12"><img src="images/clipboard-3000480319.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="600"></a></p>
+</figure>
+</div>
+<p>Next, Column W calculates the number of cause-specific deaths in the cycle based on the “DS” column in the Markov Trace:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="images/clipboard-765586153.png" class="lightbox" data-gallery="quarto-lightbox-gallery-13"><img src="images/clipboard-765586153.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="600"></a></p>
+</figure>
+</div>
+<p>In Column L, we calculate the initial cycle-specific values for YLLs (<code>YLL_t</code>) by multiplying remaining life expectancy by the number of cause-specific deaths in the cycle.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="images/clipboard-1328427434.png" class="lightbox" data-gallery="quarto-lightbox-gallery-14"><img src="images/clipboard-1328427434.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="400"></a></p>
+</figure>
+</div>
+<p>Column Y then calculates the final cycle-specific YLL values by multiplying by the cycle adjustment factor for health outcomes (Column Q). Again, this cycle-adjustment reflects both discounting and the half-cycle correction:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="images/clipboard-3866989032.png" class="lightbox" data-gallery="quarto-lightbox-gallery-15"><img src="images/clipboard-3866989032.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="400"></a></p>
+</figure>
+</div>
+<p>We then sum up the cycle specific YLL values to obtain expected YLLs over the model time horizon. This value is stored in the “Outcomes” table on the left-hand side of the worksheet. We also assign this value a name (“YLL_SOC”) using the parameter naming methods outlined above; this is useful later for creating summary tables.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="images/clipboard-644884678.png" class="lightbox" data-gallery="quarto-lightbox-gallery-16"><img src="images/clipboard-644884678.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="150"></a></p>
+</figure>
+</div>
+</section>
+<section id="years-of-life-lost-to-disability-and-costs" class="level2">
+<h2 class="anchored" data-anchor-id="years-of-life-lost-to-disability-and-costs">Years of Life Lost to Disability and Costs</h2>
+<p>YLDs and costs are more straightforward to calculate as they require only matrix multiplication of the markov trace by the respective payoff vectors. We first calculate undiscounted and unadjusted cycle-specific values using matrix multiplication of the trace and the payoff vector. We then apply the health- and cost-specific cycle adjustment values (Columns Q and S) to obtain the final adjusted cycle-specific values for YLDs and Costs, and then sum up each column for the outcomes table.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="images/clipboard-3192817535.png" class="lightbox" data-gallery="quarto-lightbox-gallery-17"><img src="images/clipboard-3192817535.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="350"></a></p>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="images/clipboard-2015412176.png" class="lightbox" data-gallery="quarto-lightbox-gallery-18"><img src="images/clipboard-2015412176.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="250"></a></p>
+</figure>
+</div>
+<p>Finally, expected DALYs are calculated as the sum of YLL and YLD outcomes.</p>
+</section>
+<section id="outcomes-under-approach-2" class="level2">
+<h2 class="anchored" data-anchor-id="outcomes-under-approach-2">Outcomes Under Approach 2</h2>
+<p>Expected outcomes are calculated for Approach 2 using a nearly identical process as above. The only difference is that the Markov trace itself already contains a count of new disease-related deaths in each cycle (in the “trDS” column); it does not need to be separately calculated, as we did in Column W above.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="images/clipboard-623297109.png" class="lightbox" data-gallery="quarto-lightbox-gallery-19"><img src="images/clipboard-623297109.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="400"></a></p>
+</figure>
+</div>
+</section>
+</section>
+<section id="summary-and-cost-effectiveness-analysis" class="level1">
+<h1>Summary and Cost-Effectiveness Analysis</h1>
+<p>Finally, the worksheet <strong>Summary and CEA</strong> draws on the named expected outcome objects to summarize YLLs, YLDs, and DALYs under each approach and strategy. These values, along with the expected cost outcome, are then used to construct the CEA table.</p>
+<p>Our results here closely match those in the tutorial manuscript, though are not identical due to the reasons outlined at the beginning of this document.</p>
+<p><a href="images/clipboard-517583444.png" class="lightbox" data-gallery="quarto-lightbox-gallery-20"><img src="images/clipboard-517583444.png" class="img-fluid"></a></p>
+<div class="hidden" aria-hidden="true">
+<span class="glightbox-desc lightbox-desc-1">Parameters Tab</span>
+<span class="glightbox-desc lightbox-desc-3">Naming parameters</span>
+<span class="glightbox-desc lightbox-desc-5">Transition rates</span>
+</div>
+</section>
+     </main>
+<!-- /main column -->  <script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>  </div> <!-- /content -->  <script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","openEffect":"zoom","selector":".lightbox","loop":false});
+window.onload = () => {
+  lightboxQuarto.on('slide_before_load', (data) => {
+    const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+    const href = trigger.getAttribute('href');
+    if (href !== null) {
+      const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+      if (imgEl !== null) {
+        const srcAttr = imgEl.getAttribute("src");
+        if (srcAttr && srcAttr.startsWith("data:")) {
+          slideConfig.href = srcAttr;
+        }
+      }
+    } 
+  });
+
+  lightboxQuarto.on('slide_after_load', (data) => {
+    const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+    if (window.Quarto?.typesetMath) {
+      window.Quarto.typesetMath(slideNode);
+    }
+  });
+
+};
+          </script> 
+  
+</body></html>

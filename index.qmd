@@ -14,12 +14,9 @@ keywords:
   - Discrete Event Simulation
   - Markov Cohort Models
 plain-language-summary: |
-  Modeling Disability-Adjusted Life Years for Policy and Decision Analysis
-key-points:
-  - Key Point 1
-  - Key Point 2
+  Modeling Disability-Adjusted Life Years for Policy and Decision Analysis: A Tutorial 
 abstract: |
-  This study outlines methods for direct incorporation of multidimensional health outcomes in common decision modeling frameworks, with a particular focus on disability-adjusted life years (DALYs) and its constituent parts---years of life lived with disability (YLDs) and years of life lost to premature mortality (YLLs). Recognizing the wide spectrum of experience and programming comfort level among practitioners, we offer two approaches (beginner, intermediate). Our beginner approach draws on the Markov trace, while the intermediate approach facilitates more efficient estimation for computationally-intensive exercises (e.g., microsimulation, probabilistic sensitivity analyses) by incorporating non-Markovian tracking elements into transition probability matrices. Drawing on an existing disease progression discrete time Markov cohort model, we demonstrate exact or near- numeric equivalence of DALY estimates and cost-effectiveness analysis results across our methods, and show that other commonly used "shortcuts" for estimating DALYs will not, in general, yield accurate estimates of DALY levels nor ICERs in a modeled population. 
+  This study outlines methods for modeling disability-adjusted life years (DALYs) in common decision modeling frameworks. Recognizing the wide spectrum of experience and programming comfort level among practitioners, we outline two approaches for modeling DALYs it its constitutent parts, Years of Life Lost to Disease (YLL) and Years of Life Lived with Disability (YLD). Our beginner approach draws on the Markov trace, while the intermediate approach facilitates more efficient estimation by incorporating non-Markovian tracking elements into the transition probability matrix. Drawing on an existing disease progression discrete time Markov cohort model, we demonstrate equivalence of DALY estimates and cost-effectiveness analysis results across our methods, and show that other commonly used "shortcuts" for estimating DALYs will not, in general, yield accurate estimates of DALY levels nor ICERs in a modeled population. 
 
 date: last-modified
 bibliography: references.bib
@@ -639,6 +636,10 @@ params2 <- with(params2,modifyList(params2,list(
 )))
 params2$m_P = params2$m_P_
 params2[["m_P_"]] <- NULL
+```
+
+```{r}
+
 ```
 
 ## DALY Outcomes  {#sec-outcomes}
