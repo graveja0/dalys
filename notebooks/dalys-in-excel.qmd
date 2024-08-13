@@ -42,7 +42,7 @@ Names can be managed (e.g., edited, deleted, etc.) by clicking on the "Name Mana
 
 # Step 2: Construct Transition Matrices
 
-The Excel document also contains two worksheets for constructing transition probability matrices—one for each Approach.
+The Excel document also contains two worksheets for constructing transition probability matrices—one for each approach.
 
 ## Beginner Approach
 
@@ -52,7 +52,7 @@ Transition probability matrices for Approach 1 (Beginner) are constructed in the
 
 Again, direct inputs are shown in Blue text while calculated values are shown in Red. In the table above, the rates are inserted using their parameter names, while the diagonal elements are calculated as the negative sum of the off-diagonal elements in the same row.
 
-Above and two the left of each matrix you will also find a matrix name. To define matrices, we select the cell values of the matrix and then input the name into the cell directly to the left of the formula bar:
+Above and to the left of each matrix you will also find a matrix name. To define matrices, we select the cell values of the matrix and then input the name into the cell directly to the left of the formula bar:
 
 ![](images/clipboard-1297328356.png)
 
@@ -76,7 +76,7 @@ A key difference, however, is that the transition rate matrix is split into two 
 
 ![](images/clipboard-548781575.png){fig-align="center"}
 
-It is critically important that the diagonal elements are set to sum to zero *only for the cells in the Markovian submatrix* (i.e., these values do not include the cells highlighted in blue). In our formulation, all transitions to death are recorded in the "D" column, while only transitions to death due to disease-related causes are captured in the "trDS" tracking state column. This is a slight difference from Approach 1, which treats disease-related and other-cause-related death transitions separately as health states.
+It is critically important that the diagonal elements are set to sum to zero *only for the cells in the Markovian submatrix* (i.e., these values do not include the cells highlighted in blue). In our formulation, all transitions to death are recorded in the "D" column, while only transitions to death due to disease-related causes are captured in the "trDS" tracking state column. This is a slight difference from Approach 1, which treats disease-related and other-cause-related death transitions as separate (mutually exclusive) health states.
 
 As under Approach 1, the transition probability matrix is calculated via a power series expansion. However, there is one manual change that must be made to the matrix. After embedding, the tracking state "trDS" will be treated as an absorbing state (i.e., the probability of transition from trDS to trDS is 1.0). We must manually change this value to 0 to make "trDs" a transition tracking state:
 
@@ -116,13 +116,14 @@ Columns U through Y provide the necessary numbers for YLL outcomes. We start by 
 
 $$
 a_t = a_0 +t \cdot \Delta_t 
-$$ {#eq-aget} where $a_0$ is the age of the cohort at $t=0$.
+$$  
+where $a_0$ is the age of the cohort at $t=0$.
 
 Column V then plugs this calculated age into a `LOOKUP()` function to obtain the value for remaining life expectancy from the reference life table ($Ex(a_t)$). As noted at the beginning of this document, `LOOKUP()` finds the value associated with closest age. The formulas then discount this value to the present value at the cycle using the following formula:
 
 $$
 Ex_{t} = \frac{1}{r}\big (1 - e^{-rEx(a_{t})} \big )
-$$ {#eq-pvEx}
+$$ 
 
 ![](images/clipboard-3000480319.png){fig-align="center" width="600"}
 

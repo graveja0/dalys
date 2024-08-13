@@ -251,7 +251,7 @@ Note
 </section>
 <section id="step-2-construct-transition-matrices" class="level1">
 <h1>Step 2: Construct Transition Matrices</h1>
-<p>The Excel document also contains two worksheets for constructing transition probability matrices—one for each Approach.</p>
+<p>The Excel document also contains two worksheets for constructing transition probability matrices—one for each approach.</p>
 <section id="beginner-approach" class="level2">
 <h2 class="anchored" data-anchor-id="beginner-approach">Beginner Approach</h2>
 <p>Transition probability matrices for Approach 1 (Beginner) are constructed in the Worksheet <strong>Transition Matrices (App. 1).</strong> Transition rates are inserted into a separate rate matrix for each strategy under the section titled “Transition Rate Matrices”:</p>
@@ -262,7 +262,7 @@ Note
 </figure>
 </div>
 <p>Again, direct inputs are shown in Blue text while calculated values are shown in Red. In the table above, the rates are inserted using their parameter names, while the diagonal elements are calculated as the negative sum of the off-diagonal elements in the same row.</p>
-<p>Above and two the left of each matrix you will also find a matrix name. To define matrices, we select the cell values of the matrix and then input the name into the cell directly to the left of the formula bar:</p>
+<p>Above and to the left of each matrix you will also find a matrix name. To define matrices, we select the cell values of the matrix and then input the name into the cell directly to the left of the formula bar:</p>
 <p><a href="images/clipboard-1297328356.png" class="lightbox" data-gallery="quarto-lightbox-gallery-6"><img src="images/clipboard-1297328356.png" class="img-fluid"></a></p>
 <p>To the right of the transition rate matrix is a series of matrices that are used in the power series expansion that helps create the transition probability matrix (shown in red in the image above). The formula used for the power series expansion is</p>
 <p><span class="math display">\[
@@ -281,7 +281,7 @@ e^{\mathbf{R}} = \sum_{k=0}^4 \frac{\mathbf{R}^k}{k!}
 <p><a href="images/clipboard-548781575.png" class="lightbox" data-gallery="quarto-lightbox-gallery-7"><img src="images/clipboard-548781575.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></a></p>
 </figure>
 </div>
-<p>It is critically important that the diagonal elements are set to sum to zero <em>only for the cells in the Markovian submatrix</em> (i.e., these values do not include the cells highlighted in blue). In our formulation, all transitions to death are recorded in the “D” column, while only transitions to death due to disease-related causes are captured in the “trDS” tracking state column. This is a slight difference from Approach 1, which treats disease-related and other-cause-related death transitions separately as health states.</p>
+<p>It is critically important that the diagonal elements are set to sum to zero <em>only for the cells in the Markovian submatrix</em> (i.e., these values do not include the cells highlighted in blue). In our formulation, all transitions to death are recorded in the “D” column, while only transitions to death due to disease-related causes are captured in the “trDS” tracking state column. This is a slight difference from Approach 1, which treats disease-related and other-cause-related death transitions as separate (mutually exclusive) health states.</p>
 <p>As under Approach 1, the transition probability matrix is calculated via a power series expansion. However, there is one manual change that must be made to the matrix. After embedding, the tracking state “trDS” will be treated as an absorbing state (i.e., the probability of transition from trDS to trDS is 1.0). We must manually change this value to 0 to make “trDs” a transition tracking state:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -328,11 +328,12 @@ e^{\mathbf{R}} = \sum_{k=0}^4 \frac{\mathbf{R}^k}{k!}
 <p>Columns U through Y provide the necessary numbers for YLL outcomes. We start by determining the age of the cohort in the model (<span class="math inline">\(a_t\)</span>; Column U):</p>
 <p><span class="math display">\[
 a_t = a_0 +t \cdot \Delta_t
-\]</span> {#eq-aget} where <span class="math inline">\(a_0\)</span> is the age of the cohort at <span class="math inline">\(t=0\)</span>.</p>
+\]</span><br>
+where <span class="math inline">\(a_0\)</span> is the age of the cohort at <span class="math inline">\(t=0\)</span>.</p>
 <p>Column V then plugs this calculated age into a <code>LOOKUP()</code> function to obtain the value for remaining life expectancy from the reference life table (<span class="math inline">\(Ex(a_t)\)</span>). As noted at the beginning of this document, <code>LOOKUP()</code> finds the value associated with closest age. The formulas then discount this value to the present value at the cycle using the following formula:</p>
 <p><span class="math display">\[
 Ex_{t} = \frac{1}{r}\big (1 - e^{-rEx(a_{t})} \big )
-\]</span> {#eq-pvEx}</p>
+\]</span></p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><a href="images/clipboard-3000480319.png" class="lightbox" data-gallery="quarto-lightbox-gallery-12"><img src="images/clipboard-3000480319.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="600"></a></p>
@@ -786,7 +787,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
   }
 });
-</script>  </div> <!-- /content -->  <script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","openEffect":"zoom","selector":".lightbox","loop":false});
+</script>  </div> <!-- /content -->  <script>var lightboxQuarto = GLightbox({"loop":false,"closeEffect":"zoom","openEffect":"zoom","descPosition":"bottom","selector":".lightbox"});
 window.onload = () => {
   lightboxQuarto.on('slide_before_load', (data) => {
     const { slideIndex, slideNode, slideConfig, player, trigger } = data;
