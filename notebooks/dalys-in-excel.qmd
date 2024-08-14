@@ -4,11 +4,12 @@ editor_options:
   chunk_output_type: console
 ---
 
+
 # Introduction
 
 The objective of this notebook is to walk readers through the process of modeling Disability-Adjusted Life Years (DALYs) in Microsoft Excel. We detail both (beginner, intermediate) approaches outlined in the tutorial manuscript.
 
-The model and results can all be found in the accompanying Excel document `sick-sicker-DALY.xlsm`.
+The model and results can all be found in the accompanying Excel document [`sick-sicker-DALY.xlsm`](https://graveja0.github.io/dalys/_excel/sick-sicker-DALY.xlsm).
 
 ::: callout-note
 Outcomes and results in the Excel document are slightly different than in the tutorial manuscript. A primary reason why is that the R code used for the main results interpolates (by age) the reference life table values for YLL calculations, while the Excel-based results rely on the `LOOKUP()` function, which does not interpolate.
