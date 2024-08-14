@@ -321,7 +321,7 @@ This results in a DALY value that exactly matches the example using the GBD equa
 
 A more common approach is to use the discrete time discounting formula $\frac{1}{(1+r)^t}$. This formula also assumes a series of discrete payoffs, though in discrete time. 
 
-We can replicate the GBD continuous time discounting approach using the discrete time formula by converting the discount rate $r$ using $r' = exp(r)-1$ @larson2013calculating. We then plug $r'$ into the discrete time discounting formula and simplify to obtain a discounting factor of $(\frac{1}{1+e^{r})^t-1=\frac{1}{1+e^{rt}-1}=\frac{1}{e^{rt}}=e^{-rt}$, which is exactly the discounting factor used above. It follows trivially, then, that we obtain the same answer as above:
+We can replicate the GBD continuous time discounting approach using the discrete time formula by converting the discount rate $r$ using $r' = exp(r)-1$ @larson2013calculating. We then plug $r'$ into the discrete time discounting formula and simplify to obtain a discounting factor of $(\frac{1}{1+e^{r}})^t-1=\frac{1}{1+e^{rt}-1}=\frac{1}{e^{rt}}=e^{-rt}$, which is exactly the discounting factor used above. It follows trivially, then, that we obtain the same answer as above:
 
 ```{r}
 v_disc_h = 
