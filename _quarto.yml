@@ -1,5 +1,7 @@
 project:
   type: manuscript
+  resources:
+    - "_excel/sick-sicker-DALY.xlsm"
 
 format:
   html:
