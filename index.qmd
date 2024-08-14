@@ -176,8 +176,6 @@ A state transition diagram is shown in @fig-model1. In the figure, nodes are hea
 
 As depicted in @fig-model1, and as parameterized in our replication code, the underlying Markov model is time homogeneous---that is, transition rates do not vary as a function of age/time. This is merely a simplification that builds on an existing time-homogeneous model constructed for didactic purposes [@alarid2023introductory]. We do, however, index all formulas and other model-relevant objects with the subscript $t$ to allow for time-inhomogenous models. Our replication code is also written to accommodate time-inhomogeneous models.
 
-An additional assumption is worth highlighting. In our model, disability weights are defined as one minus the utility weight. This is not generally the case, as DALY disability weights are derived from expert valuations and are standardized across countries and regions [@who2020methods; @sassi2006calculating]. Utility weights, by contrast, are often derived from general population and/or patient samples and therefore differ across geographies [@sassi2006calculating]. We have elected to parameterize our model in this way to hold this methodological difference fixed—that is, we aim to show how differences in methodological choices affect DALY estimates while holding fixed *additional* differences in how disability and utility weights are derived.
-
 ![State transition diagram for progressive disease model](images/state-transition-diagram-1.svg){#fig-model1}
 
 ```{r parameterize}
@@ -192,7 +190,7 @@ params_ <- list(
     v_ab_names = c("DOC","DS"), # absorbing health states
     n_states = 5, # total number of health states
     
-    horizon = 500,  # TK 400 # model time horizon (in years)  
+    horizon = 500, # model time horizon (in years)  
     r_v_disc_h  = 0.03,     # annual discount rate for health outcomes
     r_v_disc_c = 0.03,     # annual discount rate for cost outcomes
     Delta_t = 1,      # time step (1 = yearly, 1/12 = monthly, etc.)
@@ -206,11 +204,6 @@ params_ <- list(
     
     hr_S1 = 3.0,     # hazard rate of disease-related death from S1 state
     hr_S2 = 10.0,    # hazard rate of disease-related death from S1 state
-    
-    u_H = 1,           # Healthy utility weight
-    u_S1 = 0.75,       # Sick utility weight
-    u_S2 = 0.5,        # Sicker utility weight
-    u_D = 0,           # Death utility weight
 
     dw_S1 = 0.25,      # Sick disability weight
     dw_S2 = 0.5,       # Sicker disability weight
@@ -221,7 +214,7 @@ params_ <- list(
     c_D = 0, # annual cost of death
 
     c_trtA = 12000, # cost of treatment A
-    u_trtA = 0.95, # utility weight for treatment A (S1 state)
+
     dw_trtA = 0.05,    # Disability weight for sick under treatment A
     
     c_trtB = 13000, # cost of treatment B
@@ -305,10 +298,6 @@ params_lut <-
     "r_HD" = "Transition rate: Disease-free background mortality",
     "hr_S1" = "Hazard ratio: mortality from sick state",
     "hr_S2" = "Hazard ratio: mortality from sicker state", 
-    "u_H" = "Utility weight: healthy [H]",
-    "u_S1" = "Utility weight: sick [S1]",
-    "u_S2" = "Utility weight: sick [S2]",
-    "u_D" = "Utility weight: death [D]",
     "dw_S1" = "Disability weight: sick [S1]",
     "dw_S2" = "Disability weight: sicker [S2]",
     "c_H" = "Cycle occupancy cost: healthy [H]",
@@ -316,7 +305,6 @@ params_lut <-
     "c_S2" = "Cycle occupancy cost: sicker [S2]",
     "c_D" = "Cycle occupancy cost: death [D]", 
     "c_trtA" = "Cycle occupancy cost: treatment A [S1,S2]",
-    "u_trtA" = "Utility weight: treatment A [S1]",
     "dw_trtA" = "Disbility weight: treatment A [S1]",
     "c_trtB" = "Cycle occupancy cost: treatment B [S1,S2]",
     "hr_S1S2_trtB"= "Hazard Ratio: S1 to S2 disease progression under treatment B"
@@ -835,46 +823,46 @@ LYt <-
 
 LY = LYt %>% map(~sum(.x * gen_wcc(params1$omega, method = params1$cycle_correction))) 
 
-# QALYs
-qaly_ = with(params1,(matrix(c(u_H,
-              u_S1 ,
-              u_S2,
-              u_D,
-              u_D) * Delta_t,
-            dimnames = list(c(
-                c(v_tr_names,v_ab_names)
-            ), c("UW")))
-))
-qaly_ <- 
-  with(params1,{
-    v_tx_names %>% map(~({
-        if (.x=="A" | .x=="AB") {
-          tmp_ <- qaly_
-          tmp_[2,1] = u_trtA * Delta_t
-          tmp_
-      } else qaly_
-    }))
-  }) %>% 
-  set_names(params1$v_tx_names)
-
-QALYt <-  
-  with(params1, {
-    v_tx_names %>% map( ~ ({
-      P = m_P[[.x]]
-      occ <- v_s0T
-      d <- qaly_[[.x]]
-      out <- 0
-      P %>% map(~({
-        occ <<- occ %*% .x 
-        out <<-  occ %*% d
-      })) %>% 
-        map(~(data.frame(.x))) %>% 
-        bind_rows()
-    }))
-  })  %>% 
-  set_names(params1$v_tx_names)
-
-QALY = QALYt %>% map(~sum(.x * v_disc_h * gen_wcc(params1$omega, method = params1$cycle_correction))) 
+# # QALYs
+# qaly_ = with(params1,(matrix(c(u_H,
+#               u_S1 ,
+#               u_S2,
+#               u_D,
+#               u_D) * Delta_t,
+#             dimnames = list(c(
+#                 c(v_tr_names,v_ab_names)
+#             ), c("UW")))
+# ))
+# qaly_ <- 
+#   with(params1,{
+#     v_tx_names %>% map(~({
+#         if (.x=="A" | .x=="AB") {
+#           tmp_ <- qaly_
+#           tmp_[2,1] = (1 - dw_trtA) * Delta_t
+#           tmp_
+#       } else qaly_
+#     }))
+#   }) %>% 
+#   set_names(params1$v_tx_names)
+# 
+# QALYt <-  
+#   with(params1, {
+#     v_tx_names %>% map( ~ ({
+#       P = m_P[[.x]]
+#       occ <- v_s0T
+#       d <- qaly_[[.x]]
+#       out <- 0
+#       P %>% map(~({
+#         occ <<- occ %*% .x 
+#         out <<-  occ %*% d
+#       })) %>% 
+#         map(~(data.frame(.x))) %>% 
+#         bind_rows()
+#     }))
+#   })  %>% 
+#   set_names(params1$v_tx_names)
+# 
+# QALY = QALYt %>% map(~sum(.x * v_disc_h * gen_wcc(params1$omega, method = params1$cycle_correction))) 
 
 # YLD
 yld_ = with(params1,(matrix(c(0,
@@ -974,11 +962,11 @@ ACCDALYt <-
   set_names(params1$v_tx_names)
 ACCDALY = ACCDALYt %>% map(~sum(.x * v_disc_h * gen_wcc(params1$omega, method = params1$cycle_correction))) 
 
-qaly_daly_ = with(params1,(matrix(c(u_H,
+qaly_daly_ = with(params1,(matrix(c(1,
               1-dw_S1 ,
               1-dw_S2,
-              u_D,
-              u_D) * Delta_t,
+              0,
+              0) * Delta_t,
             dimnames = list(c(
                 c(v_tr_names,v_ab_names)
             ), c("QALY_DALY_")))
@@ -1066,13 +1054,14 @@ COSTt <-
 
 COST = COSTt %>% map(~sum(.x * v_disc_c * gen_wcc(params1$omega, method = params1$cycle_correction))) 
 
-result1 <- cbind(LY, YLD, YLL, DALY, ACCDALY, QALY_DALY, QALY,COST) %>%
+result1 <- cbind(LY, YLD, YLL, DALY, ACCDALY, QALY_DALY, COST) %>%
   as.data.frame() %>%
   mutate_all( ~ as.numeric(.))  %>%
   rownames_to_column(var = "strategy") %>%
   mutate(approach = "Markov Trace") %>% 
   dplyr::select(approach, strategy, everything()) 
 ```
+
 
 ## Results {#sec-results}
 
@@ -1200,7 +1189,7 @@ cea %>%
 
 The death state occupancy method yields DALY estimates that are 34% higher than our approaches, and results in an ICER that is 25% lower for Strategy B vs. the standard of care. The ICER for strategy AB is calculated relative to strategy B, so the only difference is additional improvement in quality life from strategy A. This improvement works exclusively through the YLD channel, as there is no differential effect on mortality. With this key information in mind, we note that the ICER for AB vs. B is more similar between our approaches and the death state occupancy method.
 
-Next, the approach labeled **QALY-like DALY** defines the cycle occupancy payoff for the sick and sicker states as one minus the disability weight; as in many QALY applications, the healthy state receives a payoff value of 1.0. Because we have defined the disability weight in this example as one minus the utility weight, the **QALY-like DALY** approach yields estimates that are equivalent to estimating standard QALY outcomes.
+Next, the approach labeled **QALY-like DALY** defines the cycle occupancy payoff for the sick and sicker states as one minus the disability weight; as in many QALY applications, the healthy state receives a payoff value of 1.0. 
 
 QALY-like DALY estimates are, not surprisingly, higher than the other DALY estimates, owing to their conceptual difference with DALYs (i.e., QALYs accumulate and reward the quality and extension of life, while DALYs accumulate years lost to disease). Again, ICERs for strategy A vs. the standard of care are about 25% lower, while they are very similar to our DALY approaches for the AB strategy that differentially improves quality of life.
 
