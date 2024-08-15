@@ -1064,7 +1064,7 @@ result1 <- cbind(LY, YLD, YLL, DALY, ACCDALY, QALY_DALY, COST) %>%
 
 ### DALY Shortcut Methods
 
-We consider two shortcut methods for estimating DALYs. First, we execute a method that defines cycle payoffs based on the disability weight for the diseased health states, and assigns a payoff value of 1.0 for cycles in the disease-related death state. Thus, this method accumulates time in the death state as an estimate of YLLs. This is the method included in the TreeAge Pro software package as a tutorial for calculating DALY outcomes.[^treeage] 
+We consider two shortcut methods for estimating DALYs. First, we execute a method that defines cycle payoffs based on the disability weight for the diseased health states, and assigns a payoff value of 1.0 for cycles in the disease-related death state. Thus, this method accumulates time in the death state as an estimate of YLLs. This is the method included in the TreeAge Pro software package as a template/example for calculating DALY outcomes.[^treeage] 
 
 [^treeage]: TreeAge example model can be found in `Example Models/Healthcare/Markov Cancer Decision - DALY.trex`. 
 
