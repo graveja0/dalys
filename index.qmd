@@ -28,7 +28,7 @@ editor_options:
 prefer-html: true 
 ---
 
-## Introduction {#sec-introduction}
+# Introduction {#sec-introduction}
 
 ```{r}
 #| echo: false
@@ -107,11 +107,11 @@ This study outlines methods for direct incorporation of DALY outcomes in common 
 
 To maintain consistency within the literature, we build on an existing didactic disease progression model [@alarid2023introductory]. The underlying discrete-time Markov cohort model is time homogeneous---that is, transition probabilities do not vary as a function of age/time in the model. However, our methods and code are developed to accommodate time-inhomogeneous models. Finally, recognizing the wide spectrum of experience and programming comfort level among practitioners, we offer two approaches for modeling DALYs (beginner, intermediate) and provide replication materials for implementing our approaches in R and Microsoft Excel.
 
-## Background {#sec-background}
+# Background {#sec-background}
 
 This section provides background information sufficient for conceptual understanding of DALYs and how to estimate them in a decision-analytic model; it is not intended as a comprehensive treatment of the subject. For extensive discussion of the history, assumptions and controversies around DALYs, see @arnesen1999, @mathers2020 and @parks2014.
 
-### Years of Life Lived with Disability (YLD)
+## Years of Life Lived with Disability (YLD)
 
 To quantify YLDs, conditions are assigned disability weights ($D$) ranging from zero to one, with zero representing the absence of the condition and one representing the highest burden a condition can inflict. Disability weights are elicited, in part, from expert panels. Weights are standardized across geographies and are routinely updated and published on the GBD website [@who2020methods; @global_burden_of_disease_collaborative_network_global_2024].
 
@@ -121,7 +121,7 @@ $$
 YLD(c) = D_c \cdot L_c
 $$ {#eq-yld1}
 
-### Years of Life Lost to Disease (YLL)
+## Years of Life Lost to Disease (YLL)
 
 YLLs are determined by a loss function, which is typically defined as the number of years lost to premature mortality. This value is often taken from a life table that provides information on remaining life expectancy at age of premature death, $a$,
 
@@ -133,13 +133,15 @@ For example, if an individual dies of a disease at age 60, and the remaining lif
 
 Choices over the specific value of remaining life expectancy will depend on the context and research question at hand [@anand2019]. Historically, the GBD has utilized an *exogenous*, external reference life table based on the maximum potential life span among humans [@who2020methods; @globalburdenofdiseasecollaborativenetwork2021]. More recent GBD estimates draw on reference life tables based on the lowest observed age-specific mortality rates among geographies with populations over 5 million in 2016 [@globalburdenofdiseasecollaborativenetwork2021].
 
-Finally, DALYs are simply the sum of these two components:
+## Disability-Adjusted Life Years
+
+DALYs are simply the sum of these two components:
 
 $$
 DALY(c,a) = YLD(c) + YLL(a)
 $$ {#eq-daly}
 
-### Discounting
+## Discounting
 
 In the original GBD study, additional age-weighting and time discounting practices were applied to DALY calculations [@Murray1997]. These methods respectively weighted the burden of illness more during adulthood than early childhood and old age, and valued present health over future years of illness by discounting YLD and YLL measures by 3% per year. From 2010 onwards, both practices were discontinued to make the DALY a more descriptive measure [@who2020methods].
 
@@ -161,7 +163,7 @@ $$ {#eq-yll}
 
 It is important to note that the discounting shown in @eq-yld and @eq-yll yields the present value of YLD and YLL outcomes at a single point in time when the duration of disease ($L_c$) and time of death from disease ($a$) are known. For a decision model where not all cohort members start ill, that point in time very likely occurs at some point after the baseline period---and different illness durations and death times will, of course, occur across individuals in a modeled cohort. As such, we must discount YLL and YLD outcomes further, to time point $t=0$ to align outcomes to the same starting point. This additional discounting step will become apparent in @sec-outcomes below.
 
-## Model Overview {#sec-overview}
+# Overview of Decision Problem {#sec-overview}
 
 We build on an existing progressive disease model in which healthy individuals develop a disease with two health states ("Sick" and "Sicker"; @alarid2023introductory). Individuals can also transition to an absorbing death state due to causes unrelated to the disease (i.e., "background" mortality), or due to disease-specific causes.
 
@@ -343,6 +345,8 @@ ft
 
 ```
 
+# Methods
+
 ## Transition Matrices
 
 With the model parameterized, we next define the matrices that govern transitions. The state transition diagram represented in @fig-model1 is not yet well-suited to calculate DALY outcomes, however. A primary reason is that transitions to the absorbing death state capture transitions due to all causes of death. To calculate YLLs, we must separately track the timing and number of deaths *due to disease*.
@@ -357,7 +361,7 @@ To accommodate this need, we develop two approaches for modeling DALY outcomes. 
 
 Each approach facilitates the design and execution of a decision-analytic model that correctly calculates YLD, YLL, and DALY outcomes---as well as other common outcomes such as life-years (LYs), QALYs and costs. In practice, Approaches (1) and (2) will produce identical results. We show in @sec-results that other shortcut-based approaches previously used in the literature---such as modeling a QALY-like DALY and/or accumulating time in the absorbing death state---will not in general yield similar results.
 
-### Approach 1 (Beginner): Cause-Specific Death State
+### Beginner Approach (1): Cause-Specific Death State
 
 Under this approach, we separate deaths from disease vs. other causes by defining a separate health state for cause-specific mortality; @fig-modelDS shows an updated state transition diagram.
 
@@ -385,7 +389,7 @@ Embedding the transition probability matrix using @eq-embed ensures that the res
 
 [^5]: For example, in the continuous time rate matrix $\mathbf{Q}_t$ above, there is a zero-valued rate defined for progressions from Healthy (H) to Disease-related death (DS), since individuals must first become ill before they can die from disease-related causes. However, after embedding, the matrix $\mathbf{P}$ has a non-zero cycle transition probability from Healthy (H) to Disease-related death (DS) (i.e., $\texttt{p\_HDS}$). This value captures the probability of a compound or "jumpover" transition from Healthy and through the Sick and/or Sicker state to death from disease-related causes within the same discrete time cycle; see @graves2021 for further discussion, and @iosifescu1980 for additional theory.
 
-### Approach 2 (Intermediate): Non-Markovian Tracking States
+### Intermediate Approach (2): Non-Markovian Tracking States
 
 This method maintains the overall structure as depicted in the original @fig-model1, but augments the transition probability matrix with non-Markovian components to facilitate accounting of disease-related deaths.[^6] Approach 2 offers a more generalized method that allows practitioners to accurately account for costs and/or health payoffs (such as YLLs) that are defined by *transitions* among health states, rather than occupancy in a health state. DALY outcomes can also be calculated directly, without the need to derive a vector of disease-related death transitions from the Markov trace (as required for Approach 1).
 
@@ -636,11 +640,7 @@ params2$m_P = params2$m_P_
 params2[["m_P_"]] <- NULL
 ```
 
-```{r}
-
-```
-
-## DALY Outcomes {#sec-outcomes}
+## Outcomes {#sec-outcomes}
 
 We next define formulas for estimating outcomes. Our two approaches differ in how outcomes are calculated. Approach 1 requires a Markov trace that tracks occupancy in each cycle; for YLL outcomes, we use this information to calculate the number of new disease-related deaths in each cycle. Approach 2 does not require this extra step, as both cycle-specific and total outcomes are calculated directly.
 
@@ -1062,10 +1062,17 @@ result1 <- cbind(LY, YLD, YLL, DALY, ACCDALY, QALY_DALY, COST) %>%
   dplyr::select(approach, strategy, everything()) 
 ```
 
+### DALY Shortcut Methods
 
-## Results {#sec-results}
+We consider two shortcut methods for estimating DALYs. First, we execute a method that defines cycle payoffs based on the disability weight for the diseased health states, and assigns a payoff value of 1.0 for cycles in the disease-related death state. Thus, this method accumulates time in the death state as an estimate of YLLs. This is the method included in the TreeAge Pro software package as a tutorial for calculating DALY outcomes.[^treeage] 
 
-### Comparison of DALY Outcomes Under All Three Approaches
+[^treeage]: TreeAge example model can be found in `Example Models/Healthcare/Markov Cancer Decision - DALY.trex`. 
+
+Second, we consider a simpler **QALY-like-DALY** method. This approach defines the cycle occupancy payoff for the sick and sicker states as one minus the disability weight.  As is common practice, under this method the healthy state receives a payoff value of 1.0, while the death state receives a value of 0.0. 
+
+# Results {#sec-results}
+
+## Comparison of DALY Outcomes Under All Three Approaches
 
 @tbl-compare1 draws on the Sick-Sicker model parameters and shows YLD, YLL and DALY outcomes estimates. Note that because Approaches 1 and 2 yield identical values, we only present one set of estimates in the table.
 
@@ -1105,7 +1112,7 @@ tab %>% flextable(
 
 ```
 
-### Comparison with "Shortcut-based" DALY Approaches
+## Comparison with "Shortcut-based" DALY Approaches
 
 @tbl-cea reports cost, effect and incremental cost-effectiveness ratio (ICER) results for our two DALY approaches. The table also includes results under two "shortcut" DALY strategies.
 
@@ -1185,15 +1192,11 @@ cea %>%
   
 ```
 
-@tbl-cea also includes outcomes under alternative "shortcut"-based DALY estimation approaches. First, the method labeled **death state occupancy** defines cycle payoffs based on the disease weight for the diseased health states, and a payoff value of 1.0 for the disease-related death state. Inclusion of disease weights facilitates accumulation of YLDs; YLLs are calculated by accumulating time in the disease-related death state. This approach to YLLs is endogenous to the model, i.e., it does not incorporate exogenous life expectancy information from the GBD reference life table.
-
-The death state occupancy method yields DALY estimates that are 34% higher than our approaches, and results in an ICER that is 25% lower for Strategy B vs. the standard of care. The ICER for strategy AB is calculated relative to strategy B, so the only difference is additional improvement in quality life from strategy A. This improvement works exclusively through the YLD channel, as there is no differential effect on mortality. With this key information in mind, we note that the ICER for AB vs. B is more similar between our approaches and the death state occupancy method.
-
-Next, the approach labeled **QALY-like DALY** defines the cycle occupancy payoff for the sick and sicker states as one minus the disability weight; as in many QALY applications, the healthy state receives a payoff value of 1.0. 
+@tbl-cea also includes outcomes under alternative "shortcut"-based DALY estimation approaches. The death state occupancy method yields DALY estimates that are 34% higher than our approaches, and results in an ICER that is 25% lower for Strategy B vs. the standard of care. The ICER for strategy AB is calculated relative to strategy B, so the only difference is additional improvement in quality life from strategy A. This improvement works exclusively through the YLD channel, as there is no differential effect on mortality. With this key information in mind, we note that the ICER for AB vs. B is more similar between our approaches and the death state occupancy method.
 
 QALY-like DALY estimates are, not surprisingly, higher than the other DALY estimates, owing to their conceptual difference with DALYs (i.e., QALYs accumulate and reward the quality and extension of life, while DALYs accumulate years lost to disease). Again, ICERs for strategy A vs. the standard of care are about 25% lower, while they are very similar to our DALY approaches for the AB strategy that differentially improves quality of life.
 
-## Discussion
+# Discussion
 
 This study extends the methodological toolkit available to decision modelers by introducing two DALY estimation methods. Our approaches are designed to fit a spectrum of experience and skill---thus making our methods accessible to any practitioner who aims to include DALYs in their decision model. Our results demonstrate that both beginner and intermediate approaches yield similar values for DALY levels and incremental cost-effectiveness ratios in a progressive disease model constructed for didactic purposes. Finally, we also show that other shortcuts suggested for DALY outcomes do not in general yield similar results for either DALY levels or ICERs.
 
@@ -1207,7 +1210,7 @@ Another important consideration is the role of discounting. Our approaches apply
 
 Finally, it is important to note that the methods outlined here are not purely restricted to DALY outcomes. Indeed, each approache facilitates the estimation of other common outcomes such as QALYs, life-years, etc.
 
-## References {.unnumbered}
+# References {.unnumbered}
 
 ::: {#refs}
 :::
