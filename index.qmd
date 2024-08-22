@@ -1,5 +1,5 @@
 ---
-title: Modeling Disability-Adjusted Life Years for Policy and Decision Analysis: A Tutorial
+title: Modeling Disability-Adjusted Life Years for Policy and Decision Analysis- A Tutorial
 author:
   - John Graves
   - Jinyi Zhu
